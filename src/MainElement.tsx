@@ -46,7 +46,7 @@ export const Box: FC<BoxProps> = ({
 
   const [{ isOver, isOverCurrent }, drop] = useDrop(
     () => ({
-      accept: ItemTypes.ELEMENT,
+      accept: [ItemTypes.ELEMENT, ItemTypes.SIDE_ELEMENT],
       drop(item: BoxProps, monitor) {
         if (monitor.didDrop()) {
             return
@@ -82,13 +82,13 @@ export const Box: FC<BoxProps> = ({
     return <div ref={drag} />
   }
   return (
-    <div
-      className="box z-0"
+    <a
+      className="main-element btn btn-outline-dark position-absolute"
       ref={dragDrop}
-      style={{ ...style, left, top, backgroundColor: isOver ? 'darkgreen' : 'rgba(0, 0, 0, .5)' }}
+      style={{ left, top, backgroundColor: isOver ? 'darkgreen' : 'rgba(0, 0, 0, .5)' }}
       data-testid="box"
     >
       {children}
-    </div>
+    </a>
   )
 }

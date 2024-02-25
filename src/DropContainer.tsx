@@ -1,13 +1,14 @@
 import update from 'immutability-helper'
 import type { CSSProperties, FC } from 'react'
-import { Component, useCallback, useState } from 'react'
+import { Component, useCallback, useEffect, useState } from 'react'
 import type { DropTargetMonitor, XYCoord } from 'react-dnd'
 import { useDrop } from 'react-dnd'
 
-import { Box } from './Box'
+import { Box } from './MainElement'
 import { Container } from 'react-bootstrap'
 import Main from 'electron/main'
 import { ItemTypes } from './Constants'
+import { Recipe } from './main/database'
 
 interface DragItem {
     type: string
@@ -119,6 +120,7 @@ export const DropContainer: FC<ContainerProps> = ({ hideSourceOnDrag }) => {
     }),
     [moveBox],
   )
+
  //style={styles}>
   return (
     <div ref={drop} className='h-100 w-100'>

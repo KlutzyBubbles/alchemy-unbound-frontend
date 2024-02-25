@@ -1,30 +1,29 @@
 import type { CSSProperties, FC, ReactNode } from 'react'
 import { ConnectableElement, DragSourceOptions, XYCoord, useDrag, useDrop } from 'react-dnd'
 import { ItemTypes } from './Constants'
+import { Recipe } from './main/database'
 
-const style: CSSProperties = {
-  position: 'absolute',
-  border: '1px dashed gray',
-  backgroundColor: 'white',
-  padding: '0.5rem 1rem',
-  cursor: 'move',
-}
-
-export interface BoxProps {
-  name: string
+export type SideElementProps = Recipe & {
   hideSourceOnDrag?: boolean
   children?: ReactNode
 }
 
-export const SideElement: FC<BoxProps> = ({
-  name,
+export const SideElement: FC<SideElementProps> = ({
+  a,
+  b,
+  result,
+  display,
+  emoji,
+  depth,
+  who_discovered,
+  base,
   hideSourceOnDrag,
   children,
 }) => {
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: ItemTypes.SIDE_ELEMENT,
-      item: { type: ItemTypes.SIDE_ELEMENT, name },
+      item: { type: ItemTypes.SIDE_ELEMENT, name: result },
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
@@ -42,9 +41,8 @@ export const SideElement: FC<BoxProps> = ({
     <a
       className="side-element btn btn-outline-dark"
       ref={drag}
-      href="!#"
     >
-      {name}
+      {emoji} {display}
     </a>
   )
 }

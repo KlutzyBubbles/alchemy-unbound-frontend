@@ -26,6 +26,7 @@ const electronHandler = {
   insertRecipe: (recipe: Recipe) => ipcRenderer.invoke('recipe:insert', recipe),
   deleteRecipe: (a: string, b: string) => ipcRenderer.invoke('recipe:delete', a, b),
   getRecipe: (a: string, b: string) => ipcRenderer.invoke('recipe:get', a, b),
+  getAllRecipes: () => ipcRenderer.invoke('recipe:getAll'),
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);
