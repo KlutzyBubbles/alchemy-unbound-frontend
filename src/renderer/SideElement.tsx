@@ -1,29 +1,34 @@
-import type { CSSProperties, FC, ReactNode } from 'react'
+import { useEffect, type CSSProperties, type FC, type ReactNode } from 'react'
 import { ConnectableElement, DragSourceOptions, XYCoord, useDrag, useDrop } from 'react-dnd'
 import { ItemTypes } from './Constants'
-import { Recipe } from './main/database'
+import { Recipe } from '../main/types'
+import { getEmptyImage } from 'react-dnd-html5-backend'
 
-export type SideElementProps = Recipe & {
+export type SideElementProps = {
+  recipe: Recipe
   hideSourceOnDrag?: boolean
+  removeBox: (id: string) => void,
   children?: ReactNode
 }
 
+interface DragItem {
+  type: string
+  id?: string
+  recipe?: Recipe
+  top?: number
+  left?: number
+}
+
 export const SideElement: FC<SideElementProps> = ({
-  a,
-  b,
-  result,
-  display,
-  emoji,
-  depth,
-  who_discovered,
-  base,
+  recipe,
   hideSourceOnDrag,
+  removeBox,
   children,
 }) => {
-  const [{ isDragging }, drag] = useDrag(
+  const [{ isDragging }, drag, preview] = useDrag(
     () => ({
       type: ItemTypes.SIDE_ELEMENT,
-      item: { type: ItemTypes.SIDE_ELEMENT, name: result },
+      item: { type: ItemTypes.SIDE_ELEMENT, recipe: recipe },
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
@@ -34,16 +39,20 @@ export const SideElement: FC<SideElementProps> = ({
     [name],
   )
 
+  useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: true })
+  }, [])
+
   if (isDragging && hideSourceOnDrag) {
     return <div ref={drag} />
   }
   return (
-    <a
-      className="side-element btn btn-outline-dark"
+    <div
+      className={`side-element btn btn-element mt-2 ms-2`}
       ref={drag}
     >
-      {emoji} {display}
-    </a>
+      {recipe.emoji} {recipe.display}
+    </div>
   )
 }
 

@@ -1,7 +1,7 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import { Recipe } from './main/database';
+import { Recipe } from './main/types';
 
 export type Channels = 'ipc-example';
 
@@ -26,7 +26,9 @@ const electronHandler = {
   insertRecipe: (recipe: Recipe) => ipcRenderer.invoke('recipe:insert', recipe),
   deleteRecipe: (a: string, b: string) => ipcRenderer.invoke('recipe:delete', a, b),
   getRecipe: (a: string, b: string) => ipcRenderer.invoke('recipe:get', a, b),
+  combine: (a: string, b: string) => ipcRenderer.invoke('recipe:combine', a, b),
   getAllRecipes: () => ipcRenderer.invoke('recipe:getAll'),
+  save: () => ipcRenderer.invoke('recipe:save'),
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

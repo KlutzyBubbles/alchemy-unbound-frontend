@@ -1,167 +1,127 @@
-import { Database } from 'sqlite3';
-import path from 'path';
+import { Recipe } from './types';
+import { promises as fs } from 'fs';
+import { getFolder } from './steam';
+import { dirExists, fileExists } from '../common/utils';
 
-export type Recipe = {
-  a: string;
-  b: string;
-  result: string;
-  display: string;
-  emoji: string;
-  depth: number;
-  who_discovered: string;
-  base: number;
-};
+const DATABASE_VERISON = 1;
 
-export function connect() {
-  return new Database(
-    path.join(__dirname, 'database.db'),
-  );
-  /*
-  return Database(
-    path.join(__dirname, 'database.db'),
-    { verbose: console.log, fileMustExist: true },
-  );
-  */
-}
+var data: Recipe[] = [];
 
-export function createDatabase(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    console.log('CeateDatabase')
-    const db = connect();
-    const stm = db.prepare(
-      `CREATE TABLE IF NOT EXISTS recipes (
-            a TEXT NOT NULL,
-            b TEXT NOT NULL,
-            result TEXT NOT NULL,
-            display TEXT NOT NULL,
-            emoji TEXT NOT NULL,
-            depth INTEGER DEFAULT 1,
-            who_discovered TEXT NOT NULL,
-            base INTEGER DEFAULT FALSE
-        );`
-    );
-    stm.run((error) => {
-      if (error !== null && error !== undefined) {
-        return reject(error)
-      }
-      var records = [
-        {
-          name: 'Earth',
-          emoji: '🌎'
-        },
-        {
-          name: 'Fire',
-          emoji: '🔥'
-        },
-        {
-          name: 'Water',
-          emoji: '💧'
-        },
-        {
-          name: 'Air',
-          emoji: '💨'
+export async function save(): Promise<void> {
+    if (!(await dirExists(getFolder()))) {
+        await fs.mkdir(getFolder(), { recursive: true })
+    }
+    var existing: Recipe[] = []
+    try {
+        if (fileExists(getFolder() + 'db.json')) {
+            existing = await loadData()
         }
-      ]
-  
-      records.forEach(async (item) => {
-        var result = item.name.toLowerCase()
-        var hasItem = await getRecipesFor(result)
-        if (hasItem === null || hasItem === undefined || hasItem.length === 0) {
-          await insertRecipe({
-            a: '',
-            b: '',
-            result,
-            display: item.name,
-            emoji: item.emoji,
-            depth: 0,
-            who_discovered: '',
-            base: 1
-          })
+    } catch(e) {
+        if (!(e.message as string).startsWith('Failed to load database')) {
+            console.error('Failed to load file, not overriding just incase, saving to temp instead')
+            await fs.writeFile(getFolder() + `db_backup_${(new Date()).toISOString().slice(0, 16)}.json`, JSON.stringify({
+                version: DATABASE_VERISON,
+                data: data
+            }), 'utf-8')
+            return
         }
-      })
-      return resolve()
-    });
-  });
+    }
+    var uniques = new Set(existing.map((value) => {
+        return value.a.localeCompare(value.b) > 0 ? `${value.a}${value.b}` : `${value.b}${value.a}`
+    }))
+    var newData = [...existing, ...data.filter((value) => !uniques.has(value.a.localeCompare(value.b) > 0 ? `${value.a}${value.b}` : `${value.b}${value.a}`))]
+    await fs.writeFile(getFolder() + 'db.json', JSON.stringify({
+        version: DATABASE_VERISON,
+        data: newData
+    }), 'utf-8')
 }
 
-function formatInput(input: any, prefix = '@'): any {
-  var output: any = {};
-  for (var key of Object.keys(input)) {
-    output[`${prefix}${key}`] = input[key]
-  }
-  return output
+function loadV1(loaded: any): Recipe[] {
+    return loaded
 }
 
-export function insertRecipe(recipe: Recipe): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const db = connect();
-    const stm = db.prepare(
-      'INSERT INTO recipes (a, b, result, display, emoji, depth, who_discovered, base) VALUES (@a, @b, @result, @display, @emoji, @depth, @who_discovered, @base)',
-    );
-
-    stm.run(formatInput(recipe), (error) => {
-      if (error) {
-        return reject(error)
-      }
-      return resolve()
-    });
-  })
+async function loadData(): Promise<Recipe[]> {
+    var raw = JSON.parse(await fs.readFile(getFolder() + 'db.json', 'utf-8'))
+    if (raw.version === 1) {
+        return loadV1(raw.data)
+    } else {
+        console.error('Failed to load database because of unknown version, has this been altered?')
+        throw(Error('Failed to load database because of unknown version, has this been altered?'))
+    }
 }
 
-export function deleteRecipe(a: string, b: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const db = connect();
+export async function createDatabase(): Promise<void> {
+    try {
+        data = await loadData()
+    } catch(e) {
+        console.error('Error reading JSON')
+        console.error(e)
+    }
+    var records = [
+        {
+            name: 'Earth',
+            emoji: '🌎'
+        },
+        {
+            name: 'Fire',
+            emoji: '🔥'
+        },
+        {
+            name: 'Water',
+            emoji: '💧'
+        },
+        {
+            name: 'Air',
+            emoji: '💨'
+        }
+    ]
 
-    const stm = db.prepare('DELETE FROM recipes WHERE (a = @a AND b = @b) OR (a = @b AND b = @a)');
-
-    stm.run({ a, b }, (error) => {
-      if (error) {
-        return reject(error)
-      }
-      return resolve()
-    });
-  });
+    records.forEach(async (item) => {
+    var result = item.name.toLowerCase()
+    var hasItem = await getRecipesFor(result)
+    if (hasItem === null || hasItem === undefined || hasItem.length === 0) {
+        await insertRecipe({
+        a: '',
+        b: '',
+        result,
+        display: item.name,
+        emoji: item.emoji,
+        depth: 0,
+        who_discovered: '',
+        base: 1
+        })
+    }
+    })
 }
 
-export function getRecipe(a: string, b: string): Promise<Recipe> {
-  return new Promise((resolve, reject) => {
-    const db = connect();
-    const stm = db.prepare('SELECT * FROM recipes where (a = @a AND b = @b) OR (a = @b AND b = @a)');
-
-    stm.get(formatInput({ a, b }), (err, val) => {
-      if (err) {
-        return reject(err)
-      }
-      return resolve(val as Recipe)
-    });
-  })
-  // return stm.get({ a, b }) as Recipe;
+export async function insertRecipe(recipe: Recipe): Promise<void> {
+    console.log('insertRecipe')
+    data.push(recipe)
 }
 
-export function getRecipesFor(result: string): Promise<Recipe[]> {
-  return new Promise((resolve, reject) => {
-    const db = connect();
-    const stm = db.prepare('SELECT * FROM recipes where (result = @result)');
-
-    stm.all(formatInput({ result }), (err, val) => {
-      if (err) {
-        return reject(err)
-      }
-      return resolve(val as Recipe[])
-    });
-  })
+export async function deleteRecipe(a: string, b: string): Promise<void> {
+    console.log('deleteRecipe')
+    data = data.filter((value, index) => {
+        if ((value.a === a && value.b === b) || (value.a === b && value.b === a)) {
+            return false
+        }
+        return true
+    })
 }
 
-export function getAllRecipes(): Promise<Recipe[]> {
-  return new Promise((resolve, reject) => {
-    const db = connect();
-    const stm = db.prepare('SELECT * FROM recipes');
+export async function getRecipe(a: string, b: string): Promise<Recipe | undefined> {
+    return data.find((value, index) => {
+        if ((value.a === a && value.b === b) || (value.a === b && value.b === a)) {
+            return true
+        }
+        return false
+    })
+}
 
-    stm.all({}, (err, val) => {
-      if (err) {
-        return reject(err)
-      }
-      return resolve(val as Recipe[])
-    });
-  })
+export async function getRecipesFor(result: string): Promise<Recipe[]> {
+    return data.filter((value) => value.result === result)
+}
+
+export async function getAllRecipes(): Promise<Recipe[]> {
+    return data
 }
