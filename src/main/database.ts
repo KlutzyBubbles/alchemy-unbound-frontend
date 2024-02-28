@@ -1,4 +1,4 @@
-import { Recipe } from './types';
+import { Recipe } from '../common/types';
 import { promises as fs } from 'fs';
 import { getFolder } from './steam';
 import { dirExists, fileExists } from '../common/utils';

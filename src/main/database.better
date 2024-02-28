@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 import path from 'path';
-import { Recipe } from './types';
+import { Recipe } from '../common/types';
 
 export function connect() {
   return Database(

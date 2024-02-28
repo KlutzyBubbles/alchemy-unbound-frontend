@@ -3,7 +3,7 @@ import type { XYCoord } from 'react-dnd'
 import { useDragLayer } from 'react-dnd'
 
 import { ItemTypes } from './Constants'
-import { Recipe } from '../main/types'
+import { Recipe } from '../common/types'
 
 
 const layerStyles: CSSProperties = {

@@ -1,7 +1,7 @@
 import { useEffect, type CSSProperties, type FC, type ReactNode } from 'react'
 import { ConnectableElement, DragSourceOptions, XYCoord, useDrag, useDrop } from 'react-dnd'
 import { ItemTypes } from './Constants'
-import { Recipe } from '../main/types'
+import { Recipe } from '../common/types'
 import { getEmptyImage } from 'react-dnd-html5-backend'
 
 export type SideElementProps = {

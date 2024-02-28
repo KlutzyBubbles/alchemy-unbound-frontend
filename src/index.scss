@@ -16,7 +16,7 @@ html, body, #root {
 }
 
 .gutter {
-  background-color: #eee;
+  background-color: $dark;
   background-repeat: no-repeat;
   background-position: 50%;
 }
@@ -32,7 +32,8 @@ html, body, #root {
 
 .btn-element {
   @include button-variant($light, $dark, color-contrast($light), $dark);
+}
 
-  // optitional
-  // color: #fff; #uncomment and add your color
+.btn-no-outline {
+  @include button-variant($light, $light, color-contrast($light), $light);
 }

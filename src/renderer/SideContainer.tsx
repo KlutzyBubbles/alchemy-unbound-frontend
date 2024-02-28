@@ -6,7 +6,7 @@ import { useDrop } from 'react-dnd'
 
 import { MainElement } from './MainElement'
 import { ItemTypes } from './Constants'
-import { Recipe } from '../main/types'
+import { Recipe } from '../common/types'
 import { CustomDragLayer } from './DragLayer'
 import Split from 'react-split';
 import { SideElement } from './SideElement'

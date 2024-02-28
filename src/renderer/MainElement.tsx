@@ -1,10 +1,12 @@
 import { useState, type CSSProperties, type FC, type ReactNode, useEffect } from 'react'
 import { ConnectableElement, DragSourceOptions, XYCoord, useDrag, useDrop } from 'react-dnd'
 import { ItemTypes } from './Constants'
-import { Recipe } from '../main/types'
+import { Recipe } from '../common/types'
 import Dropdown from 'react-bootstrap/Dropdown';
 import { getXY } from './DropContainer';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import { animated, easings, useSpring, useSpringValue } from '@react-spring/web';
+import { motion, useAnimation, useTime, useTransform } from 'framer-motion';
 
 export interface BoxProps {
   id: any
@@ -138,14 +140,40 @@ export const MainElement: FC<BoxProps> = ({
   if (isDragging && hideSourceOnDrag) {
     return <div ref={drag} />
   }
+  
+  const onClick = () => {
+    controls.start('start')
+  }
+
+  const variants = {
+    start: () => ({
+      rotate: [0, -20, 20, -20, 20, 0],
+      transition: {
+        times: [0, 0.2, 0.4, 0.6, 0.8, 1],
+        duration: 0.5,
+        repeat: 0,
+        ease: "easeInOut",
+        repeatDelay: 0.5
+      }
+    }),
+    reset: {
+      rotate: 0
+    }
+  };
+  
+  const controls = useAnimation();
+  
   return (
-      <div
+      <motion.div
         className="main-element btn btn-outline-dark btn-light position-absolute"
         ref={dragDrop}
-        style={getStyles(left, top, isDragging) /*{ left, top, backgroundColor: isOver ? 'darkgreen' : 'rgba(0, 0, 0, .5)' }*/}
+        style={{...getStyles(left, top, isDragging) } /*{ left, top, backgroundColor: isOver ? 'darkgreen' : 'rgba(0, 0, 0, .5)' }*/}
         data-testid="box"
         onContextMenu={handleContext}
         onBlur={() => setDropdownOpen(false)}
+        onClick={onClick}
+        variants={variants}
+        animate={controls}
       >
         {recipe.emoji} {recipe.display}
         <Dropdown show={dropdownOpen} onToggle={(nextShow) => setDropdownOpen(nextShow)}>
@@ -155,6 +183,6 @@ export const MainElement: FC<BoxProps> = ({
             <Dropdown.Item href="#">Menu Item</Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
-      </div>
+      </motion.div>
   )
 }

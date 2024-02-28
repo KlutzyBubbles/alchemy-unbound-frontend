@@ -1,6 +1,6 @@
 import { Database } from 'sqlite3';
 import path from 'path';
-import { Recipe } from './types';
+import { Recipe } from '../common/types';
 import { net } from 'electron';
 import { getRecipe, insertRecipe, save } from './database';
 

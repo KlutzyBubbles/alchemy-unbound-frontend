@@ -6,12 +6,13 @@ import { useDrop } from 'react-dnd'
 
 import { MainElement } from './MainElement'
 import { ItemTypes } from './Constants'
-import { Recipe } from '../main/types'
+import { Recipe } from '../common/types'
 import { CustomDragLayer } from './DragLayer'
 import Split from 'react-split';
-import { Row } from 'react-bootstrap'
+import { Button, Row } from 'react-bootstrap'
 import { SideElement } from './SideElement'
 import { SideContainer } from './SideContainer'
+import { IoSettingsOutline } from "react-icons/io5";
 
 interface DragItem {
     type: string
@@ -51,7 +52,7 @@ export const DropContainer: FC<ContainerProps> = ({
     const [recipes, setRecipes] = useState<Recipe[]>([]);
 
     async function getAllRecipes() {
-        const data = await window.electron.getAllRecipes();
+        const data = await window.RecipeAPI.getAllRecipes();
 
         if (data) {
             setRecipes(data);
@@ -91,7 +92,7 @@ export const DropContainer: FC<ContainerProps> = ({
             console.log(boxes)
             try {
               try {
-                var recipe: Recipe | undefined = await window.electron.combine(boxes[a].recipe.result, boxes[b].recipe.result)
+                var recipe: Recipe | undefined = await window.RecipeAPI.combine(boxes[a].recipe.result, boxes[b].recipe.result)
                 if (recipe === undefined) {
                   console.error('cant combine')
                 } else {
@@ -199,7 +200,7 @@ export const DropContainer: FC<ContainerProps> = ({
         snapOffset={0}
     >
       <div>
-        <div ref={drop} className='h-100 w-100'>
+        <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden'>
           {Object.keys(boxes).map((key) => {
             const { left, top, recipe, combining } = boxes[key]
             return (
@@ -217,6 +218,9 @@ export const DropContainer: FC<ContainerProps> = ({
             )
           })}
           <CustomDragLayer/>
+          <div className='footer mt-auto'>
+            <Button size='lg' className='btn-no-outline float-end mb-2 me-2'><IoSettingsOutline/></Button>
+          </div>
         </div>
       </div>
       <SideContainer recipes={recipes} removeBox={removeBox}/>
