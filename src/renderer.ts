@@ -1,32 +1,23 @@
-/**
- * This file will automatically be loaded by webpack and run in the "renderer" context.
- * To learn more about the differences between the "main" and the "renderer" context in
- * Electron, visit:
- *
- * https://electronjs.org/docs/latest/tutorial/process-model
- *
- * By default, Node.js integration in this file is disabled. When enabling Node.js integration
- * in a renderer process, please be aware of potential security implications. You can read
- * more about security risks here:
- *
- * https://electronjs.org/docs/tutorial/security
- *
- * To enable Node.js integration in this file, open up `main.js` and enable the `nodeIntegration`
- * flag:
- *
- * ```
- *  // Create the browser window.
- *  mainWindow = new BrowserWindow({
- *    width: 800,
- *    height: 600,
- *    webPreferences: {
- *      nodeIntegration: true
- *    }
- *  });
- * ```
- */
-
 import './index.scss';
 import './renderer/Main';
 
-console.log('👋 This message is being logged by "renderer.js", included via webpack');
+(async() => {
+    if (await window.GenericAPI.isPackaged()) {
+        var test = 'text-shadow: -1px -1px hsl(0,100%,50%),';
+        var amplitude = 40;
+        var frequency = 20;
+        var colorChange = 3.4;
+        var prefix = ''
+        for (var y = 0; y <= 669; y++) {
+            var x = amplitude * Math.sin(y / frequency)
+            test += `${prefix} ${x}px ${y}px hsl(${y * colorChange}, 100%, 50%)`
+            prefix = ','
+        }
+        test += '; font-size: 40px; padding: 0 64px 440px 20px;'
+    
+        console.log("%c %s", test, 'You shouln\'t be here');
+    } else {
+        console.log('Rendered')
+    }
+    
+})()

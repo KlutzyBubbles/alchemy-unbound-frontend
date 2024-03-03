@@ -2,7 +2,7 @@
   "name": "element-craft-frontend",
   "productName": "element-craft-frontend",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Alchemy Unbound frontend application",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
@@ -30,7 +30,7 @@
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
     "autoprefixer": "^10.4.17",
     "css-loader": "^6.10.0",
-    "electron": "29.0.1",
+    "electron": "^29.1.0",
     "eslint": "^8.56.0",
     "eslint-plugin-import": "^2.29.1",
     "fork-ts-checker-webpack-plugin": "^7.3.0",
@@ -50,10 +50,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@popperjs/core": "^2.11.8",
-    "@react-spring/web": "^9.7.3",
     "bootstrap": "^5.3.3",
     "electron-debug": "^3.2.0",
+    "electron-fetch": "^1.9.1",
     "electron-squirrel-startup": "^1.0.0",
     "electron-unhandled": "^4.0.1",
     "framer-motion": "^11.0.6",
@@ -65,7 +64,6 @@
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
     "react-split": "^2.0.14",
-    "sqlite3": "^5.1.7",
     "steamworks.js": "^0.3.1"
   }
 }

@@ -1,34 +1,27 @@
-import { useEffect, type CSSProperties, type FC, type ReactNode } from 'react'
-import { ConnectableElement, DragSourceOptions, XYCoord, useDrag, useDrop } from 'react-dnd'
+import { useEffect, type FC, type ReactNode } from 'react'
+import { useDrag } from 'react-dnd'
 import { ItemTypes } from './Constants'
-import { Recipe } from '../common/types'
+import { RecipeElement } from '../common/types'
 import { getEmptyImage } from 'react-dnd-html5-backend'
+import { DragItem } from './types'
 
 export type SideElementProps = {
-  recipe: Recipe
+  element: RecipeElement
   hideSourceOnDrag?: boolean
   removeBox: (id: string) => void,
   children?: ReactNode
 }
 
-interface DragItem {
-  type: string
-  id?: string
-  recipe?: Recipe
-  top?: number
-  left?: number
-}
-
 export const SideElement: FC<SideElementProps> = ({
-  recipe,
+  element,
   hideSourceOnDrag,
   removeBox,
   children,
 }) => {
-  const [{ isDragging }, drag, preview] = useDrag(
+  const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
     () => ({
       type: ItemTypes.SIDE_ELEMENT,
-      item: { type: ItemTypes.SIDE_ELEMENT, recipe: recipe },
+      item: { type: ItemTypes.SIDE_ELEMENT, element: element },
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
@@ -51,7 +44,7 @@ export const SideElement: FC<SideElementProps> = ({
       className={`side-element btn btn-element mt-2 ms-2`}
       ref={drag}
     >
-      {recipe.emoji} {recipe.display}
+      {element.emoji} {element.display}
     </div>
   )
 }

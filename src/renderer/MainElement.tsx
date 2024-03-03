@@ -1,39 +1,31 @@
 import { useState, type CSSProperties, type FC, type ReactNode, useEffect } from 'react'
 import { ConnectableElement, DragSourceOptions, XYCoord, useDrag, useDrop } from 'react-dnd'
 import { ItemTypes } from './Constants'
-import { Recipe } from '../common/types'
+import { Recipe, RecipeElement } from '../common/types'
 import Dropdown from 'react-bootstrap/Dropdown';
 import { getXY } from './DropContainer';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import { animated, easings, useSpring, useSpringValue } from '@react-spring/web';
 import { motion, useAnimation, useTime, useTransform } from 'framer-motion';
+import { DragItem } from './types';
 
 export interface BoxProps {
   id: any
   left: number
   top: number
-  recipe: Recipe
+  element: RecipeElement
   hideSourceOnDrag?: boolean
-  addBox: (x: number, y: number, recipe: Recipe, combining: boolean) => Promise<string>
+  addBox: (x: number, y: number, element: RecipeElement, combining: boolean) => Promise<string>
   moveBox: (id: string, left: number, top: number) => void
   combine: (a: string, b: string) => Promise<void>,
   // combineRaw: (a: string, b: string) => Promise<void>,
   children?: ReactNode
 }
 
-interface DragItem {
-  type: string
-  id?: string
-  recipe?: Recipe
-  top?: number
-  left?: number
-}
-
 export const MainElement: FC<BoxProps> = ({
   id,
   left,
   top,
-  recipe,
+  element,
   hideSourceOnDrag,
   addBox,
   moveBox,
@@ -44,10 +36,10 @@ export const MainElement: FC<BoxProps> = ({
         drag(node, options)
         drop(node, options)
     }
-  const [{ isDragging }, drag, preview] = useDrag(
+  const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
     () => ({
       type: ItemTypes.ELEMENT,
-      item: { type: ItemTypes.ELEMENT, id, left, top, recipe: recipe },
+      item: { type: ItemTypes.ELEMENT, id, left, top, element: element },
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
       }),
@@ -89,7 +81,7 @@ export const MainElement: FC<BoxProps> = ({
         let { x, y } = getXY(item, monitor)
         if (item.type === ItemTypes.SIDE_ELEMENT) {
             // Create a new and place it
-            addBox(x, y, item.recipe, true).then((newId) => {
+            addBox(x, y, item.element, true).then((newId) => {
               if (id !== newId) {
                 combine(id, newId).then(() => {
                   console.log('combined')
@@ -175,7 +167,7 @@ export const MainElement: FC<BoxProps> = ({
         variants={variants}
         animate={controls}
       >
-        {recipe.emoji} {recipe.display}
+        {element.emoji} {element.display}
         <Dropdown show={dropdownOpen} onToggle={(nextShow) => setDropdownOpen(nextShow)}>
           <Dropdown.Menu>
             <Dropdown.Item href="#">Menu Item</Dropdown.Item>

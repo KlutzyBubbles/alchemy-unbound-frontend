@@ -49,7 +49,7 @@ export const CustomDragLayer: FC<{}> = () => {
                     style={getItemStyles(initialOffset, currentOffset)}
                     data-testid="box"
                 >
-                    {item.recipe.emoji} {item.recipe.display}
+                    {item.element.emoji} {item.element.display}
                 </div>
             )
         default:

@@ -1,20 +1,7 @@
-import { Database } from 'sqlite3';
-import path from 'path';
 import { Recipe } from '../common/types';
 import { net } from 'electron';
 import { getRecipe, insertRecipe, save } from './database';
-
-export function connect() {
-  return new Database(
-    path.join(__dirname, 'database.db'),
-  );
-  /*
-  return Database(
-    path.join(__dirname, 'database.db'),
-    { verbose: console.log, fileMustExist: true },
-  );
-  */
-}
+import fetch from 'electron-fetch';
 
 export type RequestResult = {
   result: string,
@@ -43,7 +30,7 @@ export async function combine(a: string, b: string): Promise<Recipe | undefined>
   if (exists !== undefined) {
     return exists
   } else {
-    const response = await net.fetch(`http://localhost:5001?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`);
+    const response = await /*net.*/fetch(`http://localhost:5001?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`);
     if (response.ok) {
       try {
         const body: RequestResult = (await response.json()) as RequestResult

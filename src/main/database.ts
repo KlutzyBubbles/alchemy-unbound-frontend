@@ -17,7 +17,9 @@ export async function save(): Promise<void> {
             existing = await loadData()
         }
     } catch(e) {
-        if (!(e.message as string).startsWith('Failed to load database')) {
+        if (e.code === 'ENOENT') {
+            console.log('Error was coulnd\'t find file, which is fine')
+        } else if (!(e.message as string).startsWith('Failed to load database')) {
             console.error('Failed to load file, not overriding just incase, saving to temp instead')
             await fs.writeFile(getFolder() + `db_backup_${(new Date()).toISOString().slice(0, 16)}.json`, JSON.stringify({
                 version: DATABASE_VERISON,
@@ -41,12 +43,19 @@ function loadV1(loaded: any): Recipe[] {
 }
 
 async function loadData(): Promise<Recipe[]> {
-    var raw = JSON.parse(await fs.readFile(getFolder() + 'db.json', 'utf-8'))
-    if (raw.version === 1) {
-        return loadV1(raw.data)
-    } else {
-        console.error('Failed to load database because of unknown version, has this been altered?')
-        throw(Error('Failed to load database because of unknown version, has this been altered?'))
+    try {
+        var raw = JSON.parse(await fs.readFile(getFolder() + 'db.json', 'utf-8'))
+        if (raw.version === 1) {
+            return loadV1(raw.data)
+        } else {
+            console.error('Failed to load database because of unknown version, has this been altered?')
+            throw(Error('Failed to load database because of unknown version, has this been altered?'))
+        }
+    } catch (e) {
+        if (e.code === 'ENOENT') {
+            console.log('No file found, returning blank data')
+            return []
+        }
     }
 }
 

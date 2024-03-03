@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import MenuBuilder from './main/menu';
 import { insertRecipe, deleteRecipe, getRecipe, createDatabase, getAllRecipes, save } from './main/database';
 import { Recipe } from './common/types'
@@ -28,7 +28,7 @@ const createWindow = (): void => {
     height: 720,
     width: 1280,
     webPreferences: {
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
     },
   });
 
@@ -39,7 +39,6 @@ const createWindow = (): void => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
-    console.log('ready to show')
   });
 
   //const menuBuilder = new MenuBuilder(mainWindow);
@@ -49,6 +48,12 @@ const createWindow = (): void => {
   mainWindow.webContents.openDevTools();
   
   mainWindow.removeMenu();
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+  
 };
 
 // This method will be called when Electron has finished

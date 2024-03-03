@@ -32,8 +32,12 @@ export async function loadSettings(): Promise<void> {
             console.error('Failed to load settings because of unknown version, has this been altered?')
         }
     } catch(e) {
-        console.error('Error reading JSON')
-        console.error(e)
+        if (e.code !== 'ENOENT') {
+            console.error('Error reading JSON')
+            console.error(e)
+        } else {
+            console.log('No settings file found yet')
+        }
     }
 }
 

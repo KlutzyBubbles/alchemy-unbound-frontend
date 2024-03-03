@@ -37,3 +37,11 @@ html, body, #root {
 .btn-no-outline {
   @include button-variant($light, $light, color-contrast($light), $light);
 }
+
+.btn-heart {
+  @include button-variant($light, $light, color-contrast($light), $light, $light, $danger);
+}
+
+.btn-info {
+  @include button-variant($light, $light, color-contrast($light), $light, $light, $primary);
+}

@@ -6,29 +6,22 @@ import { useDrop } from 'react-dnd'
 
 import { MainElement } from './MainElement'
 import { ItemTypes } from './Constants'
-import { Recipe } from '../common/types'
+import { Recipe, RecipeElement } from '../common/types'
 import { CustomDragLayer } from './DragLayer'
 import Split from 'react-split';
 import { SideElement } from './SideElement'
-
-interface DragItem {
-    type: string
-    id?: string
-    recipe?: Recipe
-    top?: number
-    left?: number
-}
+import { DragItem } from './types'
 
 export interface ContainerProps {
   // refreshRecipes: () => void
   // hideSourceOnDrag: boolean
   removeBox: (id: string) => void,
-  recipes: Recipe[],
+  elements: RecipeElement[],
 }
 
 export const SideContainer: FC<ContainerProps> = ({
     removeBox,
-    recipes
+    elements
 }) => {
   const [{ isOver, isOverCurrent }, drop] = useDrop(
     () => ({
@@ -53,8 +46,8 @@ export const SideContainer: FC<ContainerProps> = ({
  //style={styles}>
   return (
     <div ref={drop} style={{ background: isOver ? 'red' : 'white' }}>
-        {recipes.map((recipe) => {
-            return (<SideElement key={recipe.result} recipe={recipe} removeBox={removeBox} />)
+        {elements.map((element) => {
+            return (<SideElement key={element.name} element={element} removeBox={removeBox} />)
         })}
     </div>
   )

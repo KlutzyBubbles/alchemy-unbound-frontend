@@ -6,24 +6,19 @@ import { useDrop } from 'react-dnd'
 
 import { MainElement } from './MainElement'
 import { ItemTypes } from './Constants'
-import { Recipe } from '../common/types'
+import { Recipe, RecipeElement } from '../common/types'
 import { CustomDragLayer } from './DragLayer'
 import Split from 'react-split';
 import { Button, Row } from 'react-bootstrap'
 import { SideElement } from './SideElement'
 import { SideContainer } from './SideContainer'
-import { IoSettingsOutline } from "react-icons/io5";
-
-interface DragItem {
-    type: string
-    id?: string
-    recipe?: Recipe
-    top?: number
-    left?: number
-}
+import { IoHeart, IoHeartOutline, IoInformationCircleOutline, IoSettingsOutline } from "react-icons/io5";
+import { motion, useAnimation } from 'framer-motion'
+import { ModalOption } from './Main'
+import { DragItem } from './types'
 
 export interface ContainerProps {
-  // refreshRecipes: () => void
+  openModal: (option: ModalOption) => void
   hideSourceOnDrag: boolean
 }
 
@@ -47,15 +42,32 @@ export function getXY(item: DragItem, monitor: DropTargetMonitor): XYCoord {
 }
 
 export const DropContainer: FC<ContainerProps> = ({
+  openModal,
   hideSourceOnDrag
 }) => {
-    const [recipes, setRecipes] = useState<Recipe[]>([]);
+    const [elements, setElements] = useState<RecipeElement[]>([]);
 
     async function getAllRecipes() {
         const data = await window.RecipeAPI.getAllRecipes();
 
         if (data) {
-            setRecipes(data);
+          const namesUnique = [...new Set(data.map(item => item.result))];
+
+          var formattedData: RecipeElement[] = [];
+          for (var name of namesUnique) {
+            const recipes = data.filter((item) => item.result === name);
+            if (recipes.length === 0) {
+              console.warn(`Invalid recipe data for name ${name}`)
+            } else {
+              formattedData.push({
+                name: name,
+                display: recipes[0].display,
+                emoji: recipes[0].emoji,
+                recipes: recipes
+              })
+            }
+          }
+          setElements(formattedData);
         }
     }
 
@@ -72,18 +84,24 @@ export const DropContainer: FC<ContainerProps> = ({
           top: number
           left: number
           combining: boolean,
-          recipe: Recipe
+          element: RecipeElement
         }
       }>({
-        a: { top: 20, left: 80, combining: false, recipe: {
-          a: '',
-          b: '',
-          result: 'fire',
+        a: { top: 20, left: 80, combining: false, element: {
+          name: 'fire',
           display: 'Fire',
           emoji: '🔥',
-          depth: 0,
-          who_discovered: '',
-          base: 1 } }
+          recipes: [{
+            a: '',
+            b: '',
+            result: 'fire',
+            display: 'Fire',
+            emoji: '🔥',
+            depth: 0,
+            who_discovered: '',
+            base: 1
+          }]
+        }}
       })
 
     const combine = async (a: string, b: string) => {
@@ -92,15 +110,45 @@ export const DropContainer: FC<ContainerProps> = ({
             console.log(boxes)
             try {
               try {
-                var recipe: Recipe | undefined = await window.RecipeAPI.combine(boxes[a].recipe.result, boxes[b].recipe.result)
+                var recipe: Recipe | undefined = await window.RecipeAPI.combine(boxes[a].element.name, boxes[b].element.name)
                 if (recipe === undefined) {
                   console.error('cant combine')
                 } else {
                   console.log('combining')
                   console.log(recipe)
+                  // TODO
+                  var elementList = elements.filter((value) => value.name === recipe.result);
+                  var recipes = []
+                  if (elementList.length === 0) {
+                    console.log('No existing element found')
+                    recipes.push(recipe)
+                  } else {
+                    if (elementList.length > 1) {
+                      console.warn('Elements list is more than 1, it should only be 1')
+                    }
+                    var element = elementList[0]
+                    recipes = element.recipes;
+                    var recipeExists = false
+                    for (var r of element.recipes) {
+                      if ((r.a === recipe.a && r.b === recipe.b) || (r.a === recipe.b && r.b === recipe.a)) {
+                        recipeExists = true
+                        break
+                      }
+                    }
+                    if (!recipeExists) {
+                      recipes.push(recipe)
+                    }
+                  }
                   let temp = update(boxes, {
                     [a]: {
-                        $merge: { recipe: recipe },
+                        $merge: {
+                          element: {
+                            name: recipe.result,
+                            display: recipe.display,
+                            emoji: recipe.emoji,
+                            recipes: recipes
+                          }
+                        },
                     }
                   })
                   console.log(temp)
@@ -146,7 +194,7 @@ export const DropContainer: FC<ContainerProps> = ({
     [boxes, setBoxes],
   )
 
-  const addBox = (x: number, y: number, recipe: Recipe, combining: boolean): Promise<string> => {
+  const addBox = (x: number, y: number, element: RecipeElement, combining: boolean): Promise<string> => {
     return new Promise((resolve, reject) => {
       var newId = makeid(10)
       setBoxes({
@@ -155,7 +203,7 @@ export const DropContainer: FC<ContainerProps> = ({
             top: y,
             left: x,
             combining: combining,
-            recipe: recipe
+            element: element
         }
       })
       setBoxes((value) => {
@@ -176,7 +224,7 @@ export const DropContainer: FC<ContainerProps> = ({
         let { x, y } = getXY(item, monitor)
         if (item.type === ItemTypes.SIDE_ELEMENT) {
             // Create a new and place it
-            addBox(x, y, item.recipe, false)
+            addBox(x, y, item.element, false)
         } else {
             // Moving an existing item
             moveBox(item.id, x, y)
@@ -191,25 +239,55 @@ export const DropContainer: FC<ContainerProps> = ({
     [moveBox, setBoxes],
   )
 
+  const onSettingsMouseEnter = () => {
+    settingsControls.start('start')
+  }
+
+  const onSettingsMouseLeave = () => {
+    settingsControls.start('reset')
+  }
+
+  const settingsVariants = {
+    start: () => ({
+      rotate: [0, 90],
+      transition: {
+        duration: 0.2,
+        repeat: 0,
+        ease: "easeInOut",
+        repeatDelay: 0.5
+      }
+    }),
+    reset: {
+      rotate: [90, 0],
+      transition: {
+        duration: 0.2,
+        repeat: 0,
+        ease: "easeInOut"
+      }
+    }
+  };
+  
+  const settingsControls = useAnimation();
+
  //style={styles}>
   return (
     <Split
         sizes={[75, 25]}
         className="split p-0 m-0"
-        gutterSize={5}
+        gutterSize={2}
         snapOffset={0}
     >
       <div>
         <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden'>
           {Object.keys(boxes).map((key) => {
-            const { left, top, recipe, combining } = boxes[key]
+            const { left, top, element, combining } = boxes[key]
             return (
               <MainElement
                 key={key}
                 id={key}
                 left={left}
                 top={top}
-                recipe={recipe}
+                element={element}
                 hideSourceOnDrag={hideSourceOnDrag}
                 addBox={addBox}
                 moveBox={moveBox}
@@ -219,11 +297,21 @@ export const DropContainer: FC<ContainerProps> = ({
           })}
           <CustomDragLayer/>
           <div className='footer mt-auto'>
-            <Button size='lg' className='btn-no-outline float-end mb-2 me-2'><IoSettingsOutline/></Button>
+            <motion.div
+              className='btn btn-no-outline float-end mb-2 me-2 fs-2 d-flex p-2'
+              onMouseEnter={onSettingsMouseEnter}
+              onMouseLeave={onSettingsMouseLeave}
+              variants={settingsVariants}
+              animate={settingsControls}
+              onClick={() => openModal('settings')}>
+                <IoSettingsOutline/>
+            </motion.div>
+            <a href="https://ko-fi.com/klutzybubbles" target="_blank" className='btn btn-sm btn-heart float-end mb-2 fs-2 d-flex p-2'><IoHeart /></a>
+            <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('info')}><IoInformationCircleOutline /></div>
           </div>
         </div>
       </div>
-      <SideContainer recipes={recipes} removeBox={removeBox}/>
+      <SideContainer elements={elements} removeBox={removeBox}/>
     </Split>
   )
 }
