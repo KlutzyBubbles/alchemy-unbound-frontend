@@ -1,16 +1,15 @@
-import { useState, type CSSProperties, type FC, type ReactNode, useEffect, useContext } from 'react';
+import { useState, type FC, type ReactNode, useEffect, useContext } from 'react';
 import { ConnectableElement, DragSourceOptions, useDrag, useDrop } from 'react-dnd';
-import { ItemTypes } from './Constants';
 import { RecipeElement } from '../common/types';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { getXY } from './Utils';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import { Variants, motion, useAnimation } from 'framer-motion';
-import { DragItem } from './types';
+import { Variants, useAnimation } from 'framer-motion';
+import { DragItem, ItemTypes } from './types';
 import { SettingsContext } from './SettingsProvider';
+import { ItemRenderer } from './ItemRenderer';
 
 export interface BoxProps {
-  id: string
   dragId: string
   left: number
   top: number
@@ -18,6 +17,7 @@ export interface BoxProps {
   hideSourceOnDrag?: boolean
   addBox: (x: number, y: number, element: RecipeElement, combining: boolean) => Promise<string>
   moveBox: (id: string, left: number, top: number) => Promise<void>
+  rawCombine: (a: string, bName: string) => Promise<void>,
   combine: (a: string, b: string) => Promise<void>,
   combining: boolean,
   newCombine: boolean,
@@ -28,7 +28,6 @@ export interface BoxProps {
 }
 
 export const MainElement: FC<BoxProps> = ({
-    id,
     dragId,
     left,
     top,
@@ -36,6 +35,7 @@ export const MainElement: FC<BoxProps> = ({
     hideSourceOnDrag,
     addBox,
     moveBox,
+    rawCombine,
     combine,
     combining,
     loading,
@@ -47,6 +47,7 @@ export const MainElement: FC<BoxProps> = ({
     };
 
     const { settings } = useContext(SettingsContext);
+    // const [hasDropOver, setHasDropOver] = useState(false);
     
     const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
         () => ({
@@ -59,24 +60,9 @@ export const MainElement: FC<BoxProps> = ({
         [dragId, left, top],
     );
 
-    function getStyles(
-        left: number,
-        top: number,
-        isDragging: boolean,
-    ): CSSProperties {
-        // const transform = `translate3d(${left}px, ${top}px, 0)`;
-        return {
-            position: 'absolute',
-            left,
-            top,
-            // transform,
-            // WebkitTransform: transform,
-            // IE fallback: hide the real node using CSS when dragging
-            // because IE will ignore our custom "empty image" drag preview.
-            opacity: isDragging ? 0 : 1,
-            height: isDragging ? 0 : '',
-        };
-    }
+    useEffect(() => {
+        console.log(`Moved ${left}, ${top}`);
+    }, [top, left]);
 
     useEffect(() => {
         preview(getEmptyImage(), { captureDraggingState: true });
@@ -93,16 +79,10 @@ export const MainElement: FC<BoxProps> = ({
                 const { x, y } = getXY(item, monitor);
                 if (item.type === ItemTypes.SIDE_ELEMENT) {
                     // Create a new and place it
-                    addBox(x, y, item.element, true).then((newId) => {
-                        if (dragId !== newId) {
-                            combine(dragId, newId).then(() => {
-                                console.log('combined');
-                            }).catch((e) => {
-                                console.error('combining ewrror');
-                                console.error(e);
-                            });
-                        }
+                    rawCombine(dragId, item.element.name).then(() => {
+                        console.log('combined');
                     }).catch((e) => {
+                        console.error('combining ewrror');
                         console.error(e);
                     });
                 } else {
@@ -146,6 +126,11 @@ export const MainElement: FC<BoxProps> = ({
     const onClick = () => {
         controls.start('error');
     };
+
+    //useEffect(() => {
+    //    setHasDropOver(isOver);
+    //    console.log(`IsOver changed ${isOver}`);
+    //}, [isOver]);
 
     useEffect(() => {
         (async () => {
@@ -263,26 +248,29 @@ export const MainElement: FC<BoxProps> = ({
     const controls = useAnimation();
   
     return (
-        <motion.div
-            className={`main-element btn btn-outline-dark btn-light position-absolute ${isOver ? 'active': ''}`}
-            id={id}
+        <ItemRenderer
+            element={element}
+            type={ItemTypes.MAIN_ELEMENT}
+            dragging={isDragging}
             ref={dragDrop}
-            data-testid="box"
+            top={top}
+            left={left}
+            hasDropOver={isOver}
+            initialOffset={{ x: 0, y: 0 }}
+            currentOffset={{ x: 0, y: 0 }}
             onContextMenu={handleContext}
             onBlur={() => setDropdownOpen(false)}
             onClick={onClick}
             variants={customVariants}
             animate={controls}
+            disabled={loading}
             exit={{
                 opacity: 0,
                 scale: 0,
                 transition: {
                     duration: 1,
                 }
-            }}
-            style={{...getStyles(left, top, isDragging) } /*{ left, top, backgroundColor: isOver ? 'darkgreen' : 'rgba(0, 0, 0, .5)' }*/}
-        >
-            {element.emoji} {element.display[settings.language]}
+            }}>
             <Dropdown show={dropdownOpen} onToggle={(nextShow) => setDropdownOpen(nextShow)}>
                 <Dropdown.Menu>
                     {element.recipes.map((recipe) => {
@@ -308,6 +296,6 @@ export const MainElement: FC<BoxProps> = ({
                     })}
                 </Dropdown.Menu>
             </Dropdown>
-        </motion.div>
+        </ItemRenderer>
     );
 };

@@ -1,7 +1,8 @@
-import { BasicElement, RawRecipeRow, Recipe, RecipeRow } from '../common/types';
+import { BasicElement, Languages, Recipe, RecipeRow } from '../common/types';
 import { promises as fs } from 'fs';
 import { getFolder } from './steam';
 import { dirExists, fileExists } from '../common/utils';
+import { Language, languages } from '../common/settings';
 
 const DATABASE_VERISON = 1;
 
@@ -38,8 +39,8 @@ export async function save(): Promise<void> {
     }), 'utf-8');
 }
 
-function loadV1(loaded: RawRecipeRow[]): RecipeRow[] {
-    return loaded;
+function loadV1(loaded: Record<string, unknown>[]): RecipeRow[] {
+    return loaded as RecipeRow[];
 }
 
 async function loadData(): Promise<RecipeRow[]> {
@@ -59,6 +60,15 @@ async function loadData(): Promise<RecipeRow[]> {
     }
 }
 
+function withoutEmoji(item: Record<Language | 'emoji', string>): Languages {
+    const result: Partial<Languages> = {};
+    for (const key of Object.keys(item)) {
+        if (key !== 'emoji')
+            result[key as Language] = item[key as Language];
+    }
+    return result as Languages;
+}
+
 export async function createDatabase(): Promise<void> {
     try {
         data = await loadData();
@@ -71,36 +81,69 @@ export async function createDatabase(): Promise<void> {
             english: 'Fire',
             schinese: '火',
             russian: 'огонь',
-            french: 'feu',
             spanish: 'fuego',
+            french: 'feu',
             japanese: '火',
+            indonesian: 'Api',
+            german: 'Feuer',
+            latam: 'fuego',
+            italian: 'fuoco',
+            dutch: 'vuur',
+            polish: 'ogień',
+            portuguese: 'fogo',
+            tchinese: '火',
+            koreana: '불',
             emoji: '🔥'
-        },
-        {
+        }, {
             english: 'Earth',
             schinese: '地球',
             russian: 'Земля',
-            french: 'Terre',
             spanish: 'Tierra',
+            french: 'Terre',
             japanese: '地球',
+            indonesian: 'Bumi',
+            german: 'Erde',
+            latam: 'terra',
+            italian: 'terra',
+            dutch: 'aarde',
+            polish: 'ziemia',
+            portuguese: 'terra',
+            tchinese: '地球',
+            koreana: '지구',
             emoji: '🌎'
-        },
-        {
+        }, {
             english: 'Air',
             schinese: '空气',
             russian: 'Воздух',
-            french: 'Air',
             spanish: 'Aire',
+            french: 'Air',
             japanese: '空気',
+            indonesian: 'Udara',
+            german: 'Luft',
+            latam: 'aire',
+            italian: 'aria',
+            dutch: 'lucht',
+            polish: 'powietrze',
+            portuguese: 'ar',
+            tchinese: '空氣',
+            koreana: '공기',
             emoji: '💨'
-        },
-        {
+        }, {
             english: 'Water',
             schinese: '水',
             russian: 'Вода',
-            french: 'Eau',
             spanish: 'Agua',
+            french: 'Eau',
             japanese: '水',
+            indonesian: 'Air',
+            german: 'Wasser',
+            latam: 'agua',
+            italian: 'acqua',
+            dutch: 'water',
+            polish: 'woda',
+            portuguese: 'água',
+            tchinese: '水',
+            koreana: '물',
             emoji: '💧'
         }
     ];
@@ -113,14 +156,7 @@ export async function createDatabase(): Promise<void> {
                 a: '',
                 b: '',
                 result,
-                display: {
-                    english: item.english,
-                    schinese: item.schinese,
-                    russian: item.russian,
-                    french: item.french,
-                    spanish: item.spanish,
-                    japanese: item.japanese,
-                },
+                display: withoutEmoji(item),
                 emoji: item.emoji,
                 depth: 0,
                 who_discovered: '',
@@ -182,16 +218,14 @@ export async function getAllRecipes(): Promise<Recipe[]> {
 function getBasicDetails(name: string): BasicElement {
     const found = data.find((value) => value.result === name);
     if (found === undefined) {
+        const unknowns: Partial<Languages> = {};
+        for (const language of languages) {
+            unknowns[language] = '???';
+        }
+        unknowns.english = name.charAt(0).toUpperCase() + name.slice(1);
         return {
             name: name,
-            display: {
-                english: name.charAt(0).toUpperCase() + name.slice(1),
-                japanese: '???',
-                schinese: '???',
-                french: '???',
-                russian: '???',
-                spanish: '???',
-            },
+            display: unknowns as Languages,
             emoji: '❓'
         };
     } else {

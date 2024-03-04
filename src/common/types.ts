@@ -1,13 +1,12 @@
+import { Language } from './settings';
+
+export type Languages = {
+    [key in Language]: string;
+}
+
 export type BasicElement = {
     name: string;
-    display: {
-        english: string,
-        japanese: string,
-        schinese: string,
-        french: string,
-        russian: string,
-        spanish: string,
-    };
+    display: Languages;
     emoji: string;
 }
 
@@ -15,14 +14,7 @@ export type Recipe = {
     a: BasicElement;
     b: BasicElement;
     result: string;
-    display: {
-        english: string,
-        japanese: string,
-        schinese: string,
-        french: string,
-        russian: string,
-        spanish: string,
-    };
+    display: Languages;
     emoji: string;
     depth: number;
     who_discovered: string;
@@ -33,32 +25,7 @@ export type RecipeRow = {
     a: string;
     b: string;
     result: string;
-    display: {
-        english: string,
-        japanese: string,
-        schinese: string,
-        french: string,
-        russian: string,
-        spanish: string,
-    };
-    emoji: string;
-    depth: number;
-    who_discovered: string;
-    base: number;
-}
-
-export type RawRecipeRow = {
-    a: string;
-    b: string;
-    result: string;
-    display: {
-        english: string,
-        japanese: string,
-        schinese: string,
-        french: string,
-        russian: string,
-        spanish: string,
-    };
+    display: Languages;
     emoji: string;
     depth: number;
     who_discovered: string;
@@ -67,14 +34,7 @@ export type RawRecipeRow = {
 
 export type RecipeElement = {
     name: string;
-    display: {
-        english: string,
-        japanese: string,
-        schinese: string,
-        french: string,
-        russian: string,
-        spanish: string,
-    };
+    display: Languages;
     emoji: string;
     recipes: Recipe[];
 }

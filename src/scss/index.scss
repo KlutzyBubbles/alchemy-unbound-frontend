@@ -1,0 +1,216 @@
+@use "sass:map";
+@import "../../node_modules/bootstrap/scss/functions";
+@import "../../node_modules/bootstrap/scss/variables";
+@import "../../node_modules/bootstrap/scss/variables-dark";
+@import "./variables.scss";
+@import "../../node_modules/bootstrap/scss/maps";
+@import "../../node_modules/bootstrap/scss/mixins";
+@import "../../node_modules/bootstrap/scss/utilities";
+@import "./utilities.scss";
+
+@import "../../node_modules/bootstrap/scss/bootstrap";
+
+html, body, #root {
+  height: 100%;
+}
+
+.split {
+  display: flex;
+  flex-direction: row;
+}
+
+.gutter {
+  background-color: $dark;
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+  // background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+  cursor: col-resize;
+  z-index: map.get($zindex-levels, 'side')
+}
+
+.gutter.gutter-disabled {
+  pointer-events: none;
+}
+
+.btn-element {
+  @include button-variant($light, $dark, color-contrast($light), $dark, $dark, $light, $dark);
+  border-radius: $btn-border-radius
+}
+
+.btn-element.holo {
+    --#{$prefix}btn-hover-bg: #{$dark};
+    --#{$prefix}btn-hover-color: #{$dark};
+    --#{$prefix}btn-active-color: #{$dark};
+}
+
+.btn-element.holo:hover {
+    background-color: var(--#{$prefix}-btn-hover-bg);
+}
+
+.btn-element .glare,
+.btn-element .shine,
+.btn-element .holder {
+  border-radius: $btn-border-radius
+}
+
+.btn-no-outline {
+  @include button-variant($light, $light, color-contrast($light), $light);
+}
+
+.btn-heart {
+  @include button-variant($light, $light, color-contrast($light), $light, $light, $danger);
+}
+
+.btn-info {
+  @include button-variant($light, $light, color-contrast($light), $light, $light, $primary);
+}
+
+.btn.btn-no-radius {
+    border-radius: 0
+}
+
+// @mixin customZ($zindex-levels) {
+//     @each $class, $value in $zindex-levels {
+//         .z-#{$class} {
+//             z-index: $value
+//         }
+//     }
+// }
+
+// @include customZ($zindex-levels);
+
+.element.holo {
+    background-image: url('../images/holo.avif');  
+    //-webkit-background-clip: text;
+    //-webkit-text-fill-color: transparent;
+    animation-duration: 15s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-timing-function: ease-in-out;
+    animation-name: different;
+    background-size: 300%;
+    // border-color: #fff8b9;
+    background-color: #ff00ffff;
+    background-blend-mode: hard-light;
+}
+
+.element.holo .holder {
+    background-color: #FFFA
+}
+
+.element {
+    --grain: url("../images/grain.webp");
+    --glitter: url("../images/glitter.png");
+    --glittersize: 25%;
+  
+    --space: 5%;
+    --angle: 133deg;
+    --imgsize: cover;
+  
+    --red: #f80e35;
+    --yellow: #eedf10;
+    --green: #21e985;
+    --blue: #0dbde9;
+    --violet: #c929f1;
+
+    --clip: inset( 9.85% 8% 52.85% 8% );
+    --clip-invert: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0 47.15%, 91.5% 47.15%, 91.5% 9.85%, 8% 9.85%, 8% 47.15%, 0 50%);
+  
+    --clip-stage: polygon(91.5% 9.85%, 57% 9.85%, 54% 12%, 17% 12%, 16% 14%, 12% 16%, 8% 16%, 8% 47.15%, 92% 47.15%);
+    --clip-stage-invert: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0 47.15%, 91.5% 47.15%, 91.5% 9.85%, 57% 9.85%, 54% 12%, 17% 12%, 16% 14%, 12% 16%, 8% 16%, 8% 47.15%, 0 50%);
+  
+    --clip-trainer: inset(14.5% 8.5% 48.2% 8.5%);
+    --clip-borders: inset(2.8% 4% round 2.55% / 1.5%);
+}
+  
+.shine,
+.shine {
+    will-change: transform, opacity, background-image, background-size,
+      background-position, background-blend-mode, filter;
+}
+
+.element.rainbow .shine {
+    filter: brightness(calc((var(--pointer-from-center)*0.05) + .8)) contrast(1.75) saturate(1.2);
+}
+  
+.element.rainbow .shine:after {
+    filter: brightness(calc((var(--pointer-from-center)*.4) + .85)) contrast(2) saturate(.5);
+}
+  
+.element.rainbow .shine:before {
+    background-image: 
+      radial-gradient( 
+        farthest-corner circle at var(--pointer-x) var(--pointer-y), 
+        hsl(0, 0%, 100%) 0%, 
+        hsla(0, 0%, 0%, 0) 80% 
+      );
+    
+    mix-blend-mode: screen;
+    opacity: 0.5;
+}
+
+  /*
+  
+    GLARE LAYERS
+  
+  */
+  
+.element.rainbow .glare {
+    opacity: calc( var(--card-opacity) * .75 );
+    mix-blend-mode: multiply;
+    filter: brightness(1.5) contrast(1.4) saturate(1);
+    background-size: 170% 170%;
+}
+  
+  /*
+  
+    NO MASK
+  
+  */
+  
+.element:not(.masked).rainbow .shine,
+.element:not(.masked).rainbow .shine:after {
+    --mask: none;
+    // --foil: url("/img/trainerbg.png"); 
+    --imgsize: 20%;
+    
+    background-blend-mode: color-burn, hue, hard-light;
+    filter: brightness(calc((var(--pointer-from-center)*0.05) + .6)) contrast(1.5) saturate(1.2);
+}
+
+
+@keyframes updown {
+    from {
+      background-position: top;
+    }
+  
+    to {
+      background-position: bottom;
+    }
+}
+
+@keyframes different {
+0% {
+    background-position-x: left;
+    background-position: bottom;
+    //background-color: #ff00ffff;
+}
+
+100% {
+    background-position-x: right;
+    background-position: top;
+    //background-color: #ff00ffff;
+}
+}
+
+
+@keyframes roll {
+	100% { transform: rotateZ(-2turn); }
+}
+@keyframes flip {
+	25% { background-position: rotateX(0.5turn) translate(0,-8em); }
+	75% { background-position: rotateX(0turn); }
+}

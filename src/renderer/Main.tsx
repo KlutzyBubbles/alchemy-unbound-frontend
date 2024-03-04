@@ -1,6 +1,7 @@
 import { Container, Row } from 'react-bootstrap';
 import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+// import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import { createRoot } from 'react-dom/client';
 import { DropContainer } from './DropContainer';
 import { SettingsProvider } from './SettingsProvider';
@@ -39,7 +40,7 @@ function App() {
     const openModal = (option: ModalOption) => setCurrentModal(option);
 
     return (
-        <DndProvider backend={HTML5Backend}>
+        <DndProvider backend={TouchBackend} options={{ enableTouchEvents: false, enableMouseEvents: true }}>
             <GleamyProvider>
                 <SettingsProvider value={settings}>
                     <Container fluid={true} className='h-100 p-0 bg-light overflow-hidden'>

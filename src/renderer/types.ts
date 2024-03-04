@@ -7,3 +7,10 @@ export interface DragItem {
     top?: number
     left?: number
 }
+
+export enum ItemTypes {
+    ELEMENT = 'element',
+    MAIN_ELEMENT = 'main',
+    FINAL_ELEMENT = 'final',
+    SIDE_ELEMENT = 'side'
+}

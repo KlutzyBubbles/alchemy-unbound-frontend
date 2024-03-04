@@ -1,36 +1,14 @@
-import { useContext, type CSSProperties, type FC } from 'react';
-import type { XYCoord } from 'react-dnd';
+import { type CSSProperties, type FC } from 'react';
 import { useDragLayer } from 'react-dnd';
 
-import { ItemTypes } from './Constants';
-import { SettingsContext } from './SettingsProvider';
-
+import { ItemRenderer } from './ItemRenderer';
+import { ItemTypes } from './types';
 
 const layerStyles: CSSProperties = {
     pointerEvents: 'none',
 };
 
-function getItemStyles(
-    initialOffset: XYCoord | null,
-    currentOffset: XYCoord | null,
-) {
-    if (!initialOffset || !currentOffset) {
-        return {
-            display: 'none',
-        };
-    }
-
-    const { x, y } = currentOffset;
-
-    const transform = `translate(${x}px, ${y}px)`;
-    return {
-        transform,
-        WebkitTransform: transform,
-    };
-}
-
 export const CustomDragLayer: FC<Record<string, never>> = () => {
-    const { settings } = useContext(SettingsContext);
     const { itemType, item, initialOffset, currentOffset } =
     useDragLayer((monitor) => ({
         item: monitor.getItem(),
@@ -45,24 +23,20 @@ export const CustomDragLayer: FC<Record<string, never>> = () => {
         case ItemTypes.ELEMENT:
         case ItemTypes.SIDE_ELEMENT:
             return (
-                <div
-                    className="main-element btn btn-outline-dark btn-light position-absolute shadow"
-                    style={getItemStyles(initialOffset, currentOffset)}
-                    data-testid="box"
-                >
-                    {item.element.emoji} {item.element.display[settings.language]}
-                </div>
+                <ItemRenderer
+                    element={item.element}
+                    type={itemType}
+                    dragging={true}
+                    initialOffset={initialOffset}
+                    currentOffset={currentOffset}/>
             );
         default:
             return null;
         }
     }
 
-    // if (!isDragging) {
-    //   return null
-    // }
     return (
-        <div style={layerStyles} className='h-100 w-100 z-600'>
+        <div style={layerStyles} className='h-100 w-100 z-dragLayer'>
             {renderItem()}
         </div>
     );

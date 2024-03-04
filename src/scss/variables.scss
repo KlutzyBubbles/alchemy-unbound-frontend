@@ -1,0 +1,21 @@
+$zindex-levels: (
+  n1: -1,
+  0: 0,
+  1: 1,
+  2: 2,
+  3: 3,
+  main: 10,
+  side: 15,
+  mainElement: 10,
+  sideElement: 25,
+  destroyingElement: 30,
+  dragLayer: 30,
+  draggingElement: 35
+);
+
+$input-border-radius: 2px;
+$input-border-radius-sm: 2px;
+$input-border-radius-lg: 2px;
+
+$input-focus-border-color: tint-color($component-active-bg, 50%);
+$input-focus-box-shadow: none;

@@ -1,8 +1,40 @@
 export type BackgroundType = 'blank' | 'particles' | 'rain'
 export type LeftRight = 'left' | 'right'
 
-export type Language = 'english' | 'schinese' | 'french' | 'russian' | 'spanish' | 'japanese'
-export const languages: Language[] = ['english', 'schinese', 'french', 'russian', 'spanish', 'japanese'];
+export type Language = 
+| 'english'
+| 'schinese'
+| 'french'
+| 'russian'
+| 'spanish'
+| 'japanese'
+| 'indonesian'
+| 'german'
+| 'latam'
+| 'italian'
+| 'dutch'
+| 'polish'
+| 'portuguese'
+| 'tchinese'
+| 'koreana'
+
+export const languages: Language[] = [
+    'english',
+    'schinese',
+    'french',
+    'russian',
+    'spanish',
+    'japanese',
+    'indonesian',
+    'german',
+    'latam',
+    'italian',
+    'dutch',
+    'polish',
+    'portuguese',
+    'tchinese',
+    'koreana'
+];
 
 export type Settings = {
     dark: boolean
