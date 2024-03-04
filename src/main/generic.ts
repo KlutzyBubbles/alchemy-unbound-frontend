@@ -8,7 +8,7 @@ export function getAppVersions(): AppVersions {
         electron: process.versions.electron,
         chrome: process.versions.chrome,
         app: appInfo.version
-    }
+    };
 }
 
 export function getSystemInformation(): SystemVersion {
@@ -16,7 +16,7 @@ export function getSystemInformation(): SystemVersion {
         version: process.getSystemVersion(),
         platform: process.platform.toString(),
         arch: process.arch.toString()
-    }
+    };
 }
 
 export function isPackaged(): boolean {

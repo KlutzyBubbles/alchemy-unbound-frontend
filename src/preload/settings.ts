@@ -1,9 +1,9 @@
-import { contextBridge, ipcRenderer } from 'electron'
-import { Settings } from '../common/settings'
-import { getSettings, setSettings, saveSettings, loadSettings, setSetting } from '../main/settings'
-import { SettingsChannel } from '../common/ipc'
+import { contextBridge, ipcRenderer } from 'electron';
+import { Settings } from '../common/settings';
+import { getSettings, setSettings, saveSettings, loadSettings, setSetting } from '../main/settings';
+import { SettingsChannel } from '../common/ipc';
 
-export const SettingsAPIName = 'SettingsAPI'
+export const SettingsAPIName = 'SettingsAPI';
 
 export interface ISettingsAPI {
     getSettings: typeof getSettings,
@@ -19,4 +19,4 @@ contextBridge.exposeInMainWorld(SettingsAPIName, {
     setSettings: (settings: Settings) => ipcRenderer.invoke(SettingsChannel.SET, settings),
     saveSettings: () => ipcRenderer.invoke(SettingsChannel.SAVE),
     loadSettings: () => ipcRenderer.invoke(SettingsChannel.LOAD)
-})
+});

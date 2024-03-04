@@ -6,7 +6,7 @@ export const SettingsContext = createContext<{
     setSettings: React.Dispatch<React.SetStateAction<Settings>>
 }>({
     settings: DEFAULT_SETTINGS,
-    setSettings: (_: Settings) => {}
+    setSettings: () => {}
 });
 
 interface SettingsProviderProps {
@@ -21,24 +21,24 @@ export const SettingsProvider: FC<SettingsProviderProps> = ({
     const [settings, setSettings] = useState<Settings>(null);
 
     useEffect(() => {
-      console.log('value')
-      console.log(value)
-      setSettings(value)
-    }, [])
+        console.log('value');
+        console.log(value);
+        setSettings(value);
+    }, []);
 
     useEffect(() => {
-      window.SettingsAPI.setSettings(settings)
-    }, [settings])
+        window.SettingsAPI.setSettings(settings);
+    }, [settings]);
 
     return (
-      <SettingsContext.Provider
-        value={{
-          settings,
-          setSettings
-        }}
-      >
-        {children}
-      </SettingsContext.Provider>
+        <SettingsContext.Provider
+            value={{
+                settings,
+                setSettings
+            }}
+        >
+            {children}
+        </SettingsContext.Provider>
     );
-  }
+};
   

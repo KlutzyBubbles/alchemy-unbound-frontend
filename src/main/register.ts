@@ -1,13 +1,13 @@
-import { ipcMain } from "electron";
-import { Recipe } from "../common/types";
-import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save } from "./database";
-import { combine } from "./server";
-import { DisplayChannel, GenericChannel, RecipeChannel, SettingsChannel, SteamChannel } from "../common/ipc";
-import { Settings } from "../common/settings";
-import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from "./settings";
-import { getAppVersions, isPackaged, getSystemInformation } from "./generic";
-import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from "./display";
-import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated } from "./steam";
+import { ipcMain } from 'electron';
+import { Recipe } from '../common/types';
+import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save } from './database';
+import { combine } from './server';
+import { DisplayChannel, GenericChannel, RecipeChannel, SettingsChannel, SteamChannel } from '../common/ipc';
+import { Settings } from '../common/settings';
+import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './settings';
+import { getAppVersions, isPackaged, getSystemInformation } from './generic';
+import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from './display';
+import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated } from './steam';
 
 
 export function register() {
@@ -24,10 +24,10 @@ export function register() {
     ipcMain.handle(RecipeChannel.COMBINE, async (_, a: string, b: string) => {
         return combine(a, b);
     });
-    ipcMain.handle(RecipeChannel.GET_ALL, async (_) => {
+    ipcMain.handle(RecipeChannel.GET_ALL, async () => {
         return getAllRecipes();
     });
-    ipcMain.handle(RecipeChannel.SAVE, async (_) => {
+    ipcMain.handle(RecipeChannel.SAVE, async () => {
         return save();
     });
 
@@ -35,35 +35,35 @@ export function register() {
     ipcMain.handle(SettingsChannel.SET_VALUE, async (_, key: keyof Settings, value: Settings[keyof Settings]) => {
         return setSetting(key, value);
     });
-    ipcMain.handle(SettingsChannel.GET, async (_) => {
+    ipcMain.handle(SettingsChannel.GET, async () => {
         return getSettings();
     });
     ipcMain.handle(SettingsChannel.SET, async (_, settings: Settings) => {
         return setSettings(settings);
     });
-    ipcMain.handle(SettingsChannel.LOAD, async (_) => {
+    ipcMain.handle(SettingsChannel.LOAD, async () => {
         return loadSettings();
     });
-    ipcMain.handle(SettingsChannel.SAVE, async (_) => {
+    ipcMain.handle(SettingsChannel.SAVE, async () => {
         return saveSettings();
     });
-    getSteamGameLanguage
+    getSteamGameLanguage;
     // Generic handlers
-    ipcMain.handle(GenericChannel.GET_VERSIONS, async (_) => {
+    ipcMain.handle(GenericChannel.GET_VERSIONS, async () => {
         return getAppVersions();
     });
-    ipcMain.handle(GenericChannel.GET_SYSTEM_INFO, async (_) => {
+    ipcMain.handle(GenericChannel.GET_SYSTEM_INFO, async () => {
         return getSystemInformation();
     });
-    ipcMain.handle(GenericChannel.GET_IS_PACKAGED, async (_) => {
+    ipcMain.handle(GenericChannel.GET_IS_PACKAGED, async () => {
         return isPackaged();
     });
 
     // Display handlers
-    ipcMain.handle(DisplayChannel.GET_DISPLAYS, async (_) => {
+    ipcMain.handle(DisplayChannel.GET_DISPLAYS, async () => {
         return getDisplays();
     });
-    ipcMain.handle(DisplayChannel.GET_DISPLAY, async (_) => {
+    ipcMain.handle(DisplayChannel.GET_DISPLAY, async () => {
         return getCurrentDisplay();
     });
     ipcMain.handle(DisplayChannel.SET_DISPLAY, async (_, display: Electron.Display) => {
@@ -80,10 +80,10 @@ export function register() {
     ipcMain.handle(SteamChannel.CHECK_ACHIEVEMENT, async (_, achievement: string) => {
         return isAchievementActivated(achievement);
     });
-    ipcMain.handle(SteamChannel.GET_ID, async (_) => {
+    ipcMain.handle(SteamChannel.GET_ID, async () => {
         return getSteamId();
     });
-    ipcMain.handle(SteamChannel.GET_LANGUAGE, async (_) => {
+    ipcMain.handle(SteamChannel.GET_LANGUAGE, async () => {
         return getSteamGameLanguage();
     });
 }

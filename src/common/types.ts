@@ -47,6 +47,24 @@ export type RecipeRow = {
     base: number;
 }
 
+export type RawRecipeRow = {
+    a: string;
+    b: string;
+    result: string;
+    display: {
+        english: string,
+        japanese: string,
+        schinese: string,
+        french: string,
+        russian: string,
+        spanish: string,
+    };
+    emoji: string;
+    depth: number;
+    who_discovered: string;
+    base: number;
+}
+
 export type RecipeElement = {
     name: string;
     display: {

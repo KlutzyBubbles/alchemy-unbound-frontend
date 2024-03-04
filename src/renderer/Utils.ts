@@ -1,21 +1,21 @@
-import { DropTargetMonitor, XYCoord } from "react-dnd";
-import { DragItem } from "./types";
+import { DropTargetMonitor, XYCoord } from 'react-dnd';
+import { DragItem } from './types';
 
 export function getXY(item: DragItem, monitor: DropTargetMonitor): XYCoord {
-    let delta = monitor.getClientOffset() as XYCoord
+    const delta = monitor.getClientOffset() as XYCoord;
     let left = delta.x;
     let top = delta.y;
     if (item.top !== undefined && item.left !== undefined) {
-        let delta = monitor.getDifferenceFromInitialOffset() as XYCoord
-        left = Math.round(item.left + delta.x)
-        top = Math.round(item.top + delta.y)
+        const delta = monitor.getDifferenceFromInitialOffset() as XYCoord;
+        left = Math.round(item.left + delta.x);
+        top = Math.round(item.top + delta.y);
     }
     return {
         x: left,
         y: top
-    }
+    };
 }
 
-export function hasProp<O extends Object, K extends keyof O>(o: O, k: K): boolean {
-    return Object.prototype.hasOwnProperty.call(o, k)
+export function hasProp<O extends NonNullable<unknown>, K extends keyof O>(o: O, k: K): boolean {
+    return Object.prototype.hasOwnProperty.call(o, k);
 }

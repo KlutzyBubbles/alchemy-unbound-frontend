@@ -1,6 +1,5 @@
-import { useState, type FC, useEffect } from 'react'
-import { Button, Modal, Table } from 'react-bootstrap';
-import electron from 'electron';
+import { useState, type FC, useEffect } from 'react';
+import { Modal, Table } from 'react-bootstrap';
 import { AppVersions, SystemVersion } from '../common/types';
 
 export interface InfoModalProps {
@@ -9,22 +8,22 @@ export interface InfoModalProps {
 }
 
 export const InfoModal: FC<InfoModalProps> = ({
-  show,
-  handleHide
+    show,
+    handleHide
 }) => {
-    const [appVersions, setAppVersions] = useState<AppVersions>({ node: '', electron: '', chrome: '', app: ''})
-    const [systemInformation, setSystemInformation] = useState<SystemVersion>({ arch: '', platform: '', version: '' })
+    const [appVersions, setAppVersions] = useState<AppVersions>({ node: '', electron: '', chrome: '', app: ''});
+    const [systemInformation, setSystemInformation] = useState<SystemVersion>({ arch: '', platform: '', version: '' });
 
     useEffect(() => {
         (async () => {
             try {
-                setAppVersions(await window.GenericAPI.getAppVersions())
-                setSystemInformation(await window.GenericAPI.getSystemInformation())
+                setAppVersions(await window.GenericAPI.getAppVersions());
+                setSystemInformation(await window.GenericAPI.getSystemInformation());
             } catch (e) {
-                console.error('Failed to load system information', e)
+                console.error('Failed to load system information', e);
             }
-        })()
-    }, [])
+        })();
+    }, []);
 
     return (
         <Modal show={show} onHide={handleHide} centered size="xl">
@@ -70,5 +69,5 @@ export const InfoModal: FC<InfoModalProps> = ({
                 </Table>
             </Modal.Body>
         </Modal>
-    )
-}
+    );
+};

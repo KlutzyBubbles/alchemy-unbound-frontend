@@ -19,24 +19,24 @@ function App() {
     useEffect(() => {
         (async() => {
             try {
-                var settings = await window.SettingsAPI.getSettings()
-                console.log(settings)
-                setSettings(settings)
+                const settings = await window.SettingsAPI.getSettings();
+                console.log(settings);
+                setSettings(settings);
             } catch (e) {
-                console.error('Failed to load settings (oops)')
-                console.error(e)
+                console.error('Failed to load settings (oops)');
+                console.error(e);
             }
-        })()
-    }, [])
+        })();
+    }, []);
 
     const handleModalClose = () => {
         if (currentModal === 'settings') {
-            window.SettingsAPI.saveSettings()
+            window.SettingsAPI.saveSettings();
         }
-        setCurrentModal('none')
-    }
+        setCurrentModal('none');
+    };
 
-    const openModal = (option: ModalOption) => setCurrentModal(option)
+    const openModal = (option: ModalOption) => setCurrentModal(option);
 
     return (
         <DndProvider backend={HTML5Backend}>
@@ -52,7 +52,7 @@ function App() {
                 </SettingsProvider>
             </GleamyProvider>
         </DndProvider>
-    )
+    );
 }
 
 const root = createRoot(document.getElementById('root'));

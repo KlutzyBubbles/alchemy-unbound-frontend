@@ -1,48 +1,47 @@
-import { useContext, type CSSProperties, type FC } from 'react'
-import type { XYCoord } from 'react-dnd'
-import { useDragLayer } from 'react-dnd'
+import { useContext, type CSSProperties, type FC } from 'react';
+import type { XYCoord } from 'react-dnd';
+import { useDragLayer } from 'react-dnd';
 
-import { ItemTypes } from './Constants'
-import { Recipe } from '../common/types'
-import { SettingsContext } from './SettingsProvider'
+import { ItemTypes } from './Constants';
+import { SettingsContext } from './SettingsProvider';
 
 
 const layerStyles: CSSProperties = {
     pointerEvents: 'none',
-}
+};
 
 function getItemStyles(
-  initialOffset: XYCoord | null,
-  currentOffset: XYCoord | null,
+    initialOffset: XYCoord | null,
+    currentOffset: XYCoord | null,
 ) {
-  if (!initialOffset || !currentOffset) {
-    return {
-      display: 'none',
+    if (!initialOffset || !currentOffset) {
+        return {
+            display: 'none',
+        };
     }
-  }
 
-  let { x, y } = currentOffset
+    const { x, y } = currentOffset;
 
-  const transform = `translate(${x}px, ${y}px)`
-  return {
-    transform,
-    WebkitTransform: transform,
-  }
+    const transform = `translate(${x}px, ${y}px)`;
+    return {
+        transform,
+        WebkitTransform: transform,
+    };
 }
 
-export const CustomDragLayer: FC<{}> = () => {
-  const { settings, setSettings } = useContext(SettingsContext)
-  const { itemType, isDragging, item, initialOffset, currentOffset } =
+export const CustomDragLayer: FC<Record<string, never>> = () => {
+    const { settings } = useContext(SettingsContext);
+    const { itemType, item, initialOffset, currentOffset } =
     useDragLayer((monitor) => ({
-      item: monitor.getItem(),
-      itemType: monitor.getItemType(),
-      initialOffset: monitor.getInitialSourceClientOffset(),
-      currentOffset: monitor.getSourceClientOffset(),
-      isDragging: monitor.isDragging(),
-    }))
+        item: monitor.getItem(),
+        itemType: monitor.getItemType(),
+        initialOffset: monitor.getInitialSourceClientOffset(),
+        currentOffset: monitor.getSourceClientOffset(),
+        isDragging: monitor.isDragging(),
+    }));
 
-  function renderItem() {
-    switch (itemType) {
+    function renderItem() {
+        switch (itemType) {
         case ItemTypes.ELEMENT:
         case ItemTypes.SIDE_ELEMENT:
             return (
@@ -53,18 +52,18 @@ export const CustomDragLayer: FC<{}> = () => {
                 >
                     {item.element.emoji} {item.element.display[settings.language]}
                 </div>
-            )
+            );
         default:
-            return null
+            return null;
+        }
     }
-  }
 
-  // if (!isDragging) {
-  //   return null
-  // }
-  return (
-    <div style={layerStyles} className='h-100 w-100 z-600'>
-        {renderItem()}
-    </div>
-  )
-}
+    // if (!isDragging) {
+    //   return null
+    // }
+    return (
+        <div style={layerStyles} className='h-100 w-100 z-600'>
+            {renderItem()}
+        </div>
+    );
+};

@@ -1,8 +1,5 @@
-import { app, BrowserWindow, ipcMain, session, shell } from 'electron';
-import MenuBuilder from './main/menu';
-import { insertRecipe, deleteRecipe, getRecipe, createDatabase, getAllRecipes, save } from './main/database';
-import { Recipe } from './common/types'
-import { combine } from './main/server';
+import { app, BrowserWindow, shell } from 'electron';
+import { createDatabase } from './main/database';
 import debug from 'electron-debug';
 import unhandled from 'electron-unhandled';
 import steamworks from 'steamworks.js';
@@ -17,43 +14,43 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
-  app.quit();
+    app.quit();
 }
 
 debug();
 unhandled();
 
 const createWindow = (): void => {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    height: 720,
-    width: 1280,
-    webPreferences: {
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
-    },
-  });
+    // Create the browser window.
+    const mainWindow = new BrowserWindow({
+        height: 720,
+        width: 1280,
+        webPreferences: {
+            preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY
+        },
+    });
 
-  // and load the index.html of the app.
-  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+    // and load the index.html of the app.
+    mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  mainWindow.on('ready-to-show', () => {
-    if (!mainWindow) {
-      throw new Error('"mainWindow" is not defined');
-    }
-  });
+    mainWindow.on('ready-to-show', () => {
+        if (!mainWindow) {
+            throw new Error('"mainWindow" is not defined');
+        }
+    });
 
-  //const menuBuilder = new MenuBuilder(mainWindow);
-  //menuBuilder.buildMenu();
+    //const menuBuilder = new MenuBuilder(mainWindow);
+    //menuBuilder.buildMenu();
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+    // Open the DevTools.
+    mainWindow.webContents.openDevTools();
   
-  mainWindow.removeMenu();
+    mainWindow.removeMenu();
 
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
-    return { action: 'deny' };
-  });
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        shell.openExternal(url);
+        return { action: 'deny' };
+    });
   
 };
 
@@ -66,27 +63,27 @@ app.on('ready', createWindow);
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });
 
 app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
+    // On OS X it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+    }
 });
 
 app
-  .whenReady()
-  .then(async () => {
-    await createDatabase()
-    register()
-    await installExtension(REACT_DEVELOPER_TOOLS)
-  })
-  .catch(console.log);
+    .whenReady()
+    .then(async () => {
+        await createDatabase();
+        register();
+        await installExtension(REACT_DEVELOPER_TOOLS);
+    })
+    .catch(console.log);
 
 steamworks.electronEnableSteamOverlay();
 // In this file you can include the rest of your app's specific main process

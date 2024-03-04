@@ -1,4 +1,4 @@
-import { useState, type FC, useEffect, useContext } from 'react'
+import { useState, type FC, useEffect, useContext } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { SettingsContext } from './SettingsProvider';
 
@@ -8,10 +8,10 @@ export interface SettingsModalProps {
 }
 
 export const SettingsModal: FC<SettingsModalProps> = ({
-  show,
-  handleHide
+    show,
+    handleHide
 }) => {
-    const { settings, setSettings } = useContext(SettingsContext)
+    const { settings, setSettings } = useContext(SettingsContext);
     const [displays, setDisplays] = useState<Electron.Display[]>([]);
     const [currentDisplay, setCurrentDisplay] = useState<Electron.Display>(undefined);
     const [fullscreen, setFullscreen] = useState<boolean>(settings?.fullscreen ?? false);
@@ -19,14 +19,14 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     useEffect(() => {
         (async() => {
             try {
-                setDisplays(await window.DisplayAPI.getDisplays())
-                setCurrentDisplay(await window.DisplayAPI.getCurrentDisplay())
+                setDisplays(await window.DisplayAPI.getDisplays());
+                setCurrentDisplay(await window.DisplayAPI.getCurrentDisplay());
             } catch (e) {
-                console.error('Failed to load settings (oops)')
-                console.error(e)
+                console.error('Failed to load settings (oops)');
+                console.error(e);
             }
-        })()
-    }, [])
+        })();
+    }, []);
 
     useEffect(() => {
         (async() => {
@@ -34,14 +34,14 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                 setSettings({
                     ...settings,
                     fullscreen: fullscreen
-                })
-                console.log(fullscreen)
-                window.DisplayAPI.setFullscreen(fullscreen)
+                });
+                console.log(fullscreen);
+                window.DisplayAPI.setFullscreen(fullscreen);
             } catch (e) {
-                console.error('Failed to change fullscreen', e)
+                console.error('Failed to change fullscreen', e);
             }
-        })()
-    }, [fullscreen])
+        })();
+    }, [fullscreen]);
 
     useEffect(() => {
         (async() => {
@@ -50,34 +50,37 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     setSettings({
                         ...settings,
                         currentDisplay: currentDisplay.id
-                    })
-                    console.log(currentDisplay.id)
-                    window.DisplayAPI.moveToDisplay(currentDisplay)
+                    });
+                    console.log(currentDisplay.id);
+                    window.DisplayAPI.moveToDisplay(currentDisplay);
                 }
             } catch (e) {
-                console.error('Failed to move to display', e)
+                console.error('Failed to move to display', e);
             }
-        })()
-    }, [currentDisplay])
+        })();
+    }, [currentDisplay]);
 
     const onDisplaySelect: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
         if (e.target.value === 'none') {
-            console.log('Ignoring select')
+            console.log('Ignoring select');
         } else {
+            let selectedId: number | undefined = undefined;
             try {
-                var selectedId = parseInt(e.target.value)
+                selectedId = parseInt(e.target.value);
             } catch (e) {
-                console.error('Failed to parse number?', e)
-                return
+                console.error('Failed to parse number?', e);
+                return;
             }
-            var display = displays.find((d) => d.id === selectedId)
+            if (selectedId === undefined)
+                return;
+            const display = displays.find((d) => d.id === selectedId);
             if (display === undefined) {
-                console.log('Failed to find selected display')
+                console.log('Failed to find selected display');
             } else {
-                setCurrentDisplay(display)
+                setCurrentDisplay(display);
             }
         }
-    }
+    };
 
     return (
         <Modal show={show} onHide={handleHide} centered size="xl">
@@ -99,7 +102,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                             return (<option
                                 key={display.id}
                                 value={display.id}>{display.label} ({display.size.width * display.scaleFactor}x{display.size.height * display.scaleFactor})
-                            </option>)
+                            </option>);
                         })}
                     </Form.Select>
                 </Form>
@@ -110,5 +113,5 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                 </Button>
             </Modal.Footer>
         </Modal>
-    )
-}
+    );
+};
