@@ -1,5 +1,5 @@
 import { promises as fs } from 'fs';
-import { getFolder } from './steam';
+import { getFolder, getSteamGameLanguage } from './steam';
 import { dirExists } from '../common/utils';
 import { DEFAULT_SETTINGS, Settings } from '../common/settings';
 
@@ -37,8 +37,13 @@ export async function loadSettings(): Promise<void> {
             console.error(e)
         } else {
             console.log('No settings file found yet')
+            if (settings === null || settings === undefined)
+                settings = DEFAULT_SETTINGS
+            settings.language = getSteamGameLanguage()
         }
     }
+    if (settings === null || settings === undefined)
+        settings = DEFAULT_SETTINGS
 }
 
 export async function getSettings(): Promise<Settings> {

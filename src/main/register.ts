@@ -2,11 +2,12 @@ import { ipcMain } from "electron";
 import { Recipe } from "../common/types";
 import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save } from "./database";
 import { combine } from "./server";
-import { DisplayChannel, GenericChannel, RecipeChannel, SettingsChannel } from "../common/ipc";
+import { DisplayChannel, GenericChannel, RecipeChannel, SettingsChannel, SteamChannel } from "../common/ipc";
 import { Settings } from "../common/settings";
 import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from "./settings";
 import { getAppVersions, isPackaged, getSystemInformation } from "./generic";
 import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from "./display";
+import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated } from "./steam";
 
 
 export function register() {
@@ -46,7 +47,7 @@ export function register() {
     ipcMain.handle(SettingsChannel.SAVE, async (_) => {
         return saveSettings();
     });
-
+    getSteamGameLanguage
     // Generic handlers
     ipcMain.handle(GenericChannel.GET_VERSIONS, async (_) => {
         return getAppVersions();
@@ -70,5 +71,19 @@ export function register() {
     });
     ipcMain.handle(DisplayChannel.SET_FULLSCREEN, async (_, fullscreen: boolean) => {
         return setFullscreen(fullscreen);
+    });
+
+    // Steam handlers
+    ipcMain.handle(SteamChannel.ACTIVATE_ACHIEVEMENT, async (_, achievement: string) => {
+        return activateAchievement(achievement);
+    });
+    ipcMain.handle(SteamChannel.CHECK_ACHIEVEMENT, async (_, achievement: string) => {
+        return isAchievementActivated(achievement);
+    });
+    ipcMain.handle(SteamChannel.GET_ID, async (_) => {
+        return getSteamId();
+    });
+    ipcMain.handle(SteamChannel.GET_LANGUAGE, async (_) => {
+        return getSteamGameLanguage();
     });
 }

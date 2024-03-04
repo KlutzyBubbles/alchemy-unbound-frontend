@@ -1,17 +1,17 @@
-import { Recipe } from '../common/types';
+import { BasicElement, Recipe, RecipeRow } from '../common/types';
 import { promises as fs } from 'fs';
 import { getFolder } from './steam';
 import { dirExists, fileExists } from '../common/utils';
 
 const DATABASE_VERISON = 1;
 
-var data: Recipe[] = [];
+var data: RecipeRow[] = [];
 
 export async function save(): Promise<void> {
     if (!(await dirExists(getFolder()))) {
         await fs.mkdir(getFolder(), { recursive: true })
     }
-    var existing: Recipe[] = []
+    var existing: RecipeRow[] = []
     try {
         if (fileExists(getFolder() + 'db.json')) {
             existing = await loadData()
@@ -38,11 +38,11 @@ export async function save(): Promise<void> {
     }), 'utf-8')
 }
 
-function loadV1(loaded: any): Recipe[] {
+function loadV1(loaded: any): RecipeRow[] {
     return loaded
 }
 
-async function loadData(): Promise<Recipe[]> {
+async function loadData(): Promise<RecipeRow[]> {
     try {
         var raw = JSON.parse(await fs.readFile(getFolder() + 'db.json', 'utf-8'))
         if (raw.version === 1) {
@@ -68,44 +68,79 @@ export async function createDatabase(): Promise<void> {
     }
     var records = [
         {
-            name: 'Earth',
-            emoji: '🌎'
-        },
-        {
-            name: 'Fire',
+            english: 'Fire',
+            schinese: '火',
+            russian: 'огонь',
+            french: 'feu',
+            spanish: 'fuego',
+            japanese: '火',
             emoji: '🔥'
         },
         {
-            name: 'Water',
-            emoji: '💧'
+            english: 'Earth',
+            schinese: '地球',
+            russian: 'Земля',
+            french: 'Terre',
+            spanish: 'Tierra',
+            japanese: '地球',
+            emoji: '🌎'
         },
         {
-            name: 'Air',
+            english: 'Air',
+            schinese: '空气',
+            russian: 'Воздух',
+            french: 'Air',
+            spanish: 'Aire',
+            japanese: '空気',
             emoji: '💨'
+        },
+        {
+            english: 'Water',
+            schinese: '水',
+            russian: 'Вода',
+            french: 'Eau',
+            spanish: 'Agua',
+            japanese: '水',
+            emoji: '💧'
         }
     ]
 
     records.forEach(async (item) => {
-    var result = item.name.toLowerCase()
+    var result = item.english.toLowerCase()
     var hasItem = await getRecipesFor(result)
     if (hasItem === null || hasItem === undefined || hasItem.length === 0) {
-        await insertRecipe({
-        a: '',
-        b: '',
-        result,
-        display: item.name,
-        emoji: item.emoji,
-        depth: 0,
-        who_discovered: '',
-        base: 1
+        await insertRecipeRow({
+            a: '',
+            b: '',
+            result,
+            display: {
+                english: item.english,
+                schinese: item.schinese,
+                russian: item.russian,
+                french: item.french,
+                spanish: item.spanish,
+                japanese: item.japanese,
+            },
+            emoji: item.emoji,
+            depth: 0,
+            who_discovered: '',
+            base: 1
         })
     }
     })
 }
 
-export async function insertRecipe(recipe: Recipe): Promise<void> {
+export async function insertRecipeRow(recipe: RecipeRow): Promise<void> {
     console.log('insertRecipe')
     data.push(recipe)
+}
+export async function insertRecipe(recipe: Recipe): Promise<void> {
+    console.log('insertRecipe')
+    data.push({
+        ...recipe,
+        a: recipe.a.name,
+        b: recipe.b.name
+    })
 }
 
 export async function deleteRecipe(a: string, b: string): Promise<void> {
@@ -119,18 +154,62 @@ export async function deleteRecipe(a: string, b: string): Promise<void> {
 }
 
 export async function getRecipe(a: string, b: string): Promise<Recipe | undefined> {
-    return data.find((value, index) => {
+    return traverseAndFill(data.find((value, index) => {
         if ((value.a === a && value.b === b) || (value.a === b && value.b === a)) {
             return true
         }
         return false
-    })
+    }))
 }
 
 export async function getRecipesFor(result: string): Promise<Recipe[]> {
-    return data.filter((value) => value.result === result)
+    var recipes = data.filter((value) => value.result === result)
+    var formatted = []
+    for (var recipe of recipes) {
+        formatted.push(traverseAndFill(recipe))
+    }
+    return formatted
 }
 
 export async function getAllRecipes(): Promise<Recipe[]> {
-    return data
+    var formatted = []
+    for (var recipe of data) {
+        formatted.push(traverseAndFill(recipe))
+    }
+    return formatted
+}
+
+function getBasicDetails(name: string): BasicElement {
+    var found = data.find((value) => value.result === name)
+    if (found === undefined) {
+        return {
+            name: name,
+            display: {
+                english: name.charAt(0).toUpperCase() + name.slice(1),
+                japanese: '???',
+                schinese: '???',
+                french: '???',
+                russian: '???',
+                spanish: '???',
+            },
+            emoji: '❓'
+        }
+    } else {
+        return {
+            name: found.result,
+            display: found.display,
+            emoji: found.emoji
+        }
+    }
+}
+
+export function traverseAndFill(recipe?: RecipeRow): Recipe | undefined {
+    if (recipe === undefined)
+        return undefined
+    var { a, b } = recipe
+    return {
+        ...recipe,
+        a: getBasicDetails(a),
+        b: getBasicDetails(b)
+    }
 }

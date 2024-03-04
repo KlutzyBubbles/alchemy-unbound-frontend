@@ -45,3 +45,43 @@ html, body, #root {
 .btn-info {
   @include button-variant($light, $light, color-contrast($light), $light, $light, $primary);
 }
+
+#color2 h1{
+    background-size: 400%;
+    border-color: #52bbccbf;
+}
+.side-element {
+  background-image: url('./holo.avif');  
+  //-webkit-background-clip: text;
+  //-webkit-text-fill-color: transparent;
+  animation-duration: 15s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+  animation-name: updown;
+  background-size: 500%;
+  background-size: 200%;
+  // border-color: #fff8b9;
+  background-color: #ff00ffff;
+  background-blend-mode: hard-light;
+}
+
+.myText h1:before{
+    text-shadow: 4px 2px 1px #40adff, 2px 2px 10px #f4b0e7;    
+    content: "hologram";
+    position: absolute;
+    display: inline;
+    z-index: -10;
+}
+
+
+@keyframes updown {
+  from {
+    background-position: top;
+  }
+
+  to {
+    background-position: bottom;
+  }
+}
+

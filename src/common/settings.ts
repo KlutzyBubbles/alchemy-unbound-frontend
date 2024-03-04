@@ -1,12 +1,16 @@
 export type BackgroundType = 'blank' | 'particles' | 'rain'
 export type LeftRight = 'left' | 'right'
 
+export type Language = 'english' | 'schinese' | 'french' | 'russian' | 'spanish' | 'japanese'
+export const languages: Language[] = ['english', 'schinese', 'french', 'russian', 'spanish', 'japanese']
+
 export type Settings = {
-    dark: boolean,
-    fullscreen: boolean,
-    currentDisplay: number,
+    dark: boolean
+    fullscreen: boolean
+    currentDisplay: number
     background: BackgroundType
     sidebar: LeftRight
+    language: Language
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -14,5 +18,6 @@ export const DEFAULT_SETTINGS: Settings = {
     fullscreen: false,
     currentDisplay: 1,
     background: 'particles',
-    sidebar: 'right'
+    sidebar: 'right',
+    language: 'english'
 };

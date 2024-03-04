@@ -31,6 +31,7 @@
     "autoprefixer": "^10.4.17",
     "css-loader": "^6.10.0",
     "electron": "^29.1.0",
+    "electron-devtools-assembler": "^1.2.0",
     "eslint": "^8.56.0",
     "eslint-plugin-import": "^2.29.1",
     "fork-ts-checker-webpack-plugin": "^7.3.0",
@@ -41,7 +42,7 @@
     "style-loader": "^3.3.4",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
-    "typescript": "~4.5.4"
+    "typescript": "^5.3.3"
   },
   "keywords": [],
   "author": {
@@ -56,9 +57,11 @@
     "electron-squirrel-startup": "^1.0.0",
     "electron-unhandled": "^4.0.1",
     "framer-motion": "^11.0.6",
+    "gleamy": "^2.0.0",
     "immutability-helper": "^3.1.1",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.1",
+    "react-bootstrap-toasts": "^0.2.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",

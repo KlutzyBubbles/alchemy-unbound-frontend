@@ -27,3 +27,10 @@ export enum DisplayChannel {
     SET_DISPLAY = 'display:set',
     SET_FULLSCREEN = 'display:fullscreen',
 }
+
+export enum SteamChannel {
+    ACTIVATE_ACHIEVEMENT = 'steam:activateAchievement',
+    CHECK_ACHIEVEMENT = 'steam:checkAchievement',
+    GET_ID = 'steam:getId',
+    GET_LANGUAGE = 'steam:getLanguage',
+}

@@ -8,6 +8,7 @@ import { DEFAULT_SETTINGS } from '../common/settings';
 import { useEffect, useState } from 'react';
 import { SettingsModal } from './SettingsModal';
 import { InfoModal } from './InfoModal';
+import { GleamyProvider } from 'gleamy';
 
 export type ModalOption = 'settings' | 'info' | 'none'
 
@@ -18,7 +19,9 @@ function App() {
     useEffect(() => {
         (async() => {
             try {
-                setSettings(await window.SettingsAPI.getSettings())
+                var settings = await window.SettingsAPI.getSettings()
+                console.log(settings)
+                setSettings(settings)
             } catch (e) {
                 console.error('Failed to load settings (oops)')
                 console.error(e)
@@ -37,15 +40,17 @@ function App() {
 
     return (
         <DndProvider backend={HTML5Backend}>
-            <SettingsProvider value={settings}>
-                <Container fluid={true} className='h-100 p-0 bg-light'>
-                    <Row className='h-100 p-0 m-0'>
-                        <DropContainer hideSourceOnDrag={false} openModal={openModal}/>
-                    </Row>
-                    <SettingsModal show={currentModal === 'settings'} handleHide={handleModalClose} />
-                    <InfoModal show={currentModal === 'info'} handleHide={handleModalClose} />
-                </Container>
-            </SettingsProvider>
+            <GleamyProvider>
+                <SettingsProvider value={settings}>
+                    <Container fluid={true} className='h-100 p-0 bg-light overflow-hidden'>
+                        <Row className='h-100 p-0 m-0'>
+                            <DropContainer hideSourceOnDrag={false} openModal={openModal}/>
+                        </Row>
+                        <SettingsModal show={currentModal === 'settings'} handleHide={handleModalClose} />
+                        <InfoModal show={currentModal === 'info'} handleHide={handleModalClose} />
+                    </Container>
+                </SettingsProvider>
+            </GleamyProvider>
         </DndProvider>
     )
 }

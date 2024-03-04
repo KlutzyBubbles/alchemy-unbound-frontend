@@ -1,4 +1,4 @@
-import { RecipeElement } from "src/common/types"
+import { RecipeElement } from "../common/types"
 
 export interface DragItem {
     type: string

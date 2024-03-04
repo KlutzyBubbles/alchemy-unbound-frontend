@@ -11,16 +11,19 @@ import { CustomDragLayer } from './DragLayer'
 import Split from 'react-split';
 import { SideElement } from './SideElement'
 import { DragItem } from './types'
+import { getXY } from './Utils'
 
 export interface ContainerProps {
   // refreshRecipes: () => void
   // hideSourceOnDrag: boolean
   removeBox: (id: string) => void,
+  moveBox: (id: string, left: number, top: number) => Promise<void>
   elements: RecipeElement[],
 }
 
 export const SideContainer: FC<ContainerProps> = ({
     removeBox,
+    moveBox,
     elements
 }) => {
   const [{ isOver, isOverCurrent }, drop] = useDrop(
@@ -32,7 +35,12 @@ export const SideContainer: FC<ContainerProps> = ({
         }
         console.log(`removing ${item.id}`)
         if (item.id !== undefined) {
-          removeBox(item.id)
+          let { x, y } = getXY(item, monitor)
+          moveBox(item.id, x, y).then(() => {
+            (new Promise(resolve => setTimeout(resolve, 100))).then(() => {
+              removeBox(item.id)
+            })
+          })
         }
       },
       collect: (monitor) => ({
@@ -45,10 +53,17 @@ export const SideContainer: FC<ContainerProps> = ({
 
  //style={styles}>
   return (
-    <div ref={drop} style={{ background: isOver ? 'red' : 'white' }}>
-        {elements.map((element) => {
-            return (<SideElement key={element.name} element={element} removeBox={removeBox} />)
-        })}
+    <div className='vh-100 d-flex flex-column'>
+      <div ref={drop} style={{ background: isOver ? 'red' : 'white' }} className='overflow-y-scroll overflow-x-hidden h-100'>
+          {elements.map((element) => {
+              return (<SideElement key={element.name} element={element} removeBox={removeBox} />)
+          })}
+      </div>
+      <div className='footer mt-auto'>
+        <div className="mb-3">
+          <input type="email" className="form-control" id="exampleFormControlInput1" placeholder={`Search ${elements.length} elements`}/>
+        </div>
+      </div>
     </div>
   )
 }

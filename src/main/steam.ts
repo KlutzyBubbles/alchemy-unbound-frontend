@@ -1,3 +1,4 @@
+import { Language, languages } from '../common/settings';
 import steamworks from 'steamworks.js';
 import { PlayerSteamId } from 'steamworks.js/client';
 
@@ -18,6 +19,18 @@ export function getSteamId(): PlayerSteamId | undefined {
         return undefined
     }
     return client.localplayer.getSteamId()
+}
+
+export function getSteamGameLanguage(): Language {
+    var client = getSteamworksClient()
+    if (!client) {
+        return undefined
+    }
+    var language = client.apps.currentGameLanguage()
+    if (languages.includes(language as Language)) {
+        return language as Language
+    }
+    return 'english'
 }
 
 export function activateAchievement(achievement: string) {

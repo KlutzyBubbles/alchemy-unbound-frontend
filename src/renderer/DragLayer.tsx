@@ -1,9 +1,10 @@
-import type { CSSProperties, FC } from 'react'
+import { useContext, type CSSProperties, type FC } from 'react'
 import type { XYCoord } from 'react-dnd'
 import { useDragLayer } from 'react-dnd'
 
 import { ItemTypes } from './Constants'
 import { Recipe } from '../common/types'
+import { SettingsContext } from './SettingsProvider'
 
 
 const layerStyles: CSSProperties = {
@@ -30,6 +31,7 @@ function getItemStyles(
 }
 
 export const CustomDragLayer: FC<{}> = () => {
+  const { settings, setSettings } = useContext(SettingsContext)
   const { itemType, isDragging, item, initialOffset, currentOffset } =
     useDragLayer((monitor) => ({
       item: monitor.getItem(),
@@ -49,7 +51,7 @@ export const CustomDragLayer: FC<{}> = () => {
                     style={getItemStyles(initialOffset, currentOffset)}
                     data-testid="box"
                 >
-                    {item.element.emoji} {item.element.display}
+                    {item.element.emoji} {item.element.display[settings.language]}
                 </div>
             )
         default:

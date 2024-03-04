@@ -1,17 +1,6 @@
 import { Recipe } from '../common/types';
-import { net } from 'electron';
-import { getRecipe, insertRecipe, save } from './database';
+import { getRecipe, insertRecipeRow, save, traverseAndFill } from './database';
 import fetch from 'electron-fetch';
-
-export type RequestResult = {
-  result: string,
-  display: string,
-  emoji: string,
-  depth: number,
-  who_discovered: string,
-  first: boolean,
-  base: boolean
-}
 
 export type RequestErrorResult = {
   code: number,
@@ -33,9 +22,9 @@ export async function combine(a: string, b: string): Promise<Recipe | undefined>
     const response = await /*net.*/fetch(`http://localhost:5001?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`);
     if (response.ok) {
       try {
-        const body: RequestResult = (await response.json()) as RequestResult
+        const body: Recipe = (await response.json()) as Recipe
         try {
-          await insertRecipe({
+          await insertRecipeRow({
             a: a,
             b: b,
             result: body.result,
@@ -46,7 +35,7 @@ export async function combine(a: string, b: string): Promise<Recipe | undefined>
             base: body.base ? 1 : 0
           })
           await save()
-          return {
+          return traverseAndFill({
             a: a,
             b: b,
             result: body.result,
@@ -55,11 +44,11 @@ export async function combine(a: string, b: string): Promise<Recipe | undefined>
             depth: body.depth,
             who_discovered: body.who_discovered,
             base: body.base ? 1 : 0
-          }
+          })
         } catch(e) {
           console.error('Failed to insert recipe')
           console.error(e)
-          return {
+          return traverseAndFill({
             a: a,
             b: b,
             result: body.result,
@@ -68,7 +57,7 @@ export async function combine(a: string, b: string): Promise<Recipe | undefined>
             depth: body.depth,
             who_discovered: body.who_discovered,
             base: body.base ? 1 : 0
-          }
+          })
         }
       } catch(e) {
         console.error('Failed to make api request')
