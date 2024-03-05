@@ -2,7 +2,7 @@ import { app, BrowserWindow, shell } from 'electron';
 import { createDatabase } from './main/database';
 import debug from 'electron-debug';
 import unhandled from 'electron-unhandled';
-import steamworks from 'steamworks.js';
+import steamworks from '@ai-zen/steamworks.js';
 import { register } from './main/register';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-assembler';
 

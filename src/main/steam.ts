@@ -1,6 +1,6 @@
 import { Language, languages } from '../common/settings';
-import steamworks from 'steamworks.js';
-import { PlayerSteamId } from 'steamworks.js/client';
+import steamworks from '@ai-zen/steamworks.js';
+import { PlayerSteamId, auth } from '@ai-zen/steamworks.js/client';
 
 export const APP_ID = 2858840;
 
@@ -53,4 +53,8 @@ export function getFolder() {
   
     // linux / all others
     return `~/KlutzyBubbles/${APP_ID}/${steamId}/`;
+}
+
+export async function getWebAuthTicket(): Promise<auth.Ticket> {
+    return await getSteamworksClient().auth.getSessionTicketWithSteamId(getSteamId().steamId64);
 }

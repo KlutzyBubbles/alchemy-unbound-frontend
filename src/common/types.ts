@@ -51,3 +51,19 @@ export type AppVersions = {
     chrome: string,
     app: string
 }
+
+export type TokenHolder = {
+    token: string,
+    steamId: string,
+    expiryDate: number
+}
+
+export enum ErrorCode {
+    QUERY_MISSING = 1,
+    QUERY_INVALID = 2,
+    QUERY_UNDEFINED = 3,
+    AB_NOT_KNOWN = 4,
+    STEAM_TICKET_INVALID = 5,
+    TOKEN_EXPIRED = 6,
+    STEAM_SERVERS_DOWN = 7
+}
