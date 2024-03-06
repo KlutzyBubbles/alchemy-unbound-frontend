@@ -202,7 +202,7 @@ export const DropContainer: FC<ContainerProps> = ({
                     });
                     return temp;
                 });
-                refreshRecipes();
+                await refreshRecipes();
             } catch(e) {
                 mergeState(a, undefined, 'loading', false);
                 addError(a, undefined);
@@ -237,7 +237,7 @@ export const DropContainer: FC<ContainerProps> = ({
                     delete temp[b];
                     return temp;
                 });
-                refreshRecipes();
+                await refreshRecipes();
             } catch(e) {
                 mergeState(a, b, 'loading', false);
                 addError(a, b);

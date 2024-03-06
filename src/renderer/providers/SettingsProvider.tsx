@@ -18,21 +18,21 @@ export const SettingsProvider: FC<SettingsProviderProps> = ({
 }) => {
     const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
 
-    useEffect(() => {
-        (async () => {
-            try {
-                const settings = await window.SettingsAPI.getSettings();
-                console.log(settings);
-                if (settings === undefined || settings === null) {
-                    throw new Error('getSettings returned undefined');
-                }
-                setSettings(settings);
-            } catch (e) {
-                console.error('Failed to load settings (oops)');
-                console.error(e);
-            }
-        })();
-    }, []);
+    // useEffect(() => {
+    //     (async () => {
+    //         try {
+    //             const settings = await window.SettingsAPI.getSettings();
+    //             console.log(settings);
+    //             if (settings === undefined || settings === null) {
+    //                 throw new Error('getSettings returned undefined');
+    //             }
+    //             setSettings(settings);
+    //         } catch (e) {
+    //             console.error('Failed to load settings (oops)');
+    //             console.error(e);
+    //         }
+    //     })();
+    // }, []);
 
     useEffect(() => {
         window.SettingsAPI.setSettings(settings);

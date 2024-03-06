@@ -55,8 +55,8 @@ export const SideContainer: FC<ContainerProps> = ({
         [removeBox],
     );
 
-    useEffect(() => {
-        let filteredTemp = elements;
+    const filterList = (list: RecipeElement[], searchText: string, currentFilter: string): RecipeElement[] => {
+        let filteredTemp = list;
         if (searchText !== '') {
             filteredTemp = filteredTemp.filter((element) => {
                 // for (const name of Object.values(element.display)) {
@@ -74,7 +74,6 @@ export const SideContainer: FC<ContainerProps> = ({
                 return false;
             });
         }
-        const currentFilter = filterOptions[filter];
         const steamId = window.SteamAPI.getSteamId() ?? 'NO_STEAM_ID';
         if (currentFilter !== 'all') {
             filteredTemp = filteredTemp.filter((element) => {
@@ -93,14 +92,17 @@ export const SideContainer: FC<ContainerProps> = ({
                 return true;
             });
         }
+        return filteredTemp;
+    };
+
+    useEffect(() => {
+        let filteredTemp = filterList(elements.map((x) => x), searchText, filterOptions[filter]);
+        filteredTemp = sortList(filteredTemp.map((x) => x), sortByOptions[sortBy], sortAscending);
         setFilteredElements(filteredTemp);
     }, [searchText, filter]);
 
-    useEffect(() => {
-        const sortByOption = sortByOptions[sortBy];
-        console.log('sorting by...', sortByOption, sortAscending);
-        console.log('before sort', filteredElements);
-        let sortedTemp = filteredElements.sort((a, b) => {
+    const sortList = (list: RecipeElement[], sortByOption: string, sortAscending: boolean): RecipeElement[] => {
+        let sortedTemp = list.sort((a, b) => {
             // const sortByOptions = ['discovered', 'name', 'emoji', 'depth'];
             let aDepth = Infinity;
             let bDepth = Infinity;
@@ -121,7 +123,7 @@ export const SideContainer: FC<ContainerProps> = ({
             if (sortByOption === 'discovered') {
                 // This one is inverted to go from most recent
                 //console.log('Sorting discovered', aOrder < bOrder ? 1 : aOrder > bOrder ? -1 : 0, a.name, b.name, aOrder, bOrder);
-                return aOrder < bOrder ? 1 : aOrder > bOrder ? -1 : 0;
+                return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
             } else if (sortByOption === 'name') {
                 //console.log('Sorting name', a.name < b.name ? -1 : a.name > b.name ? 1 : 0, a.name, b.name);
                 return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
@@ -134,9 +136,17 @@ export const SideContainer: FC<ContainerProps> = ({
             }
             return 0;
         });
-        if (!sortAscending) {
+        if (sortAscending) {
             sortedTemp = sortedTemp.reverse();
         }
+        return sortedTemp;
+    };
+
+    useEffect(() => {
+        const sortByOption = sortByOptions[sortBy];
+        console.log('sorting by...', sortByOption, sortAscending);
+        console.log('before sort', filteredElements);
+        const sortedTemp = sortList(filteredElements.map((x) => x), sortByOption, sortAscending);
         console.log('after sort', sortedTemp);
         setFilteredElements(sortedTemp);
     }, [sortBy, sortAscending]);
@@ -146,7 +156,9 @@ export const SideContainer: FC<ContainerProps> = ({
     };
 
     useEffect(() => {
-        setFilteredElements(elements);
+        let filteredTemp = filterList(elements.map((x) => x), searchText, filterOptions[filter]);
+        filteredTemp = sortList(filteredTemp.map((x) => x), sortByOptions[sortBy], sortAscending);
+        setFilteredElements(filteredTemp);
     }, [elements]);
 
     const onFilterClick: MouseEventHandler<HTMLDivElement> = () => {
@@ -173,6 +185,7 @@ export const SideContainer: FC<ContainerProps> = ({
         <div className='side-container vh-100 d-flex flex-column position-sticky z-side'>
             <div ref={drop} className={`${isOver ? 'is-over' : ''} overflow-y-scroll overflow-x-hidden h-100`}>
                 {filteredElements.map((element) => {
+                    //console.log(element.name, element);
                     return (<SideElement key={element.name} element={element} removeBox={removeBox} />);
                 })}
             </div>

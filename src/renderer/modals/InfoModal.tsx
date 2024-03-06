@@ -1,6 +1,7 @@
-import { useState, type FC, useEffect } from 'react';
+import { useState, type FC, useEffect, useContext } from 'react';
 import { Modal, Table } from 'react-bootstrap';
 import { AppVersions, SystemVersion } from '../../common/types';
+import { SettingsContext } from '../providers/SettingsProvider';
 
 export interface InfoModalProps {
   show: boolean
@@ -11,6 +12,7 @@ export const InfoModal: FC<InfoModalProps> = ({
     show,
     handleHide
 }) => {
+    const { settings } = useContext(SettingsContext);
     const [appVersions, setAppVersions] = useState<AppVersions>({ node: '', electron: '', chrome: '', app: ''});
     const [systemInformation, setSystemInformation] = useState<SystemVersion>({ arch: '', platform: '', version: '' });
 
@@ -26,7 +28,7 @@ export const InfoModal: FC<InfoModalProps> = ({
     }, []);
 
     return (
-        <Modal show={show} onHide={handleHide} centered size="xl">
+        <Modal show={show} onHide={handleHide} centered size="xl" data-bs-theme={settings.dark ? 'dark' : 'light'}>
             <Modal.Header closeButton>
                 <Modal.Title>Alchemy Unbound</Modal.Title>
             </Modal.Header>

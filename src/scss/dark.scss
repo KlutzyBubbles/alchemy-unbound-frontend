@@ -58,5 +58,11 @@
 
     .side-container .footer {
         border-top-color: $light;
+        border-top-style: solid;
+        border-top-width: 2px;
+    }
+
+    .modal-dialog {
+        color: $light;
     }
 }

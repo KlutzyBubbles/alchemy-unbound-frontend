@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { SettingsProvider } from './providers/SettingsProvider';
 import { GleamyProvider } from 'gleamy';
 import { ContentContainer } from './Container';
+import { LoadingProvider } from './providers/LoadingProvider';
 
 export type ModalOption = 'settings' | 'info' | 'none'
 
@@ -12,7 +13,9 @@ function App() {
         <DndProvider backend={TouchBackend} options={{ enableTouchEvents: false, enableMouseEvents: true }}>
             <GleamyProvider>
                 <SettingsProvider>
-                    <ContentContainer/>
+                    <LoadingProvider>
+                        <ContentContainer/>
+                    </LoadingProvider>
                 </SettingsProvider>
             </GleamyProvider>
         </DndProvider>
