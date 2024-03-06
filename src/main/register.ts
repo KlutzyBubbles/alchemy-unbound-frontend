@@ -5,7 +5,7 @@ import { combine } from './server';
 import { DisplayChannel, GenericChannel, RecipeChannel, SettingsChannel, SteamChannel } from '../common/ipc';
 import { Settings } from '../common/settings';
 import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './settings';
-import { getAppVersions, isPackaged, getSystemInformation } from './generic';
+import { getAppVersions, isPackaged, getSystemInformation, quit } from './generic';
 import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from './display';
 import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated } from './steam';
 
@@ -57,6 +57,9 @@ export function register() {
     });
     ipcMain.handle(GenericChannel.GET_IS_PACKAGED, async () => {
         return isPackaged();
+    });
+    ipcMain.handle(GenericChannel.QUIT, async () => {
+        return quit();
     });
 
     // Display handlers

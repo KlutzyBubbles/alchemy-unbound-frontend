@@ -157,7 +157,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     return (
         <Modal show={show} onHide={handleHide} centered size="xl" data-bs-theme={darkMode ? 'dark' : 'light'}>
             <Modal.Header closeButton data-bs-theme={darkMode ? 'dark' : 'light'}>
-                <Modal.Title>Settings</Modal.Title>
+                <Modal.Title>{getFromStore('settings', settings.language)}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form>
@@ -165,12 +165,12 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                         <div className='col-6 col-md-5 col-lg-3'>
                             <div className="form-check form-switch form-switch-lg">
                                 <input className="form-check-input" type="checkbox" role="switch" id="setFullscreen" onChange={() => setFullscreen(!fullscreen)} checked={fullscreen}/>
-                                <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setFullscreen">Fullscreen</label>
+                                <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setFullscreen">{getFromStore('fullscreen', settings.language)}</label>
                             </div>
                         </div>
                         <div className='col-6 col-md-7 col-lg-9'>
                             <Form.Select aria-label="Fullscreen display" onChange={onDisplaySelect} value={currentDisplay === undefined ? 'none' : currentDisplay.id} disabled={!fullscreen}>
-                                {<option disabled key="none" value="none">Please select a screen</option>}
+                                {<option disabled key="none" value="none">{getFromStore('selectScreen', settings.language)}</option>}
                                 {displays.map((display) => {
                                     return (<option
                                         key={display.id}
@@ -184,13 +184,13 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                         <div className='col-12'>
                             <div className="form-check form-switch form-switch-lg">
                                 <input className="form-check-input" type="checkbox" role="switch" id="setDarkMode" onChange={() => setDarkMode(!darkMode)} checked={darkMode}/>
-                                <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setDarkMode">Dark Mode</label>
+                                <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setDarkMode">{getFromStore('darkMode', settings.language)}</label>
                             </div>
                         </div>
                     </div>
                     <div className='row mb-4'>
                         <div className='col-6 col-md-5 col-lg-3 pt-1'>
-                            <h5 className='text-end'>Background</h5>
+                            <h5 className='text-end'>{getFromStore('background', settings.language)}</h5>
                         </div>
                         <div className='col-6 col-md- col-lg-9'>
                             <div className="btn-group" role="group" aria-label="Basic outlined example">
@@ -218,7 +218,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     </div>
                     <div className='row'>
                         <div className='col-6 col-md-5 col-lg-3'>
-                            <h5 className='text-end'>Language</h5>
+                            <h5 className='text-end'>{getFromStore('language', settings.language)}</h5>
                         </div>
                         <div className='col-6 col-md-7 col-lg-9'>
                             <Form.Select aria-label="Language" onChange={onLanguageSelect} value={language}>
@@ -235,8 +235,11 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                 </Form>
             </Modal.Body>
             <Modal.Footer>
+                <Button variant="danger" onClick={() => window.GenericAPI.quit()} className='me-auto'>
+                    {getFromStore('quit', settings.language)}
+                </Button>
                 <Button variant="primary" onClick={handleHide}>
-                    Save Changes
+                    {getFromStore('saveChanges', settings.language)}
                 </Button>
             </Modal.Footer>
         </Modal>

@@ -19,6 +19,7 @@ export enum GenericChannel {
     GET_VERSIONS = 'generic:getVersions',
     GET_SYSTEM_INFO = 'generic:getSystemInfo',
     GET_IS_PACKAGED = 'generic:isPackaged',
+    QUIT = 'generic:quit',
 }
 
 export enum DisplayChannel {

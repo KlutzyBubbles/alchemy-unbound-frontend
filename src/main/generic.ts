@@ -22,3 +22,7 @@ export function getSystemInformation(): SystemVersion {
 export function isPackaged(): boolean {
     return app.isPackaged;
 }
+
+export function quit(): void {
+    return app.quit();
+}
