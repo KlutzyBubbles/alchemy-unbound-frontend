@@ -1,18 +1,18 @@
 import update from 'immutability-helper';
 import type { FC } from 'react';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useDrop } from 'react-dnd';
 
 import { MainElement } from './MainElement';
-import { Recipe, RecipeElement } from '../common/types';
+import { Recipe, RecipeElement } from '../../common/types';
 import { CustomDragLayer } from './DragLayer';
 import Split from 'react-split';
 import { SideContainer } from './SideContainer';
 import { IoHeart, IoInformationCircleOutline, IoSettingsOutline } from 'react-icons/io5';
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
-import { ModalOption } from './Main';
-import { DragItem, ItemTypes } from './types';
-import { getXY, hasProp, makeId } from './Utils';
+import { ModalOption } from '../Main';
+import { DragItem, ItemTypes } from '../types';
+import { getXY, hasProp, makeId } from '../utils';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
@@ -66,6 +66,9 @@ export const DropContainer: FC<ContainerProps> = ({
     async function refreshRecipes() {
         await getAllRecipes();
     }
+
+    // const [init, setInit] = useState(false);
+    // const backgroundRef = useRef(null);
 
     useEffect(() => {
         getAllRecipes();
@@ -387,63 +390,65 @@ export const DropContainer: FC<ContainerProps> = ({
     const elementControls = useAnimation();
 
     return (
-        <Split
-            sizes={[75, 25]}
-            className="split p-0 m-0"
-            gutterSize={2}
-            snapOffset={0}
-        >
-            <div>
-                <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
-                    <AnimatePresence>
-                        {Object.keys(boxes).map((key) => {
-                            const { left, top, element, combining, newCombining, loading, error } = boxes[key];
-                            return (
-                                <motion.div
-                                    key={key}
-                                    custom={key}
-                                    variants={elementVariants}
-                                    animate={elementControls}>
-                                    <MainElement
+        <Fragment>
+            <Split
+                sizes={[75, 25]}
+                className="split p-0 m-0"
+                gutterSize={2}
+                snapOffset={0}
+            >
+                <div>
+                    <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
+                        <AnimatePresence>
+                            {Object.keys(boxes).map((key) => {
+                                const { left, top, element, combining, newCombining, loading, error } = boxes[key];
+                                return (
+                                    <motion.div
                                         key={key}
-                                        dragId={key}
-                                        left={left}
-                                        top={top}
-                                        element={element}
-                                        combining={combining}
-                                        newCombine={newCombining}
-                                        loading={loading}
-                                        error={error}
-                                        hideSourceOnDrag={hideSourceOnDrag}
-                                        addBox={addBox}
-                                        moveBox={moveBox}
-                                        rawCombine={rawCombine}
-                                        combine={combine}
-                                    />
-                                </motion.div>
-                            );
-                        })}
-                    </AnimatePresence>
-                    <CustomDragLayer/>
-                    <div className='footer mt-auto'>
-                        <motion.div
-                            className='btn btn-no-outline float-end mb-2 me-2 fs-2 d-flex p-2'
-                            onMouseEnter={onSettingsMouseEnter}
-                            onMouseLeave={onSettingsMouseLeave}
-                            variants={settingsVariants}
-                            animate={settingsControls}
-                            onClick={() => openModal('settings')}>
-                            <IoSettingsOutline/>
-                        </motion.div>
-                        <a href="https://ko-fi.com/klutzybubbles" target="_blank" className='btn btn-sm btn-heart float-end mb-2 fs-2 d-flex p-2' rel="noreferrer"><IoHeart /></a>
-                        <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('info')}><IoInformationCircleOutline /></div>
+                                        custom={key}
+                                        variants={elementVariants}
+                                        animate={elementControls}>
+                                        <MainElement
+                                            key={key}
+                                            dragId={key}
+                                            left={left}
+                                            top={top}
+                                            element={element}
+                                            combining={combining}
+                                            newCombine={newCombining}
+                                            loading={loading}
+                                            error={error}
+                                            hideSourceOnDrag={hideSourceOnDrag}
+                                            addBox={addBox}
+                                            moveBox={moveBox}
+                                            rawCombine={rawCombine}
+                                            combine={combine}
+                                        />
+                                    </motion.div>
+                                );
+                            })}
+                        </AnimatePresence>
+                        <CustomDragLayer/>
+                        <div className='footer mt-auto z-mainButtons'>
+                            <motion.div
+                                className='btn btn-no-outline float-end mb-2 me-2 fs-2 d-flex p-2'
+                                onMouseEnter={onSettingsMouseEnter}
+                                onMouseLeave={onSettingsMouseLeave}
+                                variants={settingsVariants}
+                                animate={settingsControls}
+                                onClick={() => openModal('settings')}>
+                                <IoSettingsOutline/>
+                            </motion.div>
+                            <a href="https://ko-fi.com/klutzybubbles" target="_blank" className='btn btn-sm btn-heart float-end mb-2 fs-2 d-flex p-2' rel="noreferrer"><IoHeart /></a>
+                            <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('info')}><IoInformationCircleOutline /></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <SideContainer
-                elements={elements}
-                removeBox={removeBox}
-                moveBox={moveBox}/>
-        </Split>
+                <SideContainer
+                    elements={elements}
+                    removeBox={removeBox}
+                    moveBox={moveBox}/>
+            </Split>
+        </Fragment>
     );
 };

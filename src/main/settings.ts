@@ -50,6 +50,7 @@ export async function getSettings(): Promise<Settings> {
     if (!loaded) {
         await loadSettings();
     }
+    console.log('returning settings', settings);
     return settings;
 }
 

@@ -1,4 +1,4 @@
-export type BackgroundType = 'blank' | 'particles' | 'rain'
+export type BackgroundType = 'blank' | 'line' // | 'particles' | 'rain'
 export type LeftRight = 'left' | 'right'
 
 export type Language = 
@@ -55,7 +55,7 @@ export type RawSettings = {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-    dark: false,
+    dark: true,
     fullscreen: false,
     currentDisplay: 1,
     background: 'particles',

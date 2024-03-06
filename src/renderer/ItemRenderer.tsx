@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { type ReactNode, useContext, CSSProperties, FocusEventHandler, MouseEventHandler, useState, useEffect } from 'react';
 import { RecipeElement } from '../common/types';
-import { SettingsContext } from './SettingsProvider';
+import { SettingsContext } from './providers/SettingsProvider';
 import { XYCoord } from 'react-dnd';
 import { AnimationControls, TargetAndTransition, VariantLabels, Variants, motion } from 'framer-motion';
 import { ItemTypes } from './types';
@@ -12,8 +12,6 @@ export type ItemRendererProps = {
     element: RecipeElement
     type: ItemTypes
     dragging?: boolean
-    firstDiscovered?: boolean
-    base?: boolean
     maxDepth?: boolean
     hasDropOver?: boolean
     disabled?: boolean
@@ -68,7 +66,7 @@ function getMainStyles(
     if (isDragging === undefined)
         isDragging = false;
     return {
-        position: 'absolute',
+        position: 'fixed',
         left: left === undefined ? 0 : left,
         top: top === undefined ? 0 : top,
         transform,
@@ -100,22 +98,18 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
     let {
         dragging,
         hasDropOver,
-        firstDiscovered,
-        base,
         maxDepth,
         disabled
     } = props;
 
     const [destroying, setDestroying] = useState(false);
+    const [firstDiscovered, setFirstDiscovered] = useState(false);
+    const [base, setBase] = useState(false);
 
     if (dragging === undefined)
         dragging = false;
     if (hasDropOver === undefined)
         hasDropOver = false;
-    if (firstDiscovered === undefined)
-        firstDiscovered = false;
-    if (base === undefined)
-        base = false;
     if (maxDepth === undefined)
         maxDepth = false;
     if (disabled === undefined)
@@ -135,6 +129,22 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
             setDestroying(true);
         };
     }, []);
+
+    useEffect(() => {
+        const steamId = window.SteamAPI.getSteamId() ?? 'NO_STEAM_ID';
+        let firstDiscoveredCheck = false;
+        let baseCheck = false;
+        for (const recipe of element.recipes) {
+            if (recipe.who_discovered === steamId || recipe.first) {
+                firstDiscoveredCheck = true;
+            }
+            if (recipe.base) {
+                baseCheck = true;
+            }
+        }
+        setFirstDiscovered(firstDiscoveredCheck);
+        setBase(baseCheck);
+    }, [element]);
 
     return (
         <motion.div

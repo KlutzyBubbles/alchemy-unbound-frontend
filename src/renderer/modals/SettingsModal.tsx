@@ -1,6 +1,6 @@
 import { useState, type FC, useEffect, useContext } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
-import { SettingsContext } from './SettingsProvider';
+import { SettingsContext } from '../providers/SettingsProvider';
 
 export interface SettingsModalProps {
   show: boolean
@@ -15,6 +15,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     const [displays, setDisplays] = useState<Electron.Display[]>([]);
     const [currentDisplay, setCurrentDisplay] = useState<Electron.Display>(undefined);
     const [fullscreen, setFullscreen] = useState<boolean>(settings?.fullscreen ?? false);
+    const [background, setFullscreen] = useState<boolean>(settings?.fullscreen ?? false);
 
     useEffect(() => {
         (async() => {

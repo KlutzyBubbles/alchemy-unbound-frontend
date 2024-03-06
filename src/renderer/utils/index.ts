@@ -1,5 +1,5 @@
 import { DropTargetMonitor, XYCoord } from 'react-dnd';
-import { DragItem } from './types';
+import { DragItem } from '../types';
 
 export function getXY(item: DragItem, monitor: DropTargetMonitor): XYCoord {
     const delta = monitor.getClientOffset() as XYCoord;

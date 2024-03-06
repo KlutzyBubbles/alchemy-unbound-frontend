@@ -11,23 +11,27 @@ export type BasicElement = {
 }
 
 export type Recipe = {
+    order: number;
     a: BasicElement;
     b: BasicElement;
     result: string;
     display: Languages;
     emoji: string;
     depth: number;
+    first: number;
     who_discovered: string;
     base: number;
 }
 
 export type RecipeRow = {
+    order: number;
     a: string;
     b: string;
     result: string;
     display: Languages;
     emoji: string;
     depth: number;
+    first: number;
     who_discovered: string;
     base: number;
 }

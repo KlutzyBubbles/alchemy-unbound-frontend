@@ -1,6 +1,6 @@
 import { useState, type FC, useEffect } from 'react';
 import { Modal, Table } from 'react-bootstrap';
-import { AppVersions, SystemVersion } from '../common/types';
+import { AppVersions, SystemVersion } from '../../common/types';
 
 export interface InfoModalProps {
   show: boolean

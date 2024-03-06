@@ -1,14 +1,16 @@
 @use "sass:map";
 @import "../../node_modules/bootstrap/scss/functions";
+@import "./variables.scss";
 @import "../../node_modules/bootstrap/scss/variables";
 @import "../../node_modules/bootstrap/scss/variables-dark";
-@import "./variables.scss";
 @import "../../node_modules/bootstrap/scss/maps";
 @import "../../node_modules/bootstrap/scss/mixins";
 @import "../../node_modules/bootstrap/scss/utilities";
 @import "./utilities.scss";
 
 @import "../../node_modules/bootstrap/scss/bootstrap";
+
+@import "./dark.scss";
 
 html, body, #root {
   height: 100%;
@@ -40,6 +42,14 @@ html, body, #root {
   border-radius: $btn-border-radius
 }
 
+.side-container {
+    background-color: $light;
+}
+
+.side-container .is-over {
+    background-color: mix($light, $danger, 20%);
+}
+
 .btn-element.holo {
     --#{$prefix}btn-hover-bg: #{$dark};
     --#{$prefix}btn-hover-color: #{$dark};
@@ -57,19 +67,51 @@ html, body, #root {
 }
 
 .btn-no-outline {
-  @include button-variant($light, $light, color-contrast($light), $light);
+  @include button-variant($transparent, $transparent, color-contrast($light), $transparent, $transparent, color-contrast($light));
 }
 
 .btn-heart {
-  @include button-variant($light, $light, color-contrast($light), $light, $light, $danger);
+  @include button-variant($transparent, $transparent, color-contrast($light), $transparent, $transparent, $danger);
 }
 
 .btn-info {
-  @include button-variant($light, $light, color-contrast($light), $light, $light, $primary);
+  @include button-variant($transparent, $transparent, color-contrast($light), $transparent, $transparent, $primary);
 }
 
 .btn.btn-no-radius {
     border-radius: 0
+}
+
+.btn-left-hover {
+    background: $transparent;
+    background-size: 210% 100%;
+    background-position: right bottom; 
+    transition: all 0.3s ease-out;
+}
+
+.btn-left-hover:hover, .btn-left-hover:active  {
+    background: linear-gradient(to right, $dark 50%, $light 50%);
+    background-size: 210% 100%;
+    background-position: left bottom;
+}
+
+.btn-right-hover {
+    background: $transparent;
+    background-size: 210% 100%;
+    background-position: left bottom; 
+    transition: all 0.3s ease-out;
+}
+
+.btn-right-hover:hover, .btn-right-hover:active  {
+    background: linear-gradient(to left, $dark 50%, $light 50%);
+    background-size: 210% 100%;
+    background-position: right bottom;
+}
+
+.side-container .footer {
+    border-top-color: $dark;
+    border-top-style: solid;
+    border-top-width: 2px;
 }
 
 // @mixin customZ($zindex-levels) {
@@ -86,6 +128,7 @@ html, body, #root {
     background-image: url('../images/holo.avif');  
     //-webkit-background-clip: text;
     //-webkit-text-fill-color: transparent;
+    color: $dark;
     animation-duration: 15s;
     animation-iteration-count: infinite;
     animation-direction: alternate;

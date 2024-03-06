@@ -1,6 +1,6 @@
 // import { net } from 'electron';
 import { ErrorCode, Recipe, TokenHolder } from '../common/types';
-import { getRecipe, insertRecipeRow, save, traverseAndFill } from './database';
+import { getPlaceholderOrder, getRecipe, insertRecipeRow, save, traverseAndFill } from './database';
 import { isPackaged } from './generic';
 import { getWebAuthTicket } from './steam';
 import fetch from 'electron-fetch';
@@ -121,37 +121,31 @@ export async function combine(a: string, b: string): Promise<Recipe | undefined>
             try {
                 const body: Recipe = (await response.json()) as Recipe;
                 try {
-                    await insertRecipeRow({
+                    const recipeRow = await insertRecipeRow({
                         a: a,
                         b: b,
                         result: body.result,
                         display: body.display,
                         emoji: body.emoji,
                         depth: body.depth,
+                        first: body.first ? 1 : 0,
                         who_discovered: body.who_discovered,
                         base: body.base ? 1 : 0
                     });
                     await save();
-                    return traverseAndFill({
-                        a: a,
-                        b: b,
-                        result: body.result,
-                        display: body.display,
-                        emoji: body.emoji,
-                        depth: body.depth,
-                        who_discovered: body.who_discovered,
-                        base: body.base ? 1 : 0
-                    });
+                    return traverseAndFill(recipeRow);
                 } catch(e) {
                     console.error('Failed to insert recipe');
                     console.error(e);
                     return traverseAndFill({
+                        order: getPlaceholderOrder(),
                         a: a,
                         b: b,
                         result: body.result,
                         display: body.display,
                         emoji: body.emoji,
                         depth: body.depth,
+                        first: body.first ? 1 : 0,
                         who_discovered: body.who_discovered,
                         base: body.base ? 1 : 0
                     });

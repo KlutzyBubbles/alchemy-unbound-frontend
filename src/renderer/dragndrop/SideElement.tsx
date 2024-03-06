@@ -1,9 +1,9 @@
 import { useEffect, type FC, type ReactNode } from 'react';
 import { useDrag } from 'react-dnd';
-import { RecipeElement } from '../common/types';
+import { RecipeElement } from '../../common/types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
-import { DragItem, ItemTypes } from './types';
-import { ItemRenderer } from './ItemRenderer';
+import { DragItem, ItemTypes } from '../types';
+import { ItemRenderer } from '../ItemRenderer';
 
 export type SideElementProps = {
   element: RecipeElement
@@ -34,8 +34,6 @@ export const SideElement: FC<SideElementProps> = ({
         preview(getEmptyImage(), { captureDraggingState: true });
     }, []);
 
-    const firstDiscovered = false;
-    const base = false;
     const maxDepth = false;
 
     if (isDragging && hideSourceOnDrag) {
@@ -47,8 +45,6 @@ export const SideElement: FC<SideElementProps> = ({
             element={element}
             type={ItemTypes.SIDE_ELEMENT}
             dragging={false}
-            firstDiscovered={firstDiscovered}
-            base={base}
             maxDepth={maxDepth}/>
     );
 };

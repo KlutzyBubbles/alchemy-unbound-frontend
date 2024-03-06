@@ -1,6 +1,6 @@
 {
-  "name": "element-craft-frontend",
-  "productName": "element-craft-frontend",
+  "name": "alchemy-unbound",
+  "productName": "alchemy-unbound",
   "version": "1.0.0",
   "description": "Alchemy Unbound frontend application",
   "main": ".webpack/main",
@@ -54,6 +54,8 @@
   "license": "MIT",
   "dependencies": {
     "@ai-zen/steamworks.js": "^0.3.6-dev.16",
+    "@tsparticles/engine": "^3.3.0",
+    "@tsparticles/react": "^3.0.0",
     "bootstrap": "^5.3.3",
     "electron-debug": "^3.2.0",
     "electron-fetch": "^1.9.1",
@@ -71,6 +73,7 @@
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
     "react-split": "^2.0.14",
-    "steamworks.js": "^0.3.1"
+    "steamworks.js": "^0.3.1",
+    "tsparticles": "^3.3.0"
   }
 }

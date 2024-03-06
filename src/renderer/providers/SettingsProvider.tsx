@@ -1,5 +1,5 @@
 import { FC, ReactNode, createContext, useEffect, useState } from 'react';
-import { DEFAULT_SETTINGS, Settings } from '../common/settings';
+import { DEFAULT_SETTINGS, Settings } from '../../common/settings';
 
 export const SettingsContext = createContext<{
     settings: Settings,
@@ -10,20 +10,28 @@ export const SettingsContext = createContext<{
 });
 
 interface SettingsProviderProps {
-    value: Settings
     children?: ReactNode
 }
 
 export const SettingsProvider: FC<SettingsProviderProps> = ({
-    value,
     children
 }) => {
-    const [settings, setSettings] = useState<Settings>(null);
+    const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
 
     useEffect(() => {
-        console.log('value');
-        console.log(value);
-        setSettings(value);
+        (async () => {
+            try {
+                const settings = await window.SettingsAPI.getSettings();
+                console.log(settings);
+                if (settings === undefined || settings === null) {
+                    throw new Error('getSettings returned undefined');
+                }
+                setSettings(settings);
+            } catch (e) {
+                console.error('Failed to load settings (oops)');
+                console.error(e);
+            }
+        })();
     }, []);
 
     useEffect(() => {

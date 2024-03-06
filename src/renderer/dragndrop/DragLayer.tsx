@@ -1,8 +1,8 @@
 import { type CSSProperties, type FC } from 'react';
 import { useDragLayer } from 'react-dnd';
 
-import { ItemRenderer } from './ItemRenderer';
-import { ItemTypes } from './types';
+import { ItemRenderer } from '../ItemRenderer';
+import { ItemTypes } from '../types';
 
 const layerStyles: CSSProperties = {
     pointerEvents: 'none',

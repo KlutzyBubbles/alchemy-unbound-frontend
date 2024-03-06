@@ -15,6 +15,7 @@ const config: ForgeConfig = {
         asar: {
             unpack: '*.{node,dll,dylib,so,lib}',
         },
+        icon: './icons/icon.ico',
         ignore: ['node_modules/steamworks.js/dist']
     // extraResource: [
     //   './node_modules/steamworks.js/dist'

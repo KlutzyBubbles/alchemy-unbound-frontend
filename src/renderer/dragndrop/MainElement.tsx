@@ -1,13 +1,13 @@
 import { useState, type FC, type ReactNode, useEffect, useContext } from 'react';
 import { ConnectableElement, DragSourceOptions, useDrag, useDrop } from 'react-dnd';
-import { RecipeElement } from '../common/types';
+import { RecipeElement } from '../../common/types';
 import Dropdown from 'react-bootstrap/Dropdown';
-import { getXY } from './Utils';
+import { getXY } from '../utils';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { Variants, useAnimation } from 'framer-motion';
-import { DragItem, ItemTypes } from './types';
-import { SettingsContext } from './SettingsProvider';
-import { ItemRenderer } from './ItemRenderer';
+import { DragItem, ItemTypes } from '../types';
+import { SettingsContext } from '../providers/SettingsProvider';
+import { ItemRenderer } from '../ItemRenderer';
 
 export interface BoxProps {
   dragId: string

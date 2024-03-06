@@ -7,6 +7,13 @@ import { Language, languages } from '../common/settings';
 const DATABASE_VERISON = 1;
 
 let data: RecipeRow[] = [];
+let databaseOrder = 0;
+
+export function getPlaceholderOrder(): number {
+    const temp = databaseOrder;
+    databaseOrder++;
+    return temp;
+}
 
 export async function save(): Promise<void> {
     if (!(await dirExists(getFolder()))) {
@@ -76,6 +83,7 @@ export async function createDatabase(): Promise<void> {
         console.error('Error reading JSON');
         console.error(e);
     }
+    databaseOrder = data.length;
     const records = [
         {
             english: 'Fire',
@@ -159,6 +167,7 @@ export async function createDatabase(): Promise<void> {
                 display: withoutEmoji(item),
                 emoji: item.emoji,
                 depth: 0,
+                first: 0,
                 who_discovered: '',
                 base: 1
             });
@@ -166,17 +175,24 @@ export async function createDatabase(): Promise<void> {
     });
 }
 
-export async function insertRecipeRow(recipe: RecipeRow): Promise<void> {
+export async function insertRecipeRow(recipe: Omit<RecipeRow, 'order'>): Promise<RecipeRow> {
     console.log('insertRecipe');
-    data.push(recipe);
+    const recipeRow: RecipeRow = { ...recipe, order: databaseOrder };
+    data.push(recipeRow);
+    databaseOrder++;
+    return recipeRow;
 }
-export async function insertRecipe(recipe: Recipe): Promise<void> {
+export async function insertRecipe(recipe: Omit<Recipe, 'order'>): Promise<RecipeRow> {
     console.log('insertRecipe');
-    data.push({
+    const recipeRow: RecipeRow = {
         ...recipe,
+        order: databaseOrder,
         a: recipe.a.name,
         b: recipe.b.name
-    });
+    };
+    data.push(recipeRow);
+    databaseOrder++;
+    return recipeRow;
 }
 
 export async function deleteRecipe(a: string, b: string): Promise<void> {
