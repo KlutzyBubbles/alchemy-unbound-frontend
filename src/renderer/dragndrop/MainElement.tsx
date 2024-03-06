@@ -1,13 +1,13 @@
-import { useState, type FC, type ReactNode, useEffect, useContext } from 'react';
+import { useState, type FC, type ReactNode, useEffect } from 'react';
 import { ConnectableElement, DragSourceOptions, useDrag, useDrop } from 'react-dnd';
-import { RecipeElement } from '../../common/types';
+import { BasicElement, Languages, Recipe, RecipeElement } from '../../common/types';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { getXY } from '../utils';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { Variants, useAnimation } from 'framer-motion';
 import { DragItem, ItemTypes } from '../types';
-import { SettingsContext } from '../providers/SettingsProvider';
 import { ItemRenderer } from '../ItemRenderer';
+import { languages } from '../../common/settings';
 
 export interface BoxProps {
   dragId: string
@@ -46,7 +46,7 @@ export const MainElement: FC<BoxProps> = ({
         drop(node, options);
     };
 
-    const { settings } = useContext(SettingsContext);
+    // const { settings } = useContext(SettingsContext);
     // const [hasDropOver, setHasDropOver] = useState(false);
     
     const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
@@ -247,6 +247,84 @@ export const MainElement: FC<BoxProps> = ({
 
     const controls = useAnimation();
   
+    const mockElement = (recipe: Recipe | BasicElement): RecipeElement => {
+        if ('result' in recipe) {
+            return {
+                name: recipe.result,
+                display: recipe.display,
+                emoji: recipe.emoji,
+                recipes: [
+                    recipe
+                ]
+            };
+        } else {
+            const unknowns: Partial<Languages> = {};
+            for (const language of languages) {
+                unknowns[language] = '???';
+            }
+            console.log({
+                name: recipe.name,
+                display: recipe.display,
+                emoji: recipe.emoji,
+                recipes: [
+                    {
+                        ...recipe,
+                        order: 0,
+                        result: recipe.name,
+                        a: {
+                            name: '',
+                            display: unknowns as Languages,
+                            emoji: '❓',
+                            depth: 0,
+                            first: 0,
+                            who_discovered: '',
+                            base: 0
+                        },
+                        b: {
+                            name: '',
+                            display: unknowns as Languages,
+                            emoji: '❓',
+                            depth: 0,
+                            first: 0,
+                            who_discovered: '',
+                            base: 0
+                        }
+                    }
+                ]
+            });
+            return {
+                name: recipe.name,
+                display: recipe.display,
+                emoji: recipe.emoji,
+                recipes: [
+                    {
+                        ...recipe,
+                        order: 0,
+                        result: recipe.name,
+                        a: {
+                            name: '',
+                            display: unknowns as Languages,
+                            emoji: '❓',
+                            depth: 0,
+                            first: 0,
+                            who_discovered: '',
+                            base: 0
+                        },
+                        b: {
+                            name: '',
+                            display: unknowns as Languages,
+                            emoji: '❓',
+                            depth: 0,
+                            first: 0,
+                            who_discovered: '',
+                            base: 0
+                        }
+                    }
+                ]
+            };
+        }
+    };
+
     return (
         <ItemRenderer
             element={element}
@@ -277,20 +355,23 @@ export const MainElement: FC<BoxProps> = ({
                         if (recipe.a.name === '' || recipe.b.name === '') {
                             return (
                                 <Dropdown.Item key={`${recipe.result}`} href="#">
-                                    <div className="main-element btn btn-outline-dark btn-light">
-                                        {recipe.emoji} {recipe.display[settings.language]}
-                                    </div>
+                                    <ItemRenderer
+                                        element={mockElement(recipe)}
+                                        type={ItemTypes.RECIPE_ELEMENT}
+                                        dragging={false}/>
                                 </Dropdown.Item>);
                         }
                         return (
                             <Dropdown.Item key={`${recipe.a.name}${recipe.b.name}`} href="#">
-                                <div key={`${recipe.a.name}`} className="main-element btn btn-outline-dark btn-light">
-                                    {recipe.a.emoji} {recipe.a.display[settings.language]}
-                                </div>
-                  +
-                                <div key={`${recipe.b.name}`} className="main-element btn btn-outline-dark btn-light">
-                                    {recipe.b.emoji} {recipe.b.display[settings.language]}
-                                </div>
+                                <ItemRenderer
+                                    element={mockElement(recipe.a)}
+                                    type={ItemTypes.RECIPE_ELEMENT}
+                                    dragging={false}/>
+                                    +
+                                <ItemRenderer
+                                    element={mockElement(recipe.b)}
+                                    type={ItemTypes.RECIPE_ELEMENT}
+                                    dragging={false}/>
                             </Dropdown.Item>
                         );
                     })}

@@ -12,5 +12,6 @@ export enum ItemTypes {
     ELEMENT = 'element',
     MAIN_ELEMENT = 'main',
     FINAL_ELEMENT = 'final',
-    SIDE_ELEMENT = 'side'
+    SIDE_ELEMENT = 'side',
+    RECIPE_ELEMENT = 'recipe'
 }

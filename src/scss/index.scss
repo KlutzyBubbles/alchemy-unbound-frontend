@@ -189,6 +189,10 @@ html, body, #root {
     background-blend-mode: hard-light;
 }
 
+.element.holo .holder.not-holo {
+    background-color: #00000000
+}
+
 .element.holo .holder {
     background-color: #FFFA
 }

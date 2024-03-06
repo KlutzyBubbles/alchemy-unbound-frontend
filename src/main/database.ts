@@ -242,13 +242,21 @@ function getBasicDetails(name: string): BasicElement {
         return {
             name: name,
             display: unknowns as Languages,
-            emoji: '❓'
+            emoji: '❓',
+            depth: 0,
+            first: 0,
+            who_discovered: '',
+            base: 0
         };
     } else {
         return {
             name: found.result,
             display: found.display,
-            emoji: found.emoji
+            emoji: found.emoji,
+            depth: found.depth,
+            first: found.first,
+            who_discovered: found.who_discovered,
+            base: found.base
         };
     }
 }

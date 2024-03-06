@@ -8,6 +8,10 @@ export type BasicElement = {
     name: string;
     display: Languages;
     emoji: string;
+    depth: number;
+    first: number;
+    who_discovered: string;
+    base: number;
 }
 
 export type Recipe = {

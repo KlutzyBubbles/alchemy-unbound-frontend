@@ -186,7 +186,7 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
         >
             <div className='glare h-100 w-100'>
                 <div className='shine h-100 w-100'>
-                    <div className='holder py-2 px-2 h-100 w-100'>
+                    <div className={`holder ${firstDiscovered ? '' : 'not-holo'} py-2 px-2 h-100 w-100`}>
                         {element.emoji} {element.display[settings.language]}
                         {children}
                     </div>
