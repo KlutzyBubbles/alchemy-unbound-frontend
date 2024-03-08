@@ -22,7 +22,8 @@ const config: ForgeConfig = {
     // ] as any as string[]
     },
     rebuildConfig: {},
-    makers: [new MakerSquirrel({}), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({})],
+    // makers: [new MakerSquirrel({}), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({})],
+    makers: [new MakerZIP({}, ['darwin', 'linux', 'win32'])],
     plugins: [
     // new AutoUnpackNativesPlugin({}),
         new WebpackPlugin({
