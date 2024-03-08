@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get commits since version
+        id: commits
+        run: echo "value=$(git log "$(git describe --tags --abbrev=0)..HEAD" --no-merges --oneline)" >> $GITHUB_STATE
+      - name: Debug used variables
+        run: |
+            echo $github
+            echo $prerelease
+            echo $created
+        env:
+            github: ${{ tojson(github) }}
+            prerelease: ${{ github.event.release.prerelease }}
+            created: ${{ github.event.release.created_at }}
