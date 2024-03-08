@@ -2,7 +2,7 @@ name: Release
 
 on:
     release:
-        types: [published, prereleased]
+        types: [published]
 #  push:
 #    tags:
 #      - v*
