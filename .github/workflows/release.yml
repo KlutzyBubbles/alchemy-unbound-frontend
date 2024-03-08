@@ -12,6 +12,9 @@ permissions:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     name: Build
     runs-on: ubuntu-latest
     steps:
@@ -35,9 +38,7 @@ jobs:
       - name: Install dependacnies
         run: npm ci
       - name: Build for windows
-        run: npm run make -- --platform win32
-      - name: Build for linux
-        run: npm run make -- --platform linux
+        run: npm run make
         
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -47,5 +48,4 @@ jobs:
         with:
           draft: true
           files: |
-            out/make/zip/linux/x64/*.zip
-            out/make/zip/win32/x64/*.zip
+            out/make/zip/*
