@@ -6,16 +6,26 @@ import { DEFAULT_SETTINGS, RawSettings, Settings } from '../common/settings';
 const SETTINGS_VERISON = 1;
 
 let settings: Settings = DEFAULT_SETTINGS;
+// let settings: {
+//     settings: Settings
+// } = {
+//     settings: DEFAULT_SETTINGS
+// };
 let loaded = false;
 
 export async function saveSettings(): Promise<void> {
-    if (!(await dirExists(getFolder()))) {
-        await fs.mkdir(getFolder(), { recursive: true });
+    console.log('saving settings', settings);
+    try {
+        if (!(await dirExists(getFolder()))) {
+            await fs.mkdir(getFolder(), { recursive: true });
+        }
+        await fs.writeFile(getFolder() + 'settings.json', JSON.stringify({
+            version: SETTINGS_VERISON,
+            settings: settings
+        }), 'utf-8');
+    } catch(e) {
+        console.error('Error saving on main side', e);
     }
-    await fs.writeFile(getFolder() + 'settings.json', JSON.stringify({
-        version: SETTINGS_VERISON,
-        settings: settings
-    }), 'utf-8');
 }
 
 function loadV1(loaded: RawSettings) {
@@ -54,10 +64,15 @@ export async function getSettings(): Promise<Settings> {
     return settings;
 }
 
-export function setSettings(setTo: Settings) {
+export async function setSettings(setTo: Settings) {
+    console.log('setting settings', settings);
     settings = setTo;
 }
 
-export function setSetting<K extends keyof Settings>(key: K, value: Settings[K]) {
-    settings[key] = value;
+export async function setSetting<K extends keyof Settings>(key: K, value: Settings[K]) {
+    try {
+        settings[key] = value;
+    } catch(e) {
+        console.error('Error setting settings key', e);
+    }
 }

@@ -33,6 +33,7 @@ const createWindow = (): void => {
         width: 1280,
         webPreferences: {
             preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+            devTools: !app.isPackaged
         },
         icon: __dirname + '/icons/icon.ico'
     });
@@ -50,7 +51,8 @@ const createWindow = (): void => {
     //menuBuilder.buildMenu();
 
     // Open the DevTools.
-    mainWindow.webContents.openDevTools();
+    if (!app.isPackaged)
+        mainWindow.webContents.openDevTools();
   
     mainWindow.removeMenu();
 

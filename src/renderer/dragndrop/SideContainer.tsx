@@ -184,7 +184,16 @@ export const SideContainer: FC<ContainerProps> = ({
     return (
         <div className='side-container vh-100 d-flex flex-column position-sticky z-side'>
             <div ref={drop} className={`${isOver ? 'is-over' : ''} overflow-y-scroll overflow-x-hidden h-100`}>
-                {filteredElements.map((element) => {
+                {filteredElements.filter((item) => {
+                    let discovered = false;
+                    for (const recipe of item.recipes) {
+                        if (recipe.discovered) {
+                            discovered = true;
+                            break;
+                        }
+                    }
+                    return discovered;
+                }).map((element) => {
                     //console.log(element.name, element);
                     return (<SideElement key={element.name} element={element} removeBox={removeBox} />);
                 })}

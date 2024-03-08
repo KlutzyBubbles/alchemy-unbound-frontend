@@ -18,6 +18,7 @@ export type Recipe = {
     order: number;
     a: BasicElement;
     b: BasicElement;
+    discovered: number;
     result: string;
     display: Languages;
     emoji: string;
@@ -31,6 +32,7 @@ export type RecipeRow = {
     order: number;
     a: string;
     b: string;
+    discovered: number;
     result: string;
     display: Languages;
     emoji: string;

@@ -21,10 +21,15 @@ export const LoadingProvider: FC<SettingsProviderProps> = ({
         (async () => {
             try {
                 const settings = await window.SettingsAPI.getSettings();
-                console.log(settings);
+                console.log('loading done', settings);
                 if (settings === undefined || settings === null) {
                     throw new Error('getSettings returned undefined');
                 }
+                // if (!settings.languageSet) {
+                //     const steamLanguage = await window.SteamAPI.getSteamGameLanguage();
+                //     settings.language = steamLanguage;
+                //     settings.languageSet = true;
+                // }
                 setSettings(settings);
             } catch (e) {
                 console.error('Failed to load settings (oops)');

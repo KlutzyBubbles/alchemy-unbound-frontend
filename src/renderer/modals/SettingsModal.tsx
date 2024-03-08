@@ -1,7 +1,7 @@
 import { useState, type FC, useEffect, useContext, Fragment, ChangeEventHandler } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import { SettingsContext } from '../providers/SettingsProvider';
-import { BackgroundType, BackgroundTypeList, Language, languageDisplay, languages } from '../../common/settings';
+import { BackgroundType, BackgroundTypeList, DEFAULT_SETTINGS, Language, languageDisplay, languages } from '../../common/settings';
 import { getFromStore } from '../language';
 import { LoadingContext } from '../providers/LoadingProvider';
 
@@ -18,10 +18,11 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     const { loading } = useContext(LoadingContext);
     const [displays, setDisplays] = useState<Electron.Display[]>([]);
     const [currentDisplay, setCurrentDisplay] = useState<Electron.Display>(undefined);
-    const [fullscreen, setFullscreen] = useState<boolean>(settings?.fullscreen ?? false);
-    const [darkMode, setDarkMode] = useState<boolean>(settings?.dark ?? true);
-    const [background, setBackground] = useState<BackgroundType>(settings?.background ?? 'line');
-    const [language, setLanguage] = useState<Language>(settings?.language ?? 'english');
+    const [fullscreen, setFullscreen] = useState<boolean>(settings?.fullscreen ?? DEFAULT_SETTINGS.fullscreen);
+    const [darkMode, setDarkMode] = useState<boolean>(settings?.dark ?? DEFAULT_SETTINGS.dark);
+    const [offline, setOffline] = useState<boolean>(settings?.offline ?? DEFAULT_SETTINGS.offline);
+    const [background, setBackground] = useState<BackgroundType>(settings?.background ?? DEFAULT_SETTINGS.background);
+    const [language, setLanguage] = useState<Language>(settings?.language ?? DEFAULT_SETTINGS.language);
 
     useEffect(() => {
         (async() => {
@@ -57,7 +58,10 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     fullscreen: fullscreen
                 });
-                console.log(fullscreen);
+                console.log('settings fullscreen', fullscreen, {
+                    ...settings,
+                    fullscreen: fullscreen
+                });
                 window.DisplayAPI.setFullscreen(fullscreen);
             } catch (e) {
                 console.error('Failed to change fullscreen', e);
@@ -72,7 +76,10 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     dark: darkMode
                 });
-                console.log(darkMode);
+                console.log('settings darkMode', darkMode, {
+                    ...settings,
+                    dark: darkMode
+                });
             } catch (e) {
                 console.error('Failed to change darkMode', e);
             }
@@ -82,12 +89,26 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     useEffect(() => {
         (async() => {
             try {
+                setSettings({
+                    ...settings,
+                    offline: offline
+                });
+                console.log('settings offline', offline);
+            } catch (e) {
+                console.error('Failed to change offline', e);
+            }
+        })();
+    }, [offline]);
+
+    useEffect(() => {
+        (async() => {
+            try {
                 if (currentDisplay !== undefined) {
                     setSettings({
                         ...settings,
                         currentDisplay: currentDisplay.id
                     });
-                    console.log(currentDisplay.id);
+                    console.log('settings currentDisplay', currentDisplay.id);
                     window.DisplayAPI.moveToDisplay(currentDisplay);
                 }
             } catch (e) {
@@ -103,7 +124,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     language: language
                 });
-                console.log(language);
+                console.log('settings language', language);
             } catch (e) {
                 console.error('Failed to move to display', e);
             }
@@ -117,7 +138,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     background: background
                 });
-                console.log(background);
+                console.log('settings background', background);
             } catch (e) {
                 console.error('Failed to change background', e);
             }
@@ -185,6 +206,14 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                             <div className="form-check form-switch form-switch-lg">
                                 <input className="form-check-input" type="checkbox" role="switch" id="setDarkMode" onChange={() => setDarkMode(!darkMode)} checked={darkMode}/>
                                 <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setDarkMode">{getFromStore('darkMode', settings.language)}</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <div className='col-12'>
+                            <div className="form-check form-switch form-switch-lg">
+                                <input className="form-check-input" type="checkbox" role="switch" id="setOffline" onChange={() => setOffline(!offline)} checked={offline} disabled/>
+                                <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setOffline">{getFromStore('offline', settings.language)}</label>
                             </div>
                         </div>
                     </div>

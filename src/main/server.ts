@@ -1,7 +1,8 @@
 // import { net } from 'electron';
 import { ErrorCode, Recipe, TokenHolder } from '../common/types';
-import { getPlaceholderOrder, getRecipe, insertRecipeRow, save, traverseAndFill } from './database';
+import { getPlaceholderOrder, getRecipe, insertRecipeRow, save, setDiscovered, traverseAndFill } from './database';
 import { isPackaged } from './generic';
+import { getSettings } from './settings';
 import { getWebAuthTicket } from './steam';
 import fetch from 'electron-fetch';
 
@@ -103,67 +104,76 @@ export async function combine(a: string, b: string): Promise<Recipe | undefined>
         exists = undefined;
     }
     if (exists !== undefined) {
+        setDiscovered(exists.a.name, exists.b.name, true);
+        exists.discovered = 1;
+        await save();
         return exists;
     } else {
-        let tokenResponse: TokenHolder | undefined = undefined;
-        try {
-            tokenResponse = await getToken();
-        } catch (e) {
-            console.error('Failed to get token response', e);
-        }
-        let url = `${endpoint}/api?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
-        if (tokenResponse !== undefined) {
-            url += `&token=${tokenResponse.token}`;
-        }
-        console.log(url);
-        const response = await fetch(url);
-        if (response.ok) {
+        if (!(await getSettings()).offline) {
+            let tokenResponse: TokenHolder | undefined = undefined;
             try {
-                const body: Recipe = (await response.json()) as Recipe;
+                tokenResponse = await getToken();
+            } catch (e) {
+                console.error('Failed to get token response', e);
+            }
+            let url = `${endpoint}/api?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
+            if (tokenResponse !== undefined) {
+                url += `&token=${tokenResponse.token}`;
+            }
+            console.log(url);
+            const response = await fetch(url);
+            if (response.ok) {
                 try {
-                    const recipeRow = await insertRecipeRow({
-                        a: a,
-                        b: b,
-                        result: body.result,
-                        display: body.display,
-                        emoji: body.emoji,
-                        depth: body.depth,
-                        first: body.first ? 1 : 0,
-                        who_discovered: body.who_discovered,
-                        base: body.base ? 1 : 0
-                    });
-                    await save();
-                    return traverseAndFill(recipeRow);
+                    const body: Recipe = (await response.json()) as Recipe;
+                    try {
+                        const recipeRow = await insertRecipeRow({
+                            a: a,
+                            b: b,
+                            result: body.result,
+                            discovered: 1,
+                            display: body.display,
+                            emoji: body.emoji,
+                            depth: body.depth,
+                            first: body.first ? 1 : 0,
+                            who_discovered: body.who_discovered,
+                            base: body.base ? 1 : 0
+                        });
+                        await save();
+                        return traverseAndFill(recipeRow);
+                    } catch(e) {
+                        console.error('Failed to insert recipe');
+                        console.error(e);
+                        return traverseAndFill({
+                            order: getPlaceholderOrder(),
+                            a: a,
+                            b: b,
+                            result: body.result,
+                            discovered: 1,
+                            display: body.display,
+                            emoji: body.emoji,
+                            depth: body.depth,
+                            first: body.first ? 1 : 0,
+                            who_discovered: body.who_discovered,
+                            base: body.base ? 1 : 0
+                        });
+                    }
                 } catch(e) {
-                    console.error('Failed to insert recipe');
+                    console.error('Failed to make api request');
                     console.error(e);
-                    return traverseAndFill({
-                        order: getPlaceholderOrder(),
-                        a: a,
-                        b: b,
-                        result: body.result,
-                        display: body.display,
-                        emoji: body.emoji,
-                        depth: body.depth,
-                        first: body.first ? 1 : 0,
-                        who_discovered: body.who_discovered,
-                        base: body.base ? 1 : 0
-                    });
+                    throw(e);
                 }
-            } catch(e) {
-                console.error('Failed to make api request');
-                console.error(e);
-                throw(e);
+            } else {
+                console.error(`response error code ${response.status}`);
+                const json = (await response.json()) as RequestErrorResult;
+                console.error(json);
+                if (json.code === ErrorCode.QUERY_INVALID || json.code === ErrorCode.QUERY_UNDEFINED) {
+                    throw('Unknown issue with input a/b');
+                } else if (json.code === ErrorCode.AB_NOT_KNOWN) {
+                    throw('Items are not known, have these been synced with the server?');
+                }
+                return undefined;
             }
         } else {
-            console.error(`response error code ${response.status}`);
-            const json = (await response.json()) as RequestErrorResult;
-            console.error(json);
-            if (json.code === ErrorCode.QUERY_INVALID || json.code === ErrorCode.QUERY_UNDEFINED) {
-                throw('Unknown issue with input a/b');
-            } else if (json.code === ErrorCode.AB_NOT_KNOWN) {
-                throw('Items are not known, have these been synced with the server?');
-            }
             return undefined;
         }
     }

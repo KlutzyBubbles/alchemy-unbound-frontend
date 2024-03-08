@@ -1,8 +1,9 @@
 import { BasicElement, Languages, Recipe, RecipeRow } from '../common/types';
 import { promises as fs } from 'fs';
 import { getFolder } from './steam';
-import { dirExists, fileExists } from '../common/utils';
-import { Language, languages } from '../common/settings';
+import { dirExists } from '../common/utils';
+import { languages } from '../common/settings';
+import baseData from '../base.json';
 
 const DATABASE_VERISON = 1;
 
@@ -19,31 +20,36 @@ export async function save(): Promise<void> {
     if (!(await dirExists(getFolder()))) {
         await fs.mkdir(getFolder(), { recursive: true });
     }
-    let existing: RecipeRow[] = [];
-    try {
-        if (fileExists(getFolder() + 'db.json')) {
-            existing = await loadData();
-        }
-    } catch(e) {
-        if (e.code === 'ENOENT') {
-            console.log('Error was coulnd\'t find file, which is fine');
-        } else if (!(e.message as string).startsWith('Failed to load database')) {
-            console.error('Failed to load file, not overriding just incase, saving to temp instead');
-            await fs.writeFile(getFolder() + `db_backup_${(new Date()).toISOString().slice(0, 16)}.json`, JSON.stringify({
-                version: DATABASE_VERISON,
-                data: data
-            }), 'utf-8');
-            return;
-        }
-    }
-    const uniques = new Set(existing.map((value) => {
-        return value.a.localeCompare(value.b) > 0 ? `${value.a}${value.b}` : `${value.b}${value.a}`;
-    }));
-    const newData = [...existing, ...data.filter((value) => !uniques.has(value.a.localeCompare(value.b) > 0 ? `${value.a}${value.b}` : `${value.b}${value.a}`))];
+    console.log('saving db');
     await fs.writeFile(getFolder() + 'db.json', JSON.stringify({
         version: DATABASE_VERISON,
-        data: newData
+        data: data
     }), 'utf-8');
+    //let existing: RecipeRow[] = [];
+    //try {
+    //    if (fileExists(getFolder() + 'db.json')) {
+    //        existing = await loadData();
+    //    }
+    //} catch(e) {
+    //    if (e.code === 'ENOENT') {
+    //        console.log('Error was coulnd\'t find file, which is fine');
+    //    } else if (!(e.message as string).startsWith('Failed to load database')) {
+    //        console.error('Failed to load file, not overriding just incase, saving to temp instead');
+    //        await fs.writeFile(getFolder() + `db_backup_${(new Date()).toISOString().slice(0, 16)}.json`, JSON.stringify({
+    //            version: DATABASE_VERISON,
+    //            data: data
+    //        }), 'utf-8');
+    //        return;
+    //    }
+    //}
+    //const uniques = new Set(existing.map((value) => {
+    //    return value.a.localeCompare(value.b) > 0 ? `${value.a}${value.b}` : `${value.b}${value.a}`;
+    //}));
+    //const newData = [...existing, ...data.filter((value) => !uniques.has(value.a.localeCompare(value.b) > 0 ? `${value.a}${value.b}` : `${value.b}${value.a}`))];
+    //await fs.writeFile(getFolder() + 'db.json', JSON.stringify({
+    //    version: DATABASE_VERISON,
+    //    data: newData
+    //}), 'utf-8');
 }
 
 function loadV1(loaded: Record<string, unknown>[]): RecipeRow[] {
@@ -62,18 +68,11 @@ async function loadData(): Promise<RecipeRow[]> {
     } catch (e) {
         if (e.code === 'ENOENT') {
             console.log('No file found, returning blank data');
+            // const raw: RecipeRow[] = JSON.parse(await fs.readFile(MAIN_WINDOW_WEBPACK_ENTRY + '/base.json', 'utf-8'));
+            // return baseData as RecipeRow[];
             return [];
         }
     }
-}
-
-function withoutEmoji(item: Record<Language | 'emoji', string>): Languages {
-    const result: Partial<Languages> = {};
-    for (const key of Object.keys(item)) {
-        if (key !== 'emoji')
-            result[key as Language] = item[key as Language];
-    }
-    return result as Languages;
 }
 
 export async function createDatabase(): Promise<void> {
@@ -83,96 +82,11 @@ export async function createDatabase(): Promise<void> {
         console.error('Error reading JSON');
         console.error(e);
     }
+    if (data.length === 0) {
+        data = baseData as RecipeRow[];
+        await save();
+    }
     databaseOrder = data.length;
-    const records = [
-        {
-            english: 'Fire',
-            schinese: '火',
-            russian: 'огонь',
-            spanish: 'fuego',
-            french: 'feu',
-            japanese: '火',
-            indonesian: 'Api',
-            german: 'Feuer',
-            latam: 'fuego',
-            italian: 'fuoco',
-            dutch: 'vuur',
-            polish: 'ogień',
-            portuguese: 'fogo',
-            tchinese: '火',
-            koreana: '불',
-            emoji: '🔥'
-        }, {
-            english: 'Earth',
-            schinese: '地球',
-            russian: 'Земля',
-            spanish: 'Tierra',
-            french: 'Terre',
-            japanese: '地球',
-            indonesian: 'Bumi',
-            german: 'Erde',
-            latam: 'terra',
-            italian: 'terra',
-            dutch: 'aarde',
-            polish: 'ziemia',
-            portuguese: 'terra',
-            tchinese: '地球',
-            koreana: '지구',
-            emoji: '🌎'
-        }, {
-            english: 'Air',
-            schinese: '空气',
-            russian: 'Воздух',
-            spanish: 'Aire',
-            french: 'Air',
-            japanese: '空気',
-            indonesian: 'Udara',
-            german: 'Luft',
-            latam: 'aire',
-            italian: 'aria',
-            dutch: 'lucht',
-            polish: 'powietrze',
-            portuguese: 'ar',
-            tchinese: '空氣',
-            koreana: '공기',
-            emoji: '💨'
-        }, {
-            english: 'Water',
-            schinese: '水',
-            russian: 'Вода',
-            spanish: 'Agua',
-            french: 'Eau',
-            japanese: '水',
-            indonesian: 'Air',
-            german: 'Wasser',
-            latam: 'agua',
-            italian: 'acqua',
-            dutch: 'water',
-            polish: 'woda',
-            portuguese: 'água',
-            tchinese: '水',
-            koreana: '물',
-            emoji: '💧'
-        }
-    ];
-
-    records.forEach(async (item) => {
-        const result = item.english.toLowerCase();
-        const hasItem = await getRecipesFor(result);
-        if (hasItem === null || hasItem === undefined || hasItem.length === 0) {
-            await insertRecipeRow({
-                a: '',
-                b: '',
-                result,
-                display: withoutEmoji(item),
-                emoji: item.emoji,
-                depth: 0,
-                first: 0,
-                who_discovered: '',
-                base: 1
-            });
-        }
-    });
 }
 
 export async function insertRecipeRow(recipe: Omit<RecipeRow, 'order'>): Promise<RecipeRow> {
@@ -193,6 +107,15 @@ export async function insertRecipe(recipe: Omit<Recipe, 'order'>): Promise<Recip
     data.push(recipeRow);
     databaseOrder++;
     return recipeRow;
+}
+
+export function setDiscovered(a: string, b: string, discovered: boolean) {
+    for (const recipe of data) {
+        if ((recipe.a === a && recipe.b === b) || (recipe.a === b && recipe.b === a)) {
+            recipe.discovered = discovered ? 1 : 0;
+            break;
+        }
+    }
 }
 
 export async function deleteRecipe(a: string, b: string): Promise<void> {

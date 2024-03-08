@@ -3,11 +3,11 @@ import { DEFAULT_SETTINGS, Settings } from '../../common/settings';
 
 export const SettingsContext = createContext<{
     settings: Settings,
-    setSettings: React.Dispatch<React.SetStateAction<Settings>>
-}>({
-    settings: DEFAULT_SETTINGS,
-    setSettings: () => {}
-});
+    setSettings: (settings: Settings) => void,
+        }>({
+            settings: DEFAULT_SETTINGS,
+            setSettings: (settings: Settings) => { console.log('DEFAULT STILL RUN', settings); }
+        });
 
 interface SettingsProviderProps {
     children?: ReactNode
@@ -18,24 +18,12 @@ export const SettingsProvider: FC<SettingsProviderProps> = ({
 }) => {
     const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
 
-    // useEffect(() => {
-    //     (async () => {
-    //         try {
-    //             const settings = await window.SettingsAPI.getSettings();
-    //             console.log(settings);
-    //             if (settings === undefined || settings === null) {
-    //                 throw new Error('getSettings returned undefined');
-    //             }
-    //             setSettings(settings);
-    //         } catch (e) {
-    //             console.error('Failed to load settings (oops)');
-    //             console.error(e);
-    //         }
-    //     })();
-    // }, []);
-
     useEffect(() => {
-        window.SettingsAPI.setSettings(settings);
+        (async () => {
+            console.log('Settings updated to', settings);
+            await window.SettingsAPI.setSettings(settings);
+            // await window.SettingsAPI.saveSettings();
+        })();
     }, [settings]);
 
     return (

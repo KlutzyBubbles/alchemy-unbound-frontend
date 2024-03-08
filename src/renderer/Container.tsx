@@ -1,35 +1,58 @@
 import { Container, Row } from 'react-bootstrap';
 import { DropContainer } from './dragndrop/DropContainer';
-import { FC, useContext, useEffect, useState } from 'react';
+import { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { SettingsModal } from './modals/SettingsModal';
 import { InfoModal } from './modals/InfoModal';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadFull } from 'tsparticles';
-import type { Container as ParticleContainer } from '@tsparticles/engine';
+import type { IOptions, Container as ParticleContainer, RecursivePartial } from '@tsparticles/engine';
 import options from './particles';
 import { SettingsContext } from './providers/SettingsProvider';
+import { DEFAULT_SETTINGS, Settings } from 'src/common/settings';
 
 export type ModalOption = 'settings' | 'info' | 'none'
 
 export const ContentContainer: FC = () => {
     const { settings } = useContext(SettingsContext);
     const [currentModal, setCurrentModal] = useState<ModalOption>('none');
-
-    const particlesLoaded = async (container: ParticleContainer) => {
-        console.log(container);
-    };
+    const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.dark));
+    const [particleReady, setParticleReady] = useState<boolean>(false);
 
     useEffect(() => {
         (async() => {
-            initParticlesEngine(async (engine) => {
+            await initParticlesEngine(async (engine) => {
                 await loadFull(engine);
             });
+            setParticleReady(true);
         })();
     }, []);
 
-    const handleModalClose = () => {
+    useEffect(() => {
+        (async () => {
+            console.log('Settings updated to', settings);
+            setParticleReady(false);
+            setCurrentParticles(options[settings.background](settings.dark));
+            await initParticlesEngine(async (engine) => {
+                await loadFull(engine);
+            });
+            setParticleReady(true);
+            // try {
+            //     await window.SettingsAPI.setSettings(settings);
+            //     await window.SettingsAPI.saveSettings();
+            // } catch (e) {
+            //     console.error('settings saving error', e);
+            // }
+        })();
+    }, [settings]);
+
+    const handleModalClose = async () => {
         if (currentModal === 'settings') {
-            window.SettingsAPI.saveSettings();
+            try {
+                await window.SettingsAPI.setSettings(settings);
+                await window.SettingsAPI.saveSettings();
+            } catch(e) {
+                console.error('Close saving failed', e);
+            }
         }
         setCurrentModal('none');
     };
@@ -39,12 +62,11 @@ export const ContentContainer: FC = () => {
     return (
         <Container fluid={true} className='h-100 p-0 bg-light overflow-hidden' data-bs-theme={settings.dark ? 'dark' : 'light'}>
             <Row className='h-100 p-0 m-0'>
-                <Particles
+                {particleReady ? <Particles
                     className='z-particles'
                     id="backgroundParticles"
-                    particlesLoaded={particlesLoaded}
-                    options={options[settings.background](settings.dark)}
-                />
+                    options={currentParticles}
+                /> : <Fragment/>}
                 <DropContainer hideSourceOnDrag={false} openModal={openModal}/>
             </Row>
             <SettingsModal show={currentModal === 'settings'} handleHide={handleModalClose} />

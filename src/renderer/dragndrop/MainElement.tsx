@@ -57,7 +57,7 @@ export const MainElement: FC<BoxProps> = ({
                 isDragging: monitor.isDragging(),
             }),
         }),
-        [dragId, left, top],
+        [element, dragId, left, top],
     );
 
     useEffect(() => {
@@ -301,6 +301,7 @@ export const MainElement: FC<BoxProps> = ({
                         ...recipe,
                         order: 0,
                         result: recipe.name,
+                        discovered: 1,
                         a: {
                             name: '',
                             display: unknowns as Languages,
@@ -351,7 +352,8 @@ export const MainElement: FC<BoxProps> = ({
             }}>
             <Dropdown show={dropdownOpen} onToggle={(nextShow) => setDropdownOpen(nextShow)}>
                 <Dropdown.Menu>
-                    {element.recipes.map((recipe) => {
+                    {element.recipes.filter((item) => item.discovered).map((recipe) => {
+                        console.log('element recipes', recipe);
                         if (recipe.a.name === '' || recipe.b.name === '') {
                             return (
                                 <Dropdown.Item key={`${recipe.result}`} href="#">

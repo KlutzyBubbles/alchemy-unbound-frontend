@@ -1,6 +1,6 @@
 import update from 'immutability-helper';
 import type { FC } from 'react';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { useDrop } from 'react-dnd';
 
 import { MainElement } from './MainElement';
@@ -8,11 +8,12 @@ import { Recipe, RecipeElement } from '../../common/types';
 import { CustomDragLayer } from './DragLayer';
 import Split from 'react-split';
 import { SideContainer } from './SideContainer';
-import { IoHeart, IoInformationCircleOutline, IoSettingsOutline } from 'react-icons/io5';
+import { IoCloudOfflineOutline, IoHeart, IoInformationCircleOutline, IoSettingsOutline } from 'react-icons/io5';
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../Main';
 import { DragItem, ItemTypes } from '../types';
 import { getXY, hasProp, makeId } from '../utils';
+import { SettingsContext } from '../providers/SettingsProvider';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
@@ -38,6 +39,7 @@ export const DropContainer: FC<ContainerProps> = ({
     hideSourceOnDrag
 }) => {
     const [elements, setElements] = useState<RecipeElement[]>([]);
+    const { settings } = useContext(SettingsContext);
 
     async function getAllRecipes() {
         const data = await window.RecipeAPI.getAllRecipes();
@@ -221,6 +223,12 @@ export const DropContainer: FC<ContainerProps> = ({
                 mergeState(a, b, 'loading', true);
                 const { recipe, recipes } = await backendCombine(boxes[a].element.name, boxes[b].element.name);
                 mergeState(a, b, 'loading', false);
+                console.log('updatingboxes', {
+                    name: recipe.result,
+                    display: recipe.display,
+                    emoji: recipe.emoji,
+                    recipes: recipes
+                });
                 setBoxes((boxes) => {
                     const temp = update(boxes, {
                         [a]: {
@@ -441,6 +449,7 @@ export const DropContainer: FC<ContainerProps> = ({
                             </motion.div>
                             <a href="https://ko-fi.com/klutzybubbles" target="_blank" className='btn btn-sm btn-heart float-end mb-2 fs-2 d-flex p-2' rel="noreferrer"><IoHeart /></a>
                             <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('info')}><IoInformationCircleOutline /></div>
+                            {settings.offline ? (<div className='btn btn-offline float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('settings')}><IoCloudOfflineOutline /></div>) : (<Fragment/>)}
                         </div>
                     </div>
                 </div>

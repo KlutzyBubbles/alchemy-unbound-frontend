@@ -359,5 +359,22 @@ export const LanguageStore: {
         portuguese: 'Sair',
         tchinese: '退出',
         koreana: '종료'
+    },
+    offline: {
+        english: 'Offline Mode',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
     }
 };

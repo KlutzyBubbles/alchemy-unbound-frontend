@@ -78,6 +78,10 @@ html, body, #root {
   @include button-variant($transparent, $transparent, color-contrast($light), $transparent, $transparent, $primary);
 }
 
+.btn-offline {
+  @include button-variant($transparent, $transparent, $danger, $transparent, $transparent, $danger);
+}
+
 .btn.btn-no-radius {
     border-radius: 0
 }

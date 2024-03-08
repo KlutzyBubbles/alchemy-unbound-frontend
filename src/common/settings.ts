@@ -113,26 +113,33 @@ export const languageDisplay: {
 export type Settings = {
     dark: boolean
     fullscreen: boolean
+    offline: boolean
     currentDisplay: number
     background: BackgroundType
     sidebar: LeftRight
     language: Language
+    languageSet: boolean
 }
 
+// This is here for future settings changes
 export type RawSettings = {
     dark: boolean
     fullscreen: boolean
+    offline: boolean
     currentDisplay: number
     background: BackgroundType
     sidebar: LeftRight
     language: Language
+    languageSet: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
     dark: true,
-    fullscreen: false,
+    fullscreen: true,
+    offline: true,
     currentDisplay: 1,
     background: 'line',
     sidebar: 'right',
-    language: 'english'
+    language: 'english',
+    languageSet: false
 };
