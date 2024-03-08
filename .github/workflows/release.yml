@@ -48,4 +48,4 @@ jobs:
         with:
           draft: true
           files: |
-            out/make/zip/*
+            out/make/zip/**/*
