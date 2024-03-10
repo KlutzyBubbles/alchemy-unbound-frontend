@@ -13,8 +13,9 @@ permissions:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
     name: Build
     runs-on: ${{ matrix.os }}
     steps:
@@ -38,7 +39,9 @@ jobs:
       - name: Install dependacnies
         run: npm ci
       - name: Build for ${{ matrix.os }}
-        run: npm run make
+        run: npm run make -- --platform linux
+      - name: Build for ${{ matrix.os }}
+        run: npm run make -- --platform win32
         
       - name: Release
         uses: softprops/action-gh-release@v1
