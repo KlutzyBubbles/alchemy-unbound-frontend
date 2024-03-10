@@ -51,10 +51,10 @@ jobs:
             out/make/zip/**/*
 
       - name: Set prerelease branch
-        if: github.event.release.prerelease
+        if: ${{ github.event.release.prerelease }}
         run: echo 'RELEASE_BRANCH=prerelease' >> "$GITHUB_ENV"
       - name: Set release branch
-        if: not github.event.release.prerelease
+        if: ${{ !github.event.release.prerelease }}
         run: echo 'RELEASE_BRANCH=release' >> "$GITHUB_ENV"
       - uses: game-ci/steam-deploy@v3
         with:
