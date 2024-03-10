@@ -16,7 +16,7 @@ const config: ForgeConfig = {
             unpack: '*.{node,dll,dylib,so,lib}',
         },
         icon: './icons/icon.ico',
-        ignore: ['node_modules/steamworks.js/dist']
+        ignore: ['node_modules/steamworks.js/dist', 'node_modules/@ai-zen/steamworks.js/dist']
     // extraResource: [
     //   './node_modules/steamworks.js/dist'
     // ] as any as string[]
