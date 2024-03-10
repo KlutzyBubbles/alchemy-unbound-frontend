@@ -227,7 +227,13 @@ export const SideContainer: FC<ContainerProps> = ({
                             className="form-control form-control-lg"
                             value={searchText}
                             onChange={onSearchType}
-                            placeholder={getFromStore('search', settings.language).replace('{0}', `${elements.length}`)}/>
+                            placeholder={getFromStore('search', settings.language).replace('{0}', `${elements.filter((item) => {
+                                for (const recipe of item.recipes) {
+                                    if (recipe.discovered)
+                                        return true;
+                                }
+                                return false;
+                            }).length}`)}/>
                     </div>
                 </div>
             </div>

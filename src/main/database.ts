@@ -86,7 +86,17 @@ export async function createDatabase(): Promise<void> {
         data = baseData as RecipeRow[];
         await save();
     }
-    databaseOrder = data.length;
+    setDatabaseOrder();
+}
+
+function setDatabaseOrder() {
+    let highest = 0;
+    for (const row of data) {
+        if (row.discovered && row.order > highest) {
+            highest = row.order;
+        }
+    }
+    databaseOrder = highest + 1;
 }
 
 export async function insertRecipeRow(recipe: Omit<RecipeRow, 'order'>): Promise<RecipeRow> {
@@ -109,10 +119,23 @@ export async function insertRecipe(recipe: Omit<Recipe, 'order'>): Promise<Recip
     return recipeRow;
 }
 
+function getDiscoveredOrder(result: string): number | undefined {
+    for (const recipe of data) {
+        if (recipe.result === result && recipe.discovered) {
+            return recipe.order;
+        }
+    }
+    return undefined;
+}
+
 export function setDiscovered(a: string, b: string, discovered: boolean) {
     for (const recipe of data) {
         if ((recipe.a === a && recipe.b === b) || (recipe.a === b && recipe.b === a)) {
+            const existingOrder = getDiscoveredOrder(recipe.result);
             recipe.discovered = discovered ? 1 : 0;
+            recipe.order = existingOrder ?? databaseOrder;
+            if (existingOrder === undefined)
+                databaseOrder++;
             break;
         }
     }
