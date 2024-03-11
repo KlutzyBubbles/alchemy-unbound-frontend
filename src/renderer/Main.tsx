@@ -6,10 +6,12 @@ import { GleamyProvider } from 'gleamy';
 import { ContentContainer } from './Container';
 import { LoadingProvider } from './providers/LoadingProvider';
 import { SoundProvider } from './providers/SoundProvider';
+import log from 'electron-log/renderer';
 
 export type ModalOption = 'settings' | 'info' | 'none'
 
 function App() {
+    log.info('Info from app renderer');
     return (
         <DndProvider backend={TouchBackend} options={{ enableTouchEvents: false, enableMouseEvents: true }}>
             <GleamyProvider>

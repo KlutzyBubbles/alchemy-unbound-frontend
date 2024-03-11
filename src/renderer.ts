@@ -19,5 +19,4 @@ import './renderer/Main';
     } else {
         console.log('Rendered');
     }
-    
 })();
