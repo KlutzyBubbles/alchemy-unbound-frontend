@@ -166,10 +166,12 @@ export const DropContainer: FC<ContainerProps> = ({
                 }
                 const element = elementList[0];
                 console.log('time to check', element);
+                console.log('time to check combioned', combined);
                 recipes = element.recipes;
                 let recipeExists = false;
                 for (const r of element.recipes) {
-                    if ((r.a === combined.recipe.a && r.b === combined.recipe.b) || (r.a === combined.recipe.b && r.b === combined.recipe.a)) {
+                    console.log('checking babeee', r);
+                    if ((r.a.name === combined.recipe.a.name && r.b.name === combined.recipe.b.name) || (r.a.name === combined.recipe.b.name && r.b.name === combined.recipe.a.name)) {
                         recipeExists = true;
                         break;
                     }
