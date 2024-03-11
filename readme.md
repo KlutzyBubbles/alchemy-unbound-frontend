@@ -3,7 +3,7 @@
 
 ## Preparing release workflow
 
-ESCAPE CHARACTER WITH `\` (~)`
+ESCAPE CHARACTER WITH `` ` (~)``
 
 `./steamcmd.exe +login alchemyunbound PASSWORD +quit`
 
