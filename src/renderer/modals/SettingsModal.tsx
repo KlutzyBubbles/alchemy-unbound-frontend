@@ -4,6 +4,7 @@ import { SettingsContext } from '../providers/SettingsProvider';
 import { BackgroundType, BackgroundTypeList, DEFAULT_SETTINGS, Language, languageDisplay, languages } from '../../common/settings';
 import { getFromStore } from '../language';
 import { LoadingContext } from '../providers/LoadingProvider';
+import { IoVolumeHighOutline, IoVolumeLowOutline, IoVolumeMediumOutline, IoVolumeMuteOutline } from 'react-icons/io5';
 
 export interface SettingsModalProps {
   show: boolean
@@ -23,6 +24,8 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     const [offline, setOffline] = useState<boolean>(settings?.offline ?? DEFAULT_SETTINGS.offline);
     const [background, setBackground] = useState<BackgroundType>(settings?.background ?? DEFAULT_SETTINGS.background);
     const [language, setLanguage] = useState<Language>(settings?.language ?? DEFAULT_SETTINGS.language);
+    const [volume, setVolume] = useState<number>(settings?.volume ?? DEFAULT_SETTINGS.volume);
+    const [muted, setMuted] = useState<boolean>(settings?.muted ?? DEFAULT_SETTINGS.muted);
 
     useEffect(() => {
         (async() => {
@@ -100,6 +103,34 @@ export const SettingsModal: FC<SettingsModalProps> = ({
         })();
     }, [offline]);
 
+    // useEffect(() => {
+    //     (async() => {
+    //         try {
+    //             setSettings({
+    //                 ...settings,
+    //                 muted: muted
+    //             });
+    //             console.log('settings muted', muted);
+    //         } catch (e) {
+    //             console.error('Failed to change muted', e);
+    //         }
+    //     })();
+    // }, [muted]);
+
+    //useEffect(() => {
+    //    (async() => {
+    //        try {
+    //            setSettings({
+    //                ...settings,
+    //                volume: volume
+    //            });
+    //            console.log('settings volume', volume);
+    //        } catch (e) {
+    //            console.error('Failed to change volume', e);
+    //        }
+    //    })();
+    //}, [volume]);
+
     useEffect(() => {
         (async() => {
             try {
@@ -175,8 +206,17 @@ export const SettingsModal: FC<SettingsModalProps> = ({
         setBackground(e.currentTarget.value as BackgroundType);
     };
 
+    const handleHideInside = () => {
+        setSettings({
+            ...settings,
+            volume: volume,
+            muted: muted
+        });
+        handleHide();
+    };
+
     return (
-        <Modal show={show} onHide={handleHide} centered size="xl" data-bs-theme={darkMode ? 'dark' : 'light'}>
+        <Modal show={show} onHide={handleHideInside} centered size="xl" data-bs-theme={darkMode ? 'dark' : 'light'}>
             <Modal.Header closeButton data-bs-theme={darkMode ? 'dark' : 'light'}>
                 <Modal.Title>{getFromStore('settings', settings.language)}</Modal.Title>
             </Modal.Header>
@@ -245,7 +285,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                             </div>
                         </div>
                     </div>
-                    <div className='row'>
+                    <div className='row mb-4'>
                         <div className='col-6 col-md-5 col-lg-3'>
                             <h5 className='text-end'>{getFromStore('language', settings.language)}</h5>
                         </div>
@@ -259,6 +299,18 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                     </option>);
                                 })}
                             </Form.Select>
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <div className='col-6 col-md-5 col-lg-3 pt-2'>
+                            <h5 className='text-end'>{getFromStore('volume', settings.language)}</h5>
+                        </div>
+                        <div className='col-6 col-md-7 col-lg-9 d-flex'>
+                            <div className={`btn ${muted ? 'btn-offline' : 'btn-no-outline'} float-start mb-2 fs-2 d-flex p-2`} onClick={() => setMuted(!muted)}>
+                                {muted ? (<IoVolumeMuteOutline />) :
+                                    volume > 0.7 ? (<IoVolumeHighOutline />) : volume > 0.3 ? (<IoVolumeMediumOutline />) : volume === 0 ? (<IoVolumeMuteOutline />) : (<IoVolumeLowOutline />)}
+                            </div>
+                            <input type="range" className="form-range mt-3" min="0" max="1" step="0.02" value={volume} disabled={muted} onChange={(e) => setVolume(parseFloat(e.target.value))}/>
                         </div>
                     </div>
                 </Form>

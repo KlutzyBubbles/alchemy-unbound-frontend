@@ -68,6 +68,12 @@ export type TokenHolder = {
     expiryDate: number
 }
 
+export type CombineOuput = {
+    newDiscovery: boolean,
+    firstDiscovery: boolean,
+    recipe: Recipe
+}
+
 export enum ErrorCode {
     QUERY_MISSING = 1,
     QUERY_INVALID = 2,
@@ -77,3 +83,7 @@ export enum ErrorCode {
     TOKEN_EXPIRED = 6,
     STEAM_SERVERS_DOWN = 7
 }
+
+export type SoundFile = 'new-discovery' | 'first-discovery' | 'pickup' | 'side-drop' | 'drop'
+
+export const SoundFiles: SoundFile[] = ['first-discovery', 'new-discovery', 'pickup', 'side-drop', 'drop'];

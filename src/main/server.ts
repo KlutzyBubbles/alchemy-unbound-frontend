@@ -1,5 +1,4 @@
-// import { net } from 'electron';
-import { ErrorCode, Recipe, TokenHolder } from '../common/types';
+import { CombineOuput, ErrorCode, Recipe, TokenHolder } from '../common/types';
 import { getPlaceholderOrder, getRecipe, insertRecipeRow, save, setDiscovered, traverseAndFill } from './database';
 import { isPackaged } from './generic';
 import { getSettings } from './settings';
@@ -94,7 +93,7 @@ async function createToken(): Promise<TokenHolder> {
     }
 }
 
-export async function combine(a: string, b: string): Promise<Recipe | undefined> {
+export async function combine(a: string, b: string): Promise<CombineOuput | undefined> {
     let exists: Recipe | undefined = undefined;
     try {
         exists = await getRecipe(a, b);
@@ -103,11 +102,19 @@ export async function combine(a: string, b: string): Promise<Recipe | undefined>
         console.error(e);
         exists = undefined;
     }
+    let newDiscovery = false;
+    let firstDiscovery = false;
     if (exists !== undefined) {
         setDiscovered(exists.a.name, exists.b.name, true);
+        if (!exists.discovered)
+            newDiscovery = true;
         exists.discovered = 1;
         await save();
-        return exists;
+        return {
+            newDiscovery,
+            firstDiscovery,
+            recipe: exists
+        };
     } else {
         if (!(await getSettings()).offline) {
             let tokenResponse: TokenHolder | undefined = undefined;
@@ -125,6 +132,8 @@ export async function combine(a: string, b: string): Promise<Recipe | undefined>
             if (response.ok) {
                 try {
                     const body: Recipe = (await response.json()) as Recipe;
+                    newDiscovery = true;
+                    firstDiscovery = body.first ? true : false;
                     try {
                         const recipeRow = await insertRecipeRow({
                             a: a,
@@ -139,23 +148,31 @@ export async function combine(a: string, b: string): Promise<Recipe | undefined>
                             base: body.base ? 1 : 0
                         });
                         await save();
-                        return traverseAndFill(recipeRow);
+                        return {
+                            newDiscovery,
+                            firstDiscovery,
+                            recipe: traverseAndFill(recipeRow)
+                        };
                     } catch(e) {
                         console.error('Failed to insert recipe');
                         console.error(e);
-                        return traverseAndFill({
-                            order: getPlaceholderOrder(),
-                            a: a,
-                            b: b,
-                            result: body.result,
-                            discovered: 1,
-                            display: body.display,
-                            emoji: body.emoji,
-                            depth: body.depth,
-                            first: body.first ? 1 : 0,
-                            who_discovered: body.who_discovered,
-                            base: body.base ? 1 : 0
-                        });
+                        return {
+                            newDiscovery,
+                            firstDiscovery,
+                            recipe: traverseAndFill({
+                                order: getPlaceholderOrder(),
+                                a: a,
+                                b: b,
+                                result: body.result,
+                                discovered: 1,
+                                display: body.display,
+                                emoji: body.emoji,
+                                depth: body.depth,
+                                first: body.first ? 1 : 0,
+                                who_discovered: body.who_discovered,
+                                base: body.base ? 1 : 0
+                            })
+                        };
                     }
                 } catch(e) {
                     console.error('Failed to make api request');

@@ -1,8 +1,5 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
-import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
-import { MakerDeb } from '@electron-forge/maker-deb';
-import { MakerRpm } from '@electron-forge/maker-rpm';
 import { WebpackPlugin } from '@electron-forge/plugin-webpack';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
@@ -16,18 +13,18 @@ const config: ForgeConfig = {
             unpack: '*.{node,dll,dylib,so,lib}',
         },
         icon: './icons/icon.ico',
-        ignore: ['node_modules/steamworks.js/dist', 'node_modules/@ai-zen/steamworks.js/dist']
-    // extraResource: [
-    //   './node_modules/steamworks.js/dist'
-    // ] as any as string[]
+        ignore: ['node_modules/steamworks.js/dist', 'node_modules/@ai-zen/steamworks.js/dist'],
+        // extraResource: [
+        //     'src/sounds/*'
+        // ]
     },
     rebuildConfig: {},
-    // makers: [new MakerSquirrel({}), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({})],
     makers: [new MakerZIP({}, ['darwin', 'linux', 'win32'])],
     plugins: [
     // new AutoUnpackNativesPlugin({}),
         new WebpackPlugin({
             mainConfig,
+            devContentSecurityPolicy: '',
             renderer: {
                 config: rendererConfig,
                 entryPoints: [

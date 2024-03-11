@@ -1,16 +1,11 @@
 import { promises as fs } from 'fs';
 import { getFolder, getSteamGameLanguage } from './steam';
-import { dirExists } from '../common/utils';
+import { dirExists } from './utils';
 import { DEFAULT_SETTINGS, RawSettings, Settings } from '../common/settings';
 
 const SETTINGS_VERISON = 1;
 
 let settings: Settings = DEFAULT_SETTINGS;
-// let settings: {
-//     settings: Settings
-// } = {
-//     settings: DEFAULT_SETTINGS
-// };
 let loaded = false;
 
 export async function saveSettings(): Promise<void> {
@@ -67,6 +62,14 @@ export async function getSettings(): Promise<Settings> {
 export async function setSettings(setTo: Settings) {
     console.log('setting settings', settings);
     settings = setTo;
+}
+
+export async function getSetting<K extends keyof Settings>(setting: K): Promise<Settings[K]> {
+    console.log('getting setting', setting);
+    if (!loaded) {
+        await loadSettings();
+    }
+    return settings[setting];
 }
 
 export async function setSetting<K extends keyof Settings>(key: K, value: Settings[K]) {

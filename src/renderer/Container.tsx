@@ -5,10 +5,9 @@ import { SettingsModal } from './modals/SettingsModal';
 import { InfoModal } from './modals/InfoModal';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadFull } from 'tsparticles';
-import type { IOptions, Container as ParticleContainer, RecursivePartial } from '@tsparticles/engine';
+import type { IOptions, RecursivePartial } from '@tsparticles/engine';
 import options from './particles';
 import { SettingsContext } from './providers/SettingsProvider';
-import { DEFAULT_SETTINGS, Settings } from 'src/common/settings';
 
 export type ModalOption = 'settings' | 'info' | 'none'
 
@@ -36,12 +35,6 @@ export const ContentContainer: FC = () => {
                 await loadFull(engine);
             });
             setParticleReady(true);
-            // try {
-            //     await window.SettingsAPI.setSettings(settings);
-            //     await window.SettingsAPI.saveSettings();
-            // } catch (e) {
-            //     console.error('settings saving error', e);
-            // }
         })();
     }, [settings]);
 

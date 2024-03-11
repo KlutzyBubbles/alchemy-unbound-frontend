@@ -7,6 +7,7 @@ import { getXY } from '../utils';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { IoArrowDown, IoArrowUp, IoFilterOutline } from 'react-icons/io5';
 import { getFromStore } from '../language';
+import { SoundContext } from '../providers/SoundProvider';
 
 export interface ContainerProps {
   removeBox: (id: string) => void,
@@ -29,6 +30,7 @@ export const SideContainer: FC<ContainerProps> = ({
     const [filter, setFilter] = useState<number>(0);
     const [searchText, setSearchText] = useState<string>('');
     const { settings } = useContext(SettingsContext);
+    const { playSound } = useContext(SoundContext);
 
     const [{ isOver }, drop] = useDrop(
         () => ({
@@ -41,6 +43,7 @@ export const SideContainer: FC<ContainerProps> = ({
                 if (item.id !== undefined) {
                     const { x, y } = getXY(item, monitor);
                     moveBox(item.id, x, y).then(() => {
+                        playSound('side-drop');
                         (new Promise(resolve => setTimeout(resolve, 100))).then(() => {
                             removeBox(item.id);
                         });

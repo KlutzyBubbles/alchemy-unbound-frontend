@@ -5,6 +5,7 @@ import { SettingsProvider } from './providers/SettingsProvider';
 import { GleamyProvider } from 'gleamy';
 import { ContentContainer } from './Container';
 import { LoadingProvider } from './providers/LoadingProvider';
+import { SoundProvider } from './providers/SoundProvider';
 
 export type ModalOption = 'settings' | 'info' | 'none'
 
@@ -14,7 +15,9 @@ function App() {
             <GleamyProvider>
                 <SettingsProvider>
                     <LoadingProvider>
-                        <ContentContainer/>
+                        <SoundProvider>
+                            <ContentContainer/>
+                        </SoundProvider>
                     </LoadingProvider>
                 </SettingsProvider>
             </GleamyProvider>

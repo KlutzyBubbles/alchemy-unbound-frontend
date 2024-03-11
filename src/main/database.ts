@@ -1,7 +1,7 @@
 import { BasicElement, Languages, Recipe, RecipeRow } from '../common/types';
 import { promises as fs } from 'fs';
 import { getFolder } from './steam';
-import { dirExists } from '../common/utils';
+import { dirExists } from './utils';
 import { languages } from '../common/settings';
 import baseData from '../base.json';
 

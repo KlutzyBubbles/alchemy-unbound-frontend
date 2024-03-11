@@ -119,6 +119,8 @@ export type Settings = {
     sidebar: LeftRight
     language: Language
     languageSet: boolean
+    volume: number
+    muted: boolean
 }
 
 // This is here for future settings changes
@@ -131,6 +133,8 @@ export type RawSettings = {
     sidebar: LeftRight
     language: Language
     languageSet: boolean
+    volume: number
+    muted: boolean
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -141,5 +145,7 @@ export const DEFAULT_SETTINGS: Settings = {
     background: 'line',
     sidebar: 'right',
     language: 'english',
-    languageSet: false
+    languageSet: false,
+    volume: 0.5,
+    muted: false
 };

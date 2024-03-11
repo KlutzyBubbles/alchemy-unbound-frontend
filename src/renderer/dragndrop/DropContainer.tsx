@@ -4,7 +4,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { useDrop } from 'react-dnd';
 
 import { MainElement } from './MainElement';
-import { Recipe, RecipeElement } from '../../common/types';
+import { CombineOuput, Recipe, RecipeElement } from '../../common/types';
 import { CustomDragLayer } from './DragLayer';
 import Split from 'react-split';
 import { SideContainer } from './SideContainer';
@@ -14,6 +14,7 @@ import { ModalOption } from '../Main';
 import { DragItem, ItemTypes } from '../types';
 import { getXY, hasProp, makeId } from '../utils';
 import { SettingsContext } from '../providers/SettingsProvider';
+import { SoundContext } from '../providers/SoundProvider';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
@@ -40,6 +41,7 @@ export const DropContainer: FC<ContainerProps> = ({
 }) => {
     const [elements, setElements] = useState<RecipeElement[]>([]);
     const { settings } = useContext(SettingsContext);
+    const { playSound } = useContext(SoundContext);
 
     async function getAllRecipes() {
         const data = await window.RecipeAPI.getAllRecipes();
@@ -68,9 +70,6 @@ export const DropContainer: FC<ContainerProps> = ({
     async function refreshRecipes() {
         await getAllRecipes();
     }
-
-    // const [init, setInit] = useState(false);
-    // const backgroundRef = useRef(null);
 
     useEffect(() => {
         getAllRecipes();
@@ -147,16 +146,20 @@ export const DropContainer: FC<ContainerProps> = ({
 
     const backendCombine = async(aName: string, bName: string): Promise<{ recipe: Recipe, recipes: Recipe[] }> => {
         console.log(`backendCombine(${aName}, ${bName})`);
-        const recipe: Recipe | undefined = await window.RecipeAPI.combine(aName, bName);
-        if (recipe === undefined) {
+        const combined: CombineOuput | undefined = await window.RecipeAPI.combine(aName, bName);
+        if (combined === undefined) {
             throw Error('Unknown error occurred while combining');
         } else {
-            console.log('Found recipe', recipe);
-            const elementList = elements.filter((value) => value.name === recipe.result);
+            console.log('Found recipe', combined);
+            if (combined.newDiscovery)
+                playSound('new-discovery');
+            if (combined.firstDiscovery)
+                playSound('first-discovery');
+            const elementList = elements.filter((value) => value.name === combined.recipe.result);
             let recipes: Recipe[] = [];
             if (elementList.length === 0) {
                 console.log('No existing element found');
-                recipes.push(recipe);
+                recipes.push(combined.recipe);
             } else {
                 if (elementList.length > 1) {
                     console.warn('Elements list is more than 1, it should only be 1');
@@ -166,17 +169,17 @@ export const DropContainer: FC<ContainerProps> = ({
                 recipes = element.recipes;
                 let recipeExists = false;
                 for (const r of element.recipes) {
-                    if ((r.a === recipe.a && r.b === recipe.b) || (r.a === recipe.b && r.b === recipe.a)) {
+                    if ((r.a === combined.recipe.a && r.b === combined.recipe.b) || (r.a === combined.recipe.b && r.b === combined.recipe.a)) {
                         recipeExists = true;
                         break;
                     }
                 }
                 if (!recipeExists) {
-                    recipes.push(recipe);
+                    recipes.push(combined.recipe);
                 }
             }
             return {
-                recipe,
+                recipe: combined.recipe,
                 recipes
             };
         }
@@ -223,6 +226,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 mergeState(a, b, 'loading', true);
                 const { recipe, recipes } = await backendCombine(boxes[a].element.name, boxes[b].element.name);
                 mergeState(a, b, 'loading', false);
+                playSound('drop', 0.5);
                 console.log('updatingboxes', {
                     name: recipe.result,
                     display: recipe.display,

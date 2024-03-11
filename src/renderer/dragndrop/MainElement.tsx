@@ -1,4 +1,4 @@
-import { useState, type FC, type ReactNode, useEffect } from 'react';
+import { useState, type FC, type ReactNode, useEffect, useContext } from 'react';
 import { ConnectableElement, DragSourceOptions, useDrag, useDrop } from 'react-dnd';
 import { BasicElement, Languages, Recipe, RecipeElement } from '../../common/types';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -8,6 +8,7 @@ import { Variants, useAnimation } from 'framer-motion';
 import { DragItem, ItemTypes } from '../types';
 import { ItemRenderer } from '../ItemRenderer';
 import { languages } from '../../common/settings';
+import { SoundContext } from '../providers/SoundProvider';
 
 export interface BoxProps {
   dragId: string
@@ -41,18 +42,23 @@ export const MainElement: FC<BoxProps> = ({
     loading,
     error,
 }) => {
+    const { playSound } = useContext(SoundContext);
     const dragDrop = (node: ConnectableElement, options?: DragSourceOptions) => {
         drag(node, options);
         drop(node, options);
     };
-
-    // const { settings } = useContext(SettingsContext);
-    // const [hasDropOver, setHasDropOver] = useState(false);
     
     const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
         () => ({
             type: ItemTypes.ELEMENT,
-            item: { type: ItemTypes.ELEMENT, id: dragId, left, top, element: element },
+            end: () => {
+                // playSound('drop', 0.5);
+                console.log('end');
+            },
+            item: () => {
+                playSound('pickup', 0.5);
+                return { type: ItemTypes.ELEMENT, id: dragId, left, top, element: element };
+            },
             collect: (monitor) => ({
                 isDragging: monitor.isDragging(),
             }),
@@ -346,6 +352,7 @@ export const MainElement: FC<BoxProps> = ({
             exit={{
                 opacity: 0,
                 scale: 0,
+                zIndex: 27,
                 transition: {
                     duration: 1,
                 }
