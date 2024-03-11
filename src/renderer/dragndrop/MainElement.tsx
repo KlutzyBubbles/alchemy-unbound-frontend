@@ -206,7 +206,7 @@ export const MainElement: FC<BoxProps> = ({
             }
         }),
         flash: () => ({
-            opacity: [0, 1],
+            opacity: [0.15, 1],
             transition: {
                 times: [0, 1],
                 duration: 0.8,
@@ -244,6 +244,17 @@ export const MainElement: FC<BoxProps> = ({
                 repeat: 0,
                 ease: 'easeOut',
                 repeatDelay: 0.5
+            }
+        }),
+        newItem: () => ({
+            rotate: [0, 361],
+            transition: {
+                times: [0, 1],
+                duration: 0.3,
+                repeat: Infinity,
+                repeatType: 'loop',
+                ease: 'easeIn',
+                repeatDelay: 0
             }
         }),
         reset: {

@@ -14,7 +14,7 @@ export type ModalOption = 'settings' | 'info' | 'none'
 export const ContentContainer: FC = () => {
     const { settings } = useContext(SettingsContext);
     const [currentModal, setCurrentModal] = useState<ModalOption>('none');
-    const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.dark));
+    const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.dark, settings.fps));
     const [particleReady, setParticleReady] = useState<boolean>(false);
 
     useEffect(() => {
@@ -30,7 +30,7 @@ export const ContentContainer: FC = () => {
         (async () => {
             console.log('Settings updated to', settings);
             setParticleReady(false);
-            setCurrentParticles(options[settings.background](settings.dark));
+            setCurrentParticles(options[settings.background](settings.dark, settings.fps));
             await initParticlesEngine(async (engine) => {
                 await loadFull(engine);
             });

@@ -121,6 +121,7 @@ export type Settings = {
     languageSet: boolean
     volume: number
     muted: boolean
+    fps: number
 }
 
 // This is here for future settings changes
@@ -135,6 +136,7 @@ export type RawSettings = {
     languageSet: boolean
     volume: number
     muted: boolean
+    fps: number
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -147,5 +149,6 @@ export const DEFAULT_SETTINGS: Settings = {
     language: 'english',
     languageSet: false,
     volume: 0.5,
-    muted: false
+    muted: false,
+    fps: 120
 };

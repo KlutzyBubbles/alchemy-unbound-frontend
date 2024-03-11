@@ -60,6 +60,15 @@ html, body, #root {
     background-color: var(--#{$prefix}-btn-hover-bg);
 }
 
+.btn-element .btn-holder {
+  background-color: $dark;
+}
+
+.btn-element:hover .btn-holder {
+  background-color: $light;
+}
+
+.btn-element .btn-holder,
 .btn-element .glare,
 .btn-element .shine,
 .btn-element .holder {
@@ -119,6 +128,150 @@ html, body, #root {
     border-top-style: solid;
     border-top-width: 2px;
 }
+
+@keyframes spin {
+    from {transform: translate(-50%, -50%) rotate(0);}
+    to   {transform: translate(-50%, -50%) rotate(360deg);}
+}
+
+.highlight {
+    --border-radius: 1rem;
+    //--border-size: 0.5rem;
+    --border-bg: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+    //--padding: 1rem;
+    
+    //position: relative;
+    //overflow: hidden;
+    //font-size: 2rem;
+    //padding: calc(var(--padding) + var(--border-size));
+    border-radius: var(--border-radius);
+    //display: inline-block;
+    
+    &::before {
+      content: '';
+      display: block;
+      background: var(--border-bg);
+      width: calc(100% * 1.41421356237);
+      padding-bottom: calc(100% * 1.41421356237);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 100%;
+      z-index: -2;
+      animation: spin 5s linear infinite;
+    }
+    &--reverse::before{
+      animation-direction: reverse;
+    }
+    &::after{
+      content: '';
+      position: absolute;
+      inset: var(--border-size);
+      background: white;
+      z-index: -1;
+      border-radius: calc(var(--border-radius) - var(--border-size));
+    }
+}
+  /* ---------- End .rotating-border ---------- */
+  
+  /* ---------- Begin customizing .rotating-border ---------- */
+.rotating-border--google {
+    --border-radius: 0.5rem;
+    --border-size: 0.25rem;
+    --border-bg: conic-gradient(
+      #ea4335 0.0turn 0.125turn, 
+      #4285f4 0.125turn 0.25turn, 
+      #fbbc05 0.25turn 0.375turn, 
+      #34a853 0.375turn 0.5turn, 
+      #ea4335 0.5turn 0.625turn, 
+      #4285f4 0.625turn 0.75turn, 
+      #fbbc05 0.75turn 0.875turn, 
+      #34a853 0.875turn 1.0turn
+    );
+    
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 2;
+}
+.rotating-border--rainbow{
+    --border-radius: 1.5rem;
+    --border-size: 0.5rem;
+    --border-bg: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+}
+.highlight-black-white{
+    //--border-radius: 100%;
+    //--border-size: 0.6rem;var(--light-color)
+    --light-color: #{$light};
+    --dark-color: #00000000;
+    --border-bg: conic-gradient(
+      var(--light-color) 0.00turn 0.05turn, 
+      var(--dark-color) 0.05turn 0.10turn, 
+      var(--light-color) 0.10turn 0.15turn, 
+      var(--dark-color) 0.15turn 0.20turn, 
+      var(--light-color) 0.20turn 0.25turn, 
+      var(--dark-color) 0.25turn 0.30turn, 
+      var(--light-color) 0.30turn 0.35turn, 
+      var(--dark-color) 0.35turn 0.40turn, 
+      var(--light-color) 0.40turn 0.45turn, 
+      var(--dark-color) 0.45turn 0.50turn, 
+      var(--light-color) 0.50turn 0.55turn, 
+      var(--dark-color) 0.55turn 0.60turn, 
+      var(--light-color) 0.60turn 0.65turn, 
+      var(--dark-color) 0.65turn 0.70turn, 
+      var(--light-color) 0.70turn 0.75turn, 
+      var(--dark-color) 0.75turn 0.80turn, 
+      var(--light-color) 0.80turn 0.85turn, 
+      var(--dark-color) 0.85turn 0.90turn, 
+      var(--light-color) 0.90turn 0.95turn,
+      var(--dark-color) 0.95turn 1.00turn
+    );
+    //--border-bg: conic-gradient(
+    //  #ffffff 0.00turn 0.05turn, 
+    //  #000000 0.05turn 0.10turn, 
+    //  #ffffff 0.10turn 0.15turn, 
+    //  #000000 0.15turn 0.20turn, 
+    //  #ffffff 0.20turn 0.25turn, 
+    //  #000000 0.25turn 0.30turn, 
+    //  #ffffff 0.30turn 0.35turn, 
+    //  #000000 0.35turn 0.40turn, 
+    //  #ffffff 0.40turn 0.45turn, 
+    //  #000000 0.45turn 0.50turn, 
+    //  #ffffff 0.50turn 0.55turn, 
+    //  #000000 0.55turn 0.60turn, 
+    //  #ffffff 0.60turn 0.65turn, 
+    //  #000000 0.65turn 0.70turn, 
+    //  #ffffff 0.70turn 0.75turn, 
+    //  #000000 0.75turn 0.80turn, 
+    //  #ffffff 0.80turn 0.85turn, 
+    //  #000000 0.85turn 0.90turn, 
+    //  #ffffff 0.90turn 0.95turn,
+    //  #000000 0.95turn 1.00turn
+    //);
+    // --border-bg: conic-gradient(
+    //   $light 0.00turn 0.05turn, 
+    //   #000000 0.05turn 0.10turn, 
+    //   $light 0.10turn 0.15turn, 
+    //   #000000 0.15turn 0.20turn, 
+    //   $light 0.20turn 0.25turn, 
+    //   #000000 0.25turn 0.30turn, 
+    //   $light 0.30turn 0.35turn, 
+    //   #000000 0.35turn 0.40turn, 
+    //   $light 0.40turn 0.45turn, 
+    //   #000000 0.45turn 0.50turn, 
+    //   $light 0.50turn 0.55turn, 
+    //   #000000 0.55turn 0.60turn, 
+    //   $light 0.60turn 0.65turn, 
+    //   #000000 0.65turn 0.70turn, 
+    //   $light 0.70turn 0.75turn, 
+    //   #000000 0.75turn 0.80turn, 
+    //   $light 0.80turn 0.85turn, 
+    //   #000000 0.85turn 0.90turn, 
+    //   $light 0.90turn 0.95turn,
+    //   #000000 0.95turn 1.00turn
+    // );
+}
+  /* ---------- End customizing .rotating-border ---------- */
 
 @mixin switch($res: 'sm') {
     $index: 1rem;

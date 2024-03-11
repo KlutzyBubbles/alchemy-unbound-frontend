@@ -1,7 +1,9 @@
+import { XYCoord } from 'react-dnd';
 import { RecipeElement } from '../common/types';
 
 export interface DragItem {
     type: string
+    offset?: XYCoord
     id?: string
     element?: RecipeElement
     top?: number

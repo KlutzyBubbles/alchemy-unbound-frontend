@@ -1,5 +1,5 @@
-import { useEffect, type FC, type ReactNode, useContext } from 'react';
-import { useDrag } from 'react-dnd';
+import { useEffect, type FC, type ReactNode, useContext, useRef } from 'react';
+import { XYCoord, useDrag } from 'react-dnd';
 import { RecipeElement } from '../../common/types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DragItem, ItemTypes } from '../types';
@@ -18,6 +18,7 @@ export const SideElement: FC<SideElementProps> = ({
     hideSourceOnDrag,
 }) => {
     const { playSound } = useContext(SoundContext);
+    const elementRef = useRef<HTMLInputElement>(null);
     const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
         () => ({
             type: ItemTypes.SIDE_ELEMENT,
@@ -25,9 +26,21 @@ export const SideElement: FC<SideElementProps> = ({
                 // playSound('drop', 0.5);
                 console.log('end');
             },
-            item: () => {
+            item: (monitor) => {
                 playSound('pickup', 0.5);
-                return { type: ItemTypes.SIDE_ELEMENT, element: element };
+                console.log(elementRef.current.getBoundingClientRect());
+                console.log(monitor.getInitialClientOffset());
+                const elementPos = elementRef.current.getBoundingClientRect();
+                const mousePos = monitor.getInitialClientOffset();
+
+                let offset: XYCoord | undefined = undefined;
+                if (elementPos !== undefined && elementPos !== null && mousePos !== undefined && mousePos !== null) {
+                    offset = {
+                        x: mousePos.x - elementPos.x,
+                        y: mousePos.y - elementPos.y
+                    };
+                }
+                return { type: ItemTypes.SIDE_ELEMENT, element: element, offset: offset };
             },
             collect: (monitor) => ({
                 isDragging: monitor.isDragging()
@@ -50,7 +63,10 @@ export const SideElement: FC<SideElementProps> = ({
     }
     return (
         <ItemRenderer
-            ref={drag}
+            ref={(ref) => {
+                drag(ref);
+                elementRef.current = ref;
+            }}
             element={element}
             type={ItemTypes.SIDE_ELEMENT}
             dragging={false}

@@ -335,9 +335,13 @@ export const DropContainer: FC<ContainerProps> = ({
                 if (monitor.didDrop()) {
                     return;
                 }
-                const { x, y } = getXY(item, monitor);
+                let { x, y } = getXY(item, monitor);
                 if (item.type === ItemTypes.SIDE_ELEMENT) {
                     // Create a new and place it
+                    if (item.offset !== undefined) {
+                        x -= item.offset.x;
+                        y -= item.offset.y;
+                    }
                     addBox(x, y, item.element, false);
                 } else {
                     // Moving an existing item

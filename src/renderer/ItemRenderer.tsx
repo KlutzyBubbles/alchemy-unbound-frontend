@@ -157,6 +157,7 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
             z-${dragging ? 'dragging' : destroying ? 'destroying' : type}Element 
             ${dragging ? 'position-absolute': ''}
             ${hasDropOver ? 'active': ''}
+            ${type === ItemTypes.MAIN_ELEMENT ? 'highlight highlight-black-white': ''}
             ${disabled ? 'disabled': ''}`}
             ref={ref}
             data-type={firstDiscovered ? 'holo' : base ? 'foil' : maxDepth ? 'rainbow' : 'none'}
@@ -184,11 +185,13 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
                 '--background-y': '50%'
             }}
         >
-            <div className='glare h-100 w-100'>
-                <div className='shine h-100 w-100'>
-                    <div className={`holder ${firstDiscovered ? '' : 'not-holo'} py-2 px-2 h-100 w-100`}>
-                        {element.emoji} {element.display[settings.language]}
-                        {children}
+            <div className='btn-holder h-100 w-100'>
+                <div className='glare h-100 w-100'>
+                    <div className='shine h-100 w-100'>
+                        <div className={`holder ${firstDiscovered ? '' : 'not-holo'} py-2 px-2 h-100 w-100`}>
+                            {element.emoji} {element.display[settings.language]}
+                            {children}
+                        </div>
                     </div>
                 </div>
             </div>
