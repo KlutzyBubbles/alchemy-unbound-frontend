@@ -8,11 +8,11 @@ on:
         required: false
         default: ''
         type: string
-      includePrerelease:
-        description: 'Whether or not to include prerelease when getting latest'
-        required: false
-        default: true
-        type: boolean
+      # includePrerelease:
+      #   description: 'Whether or not to include prerelease when getting latest'
+      #   required: false
+      #   default: true
+      #   type: boolean
 
 permissions:
   contents: write
@@ -25,7 +25,7 @@ jobs:
     - uses: robinraju/release-downloader@v1.8
       with: 
         latest: ${{ github.event.inputs.releaseTag == '' }}
-        preRelease: ${{ github.event.inputs.includePrerelease }}
+        # preRelease: ${{ github.event.inputs.includePrerelease }}
         tag: ${{ github.event.inputs.releaseTag }}
         # The name of the file to download.
         # Use this field only to specify filenames other than tarball or zipball, if any.
@@ -34,11 +34,6 @@ jobs:
         out-file-path: "out"
         extract: true
         token: ${{ secrets.GITHUB_TOKEN }}
-
-        # The URL of the Github API, only use this input if you are using Github Enterprise
-        # Default: "https://api.github.com"
-        # Use http(s)://[hostname]/api/v3 to access the API for GitHub Enterprise Server
-        github-api-url: ""
     - name: Debug used variables
       run: |
           echo $github
