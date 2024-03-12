@@ -17,3 +17,15 @@ export enum ItemTypes {
     SIDE_ELEMENT = 'side',
     RECIPE_ELEMENT = 'recipe'
 }
+
+export interface Box {
+    top: number
+    left: number
+    combining: boolean,
+    newCombining: boolean,
+    loading: boolean,
+    firstDiscovery: boolean,
+    newDiscovery: boolean,
+    error: number,
+    element: RecipeElement
+  }

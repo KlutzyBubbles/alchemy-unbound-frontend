@@ -11,7 +11,7 @@ import { SideContainer } from './SideContainer';
 import { IoCloudOfflineOutline, IoHeart, IoInformationCircleOutline, IoSettingsOutline } from 'react-icons/io5';
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../Main';
-import { DragItem, ItemTypes } from '../types';
+import { Box, DragItem, ItemTypes } from '../types';
 import { getXY, hasProp, makeId } from '../utils';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { SoundContext } from '../providers/SoundProvider';
@@ -23,16 +23,6 @@ export interface ContainerProps {
 
 export interface ContainerState {
   boxes: { [key: string]: { top: number; left: number; title: string } }
-}
-
-interface Box {
-  top: number
-  left: number
-  combining: boolean,
-  newCombining: boolean,
-  loading: boolean,
-  error: number,
-  element: RecipeElement
 }
 
 export const DropContainer: FC<ContainerProps> = ({
@@ -145,7 +135,12 @@ export const DropContainer: FC<ContainerProps> = ({
         }
     };
 
-    const backendCombine = async(aName: string, bName: string): Promise<{ recipe: Recipe, recipes: Recipe[] }> => {
+    const backendCombine = async(aName: string, bName: string): Promise<{
+        newDiscovery: boolean,
+        firstDiscovery: boolean,
+        recipe: Recipe,
+        recipes: Recipe[]
+    }> => {
         console.log(`backendCombine(${aName}, ${bName})`);
         const combined: CombineOuput | undefined = await window.RecipeAPI.combine(aName, bName);
         if (combined === undefined) {
@@ -181,6 +176,8 @@ export const DropContainer: FC<ContainerProps> = ({
                 }
             }
             return {
+                newDiscovery: combined.newDiscovery,
+                firstDiscovery: combined.firstDiscovery,
                 recipe: combined.recipe,
                 recipes
             };
@@ -192,12 +189,14 @@ export const DropContainer: FC<ContainerProps> = ({
         if (hasProp(boxes, a)) {
             try {
                 mergeState(a, undefined, 'loading', true);
-                const { recipe, recipes } = await backendCombine(boxes[a].element.name, bName);
+                const { recipe, recipes, newDiscovery, firstDiscovery } = await backendCombine(boxes[a].element.name, bName);
                 mergeState(a, undefined, 'loading', false);
                 setBoxes((boxes) => {
                     const temp = update(boxes, {
                         [a]: {
                             $merge: {
+                                newDiscovery: newDiscovery,
+                                firstDiscovery: firstDiscovery,
                                 element: {
                                     name: recipe.result,
                                     display: recipe.display,
@@ -218,6 +217,17 @@ export const DropContainer: FC<ContainerProps> = ({
         } else {
             console.error('One or more of the items doesn\'t exist anymore');
             throw('One or more of the items doesn\'t exist anymore');
+        }
+    };
+
+    const stopState = async (key: string, state: keyof Box) => {
+        console.log(`stopState(${key}, ${state})`, boxes);
+        if (hasProp(boxes, key)) {
+            try {
+                mergeState(key, undefined, state, false);
+            } catch(e) {
+                console.error('Error stopping state', e);
+            }
         }
     };
 
@@ -326,6 +336,8 @@ export const DropContainer: FC<ContainerProps> = ({
                         combining: combining,
                         newCombining: false,
                         loading: false,
+                        newDiscovery: false,
+                        firstDiscovery: false,
                         error: 0,
                         element: element
                     }
@@ -436,7 +448,7 @@ export const DropContainer: FC<ContainerProps> = ({
                     <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
                         <AnimatePresence>
                             {Object.keys(boxes).map((key) => {
-                                const { left, top, element, combining, newCombining, loading, error } = boxes[key];
+                                const { left, top, element, combining, newCombining, loading, error, newDiscovery, firstDiscovery } = boxes[key];
                                 return (
                                     <motion.div
                                         key={key}
@@ -451,11 +463,14 @@ export const DropContainer: FC<ContainerProps> = ({
                                             element={element}
                                             combining={combining}
                                             newCombine={newCombining}
+                                            newDiscovery={newDiscovery}
+                                            firstDiscovery={firstDiscovery}
                                             loading={loading}
                                             error={error}
                                             hideSourceOnDrag={hideSourceOnDrag}
                                             addBox={addBox}
                                             moveBox={moveBox}
+                                            stopState={stopState}
                                             rawCombine={rawCombine}
                                             combine={combine}
                                         />

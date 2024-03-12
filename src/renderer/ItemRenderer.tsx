@@ -23,6 +23,7 @@ export type ItemRendererProps = {
     onContextMenu?: MouseEventHandler<HTMLDivElement>
     onBlur?: FocusEventHandler<HTMLDivElement>
     onClick?: MouseEventHandler<HTMLDivElement>
+    newDiscovery?: boolean
     variants?: Variants
     animate?: boolean | AnimationControls | TargetAndTransition | VariantLabels
     exit?: TargetAndTransition | VariantLabels
@@ -99,7 +100,8 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
         dragging,
         hasDropOver,
         maxDepth,
-        disabled
+        disabled,
+        newDiscovery,
     } = props;
 
     const [destroying, setDestroying] = useState(false);
@@ -114,6 +116,8 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
         maxDepth = false;
     if (disabled === undefined)
         disabled = false;
+    if (newDiscovery === undefined)
+        newDiscovery = false;
     const { settings } = useContext(SettingsContext);
     //const [xy, setXY] = useState({ x: 0, y: 0 });
 
@@ -157,7 +161,7 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
             z-${dragging ? 'dragging' : destroying ? 'destroying' : type}Element 
             ${dragging ? 'position-absolute': ''}
             ${hasDropOver ? 'active': ''}
-            ${type === ItemTypes.MAIN_ELEMENT ? 'highlight highlight-black-white': ''}
+            ${newDiscovery ? 'highlight highlight-black-white': ''}
             ${disabled ? 'disabled': ''}`}
             ref={ref}
             data-type={firstDiscovered ? 'holo' : base ? 'foil' : maxDepth ? 'rainbow' : 'none'}

@@ -5,7 +5,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { getXY } from '../utils';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { Variants, useAnimation } from 'framer-motion';
-import { DragItem, ItemTypes } from '../types';
+import { Box, DragItem, ItemTypes } from '../types';
 import { ItemRenderer } from '../ItemRenderer';
 import { languages } from '../../common/settings';
 import { SoundContext } from '../providers/SoundProvider';
@@ -20,8 +20,11 @@ export interface BoxProps {
   moveBox: (id: string, left: number, top: number) => Promise<void>
   rawCombine: (a: string, bName: string) => Promise<void>,
   combine: (a: string, b: string) => Promise<void>,
+  stopState: (key: string, state: keyof Box) => void,
   combining: boolean,
   newCombine: boolean,
+  newDiscovery: boolean,
+  firstDiscovery: boolean,
   loading: boolean,
   error: number,
   // combineRaw: (a: string, b: string) => Promise<void>,
@@ -34,9 +37,11 @@ export const MainElement: FC<BoxProps> = ({
     top,
     element,
     hideSourceOnDrag,
+    newDiscovery,
     addBox,
     moveBox,
     rawCombine,
+    stopState,
     combine,
     combining,
     loading,
@@ -69,6 +74,16 @@ export const MainElement: FC<BoxProps> = ({
     useEffect(() => {
         console.log(`Moved ${left}, ${top}`);
     }, [top, left]);
+
+    useEffect(() => {
+        if (newDiscovery) {
+            controls.start('newItem').then(() => {
+                controls.start('newItemAway').then(() => {
+                    stopState(dragId, 'newDiscovery');
+                });
+            });
+        }
+    }, [newDiscovery]);
 
     useEffect(() => {
         preview(getEmptyImage(), { captureDraggingState: true });
@@ -247,12 +262,22 @@ export const MainElement: FC<BoxProps> = ({
             }
         }),
         newItem: () => ({
-            rotate: [0, 361],
+            backgroundSize: ['0%', '100%'],
+            transition: {
+                times: [0, 0.4],
+                duration: 3,
+                repeat: 0,
+                // repeatType: 'mirror',
+                ease: 'easeIn',
+                repeatDelay: 0
+            }
+        }),
+        newItemAway: () => ({
+            backgroundSize: ['100%', '0%'],
             transition: {
                 times: [0, 1],
-                duration: 0.3,
-                repeat: Infinity,
-                repeatType: 'loop',
+                duration: 1,
+                repeat: 0,
                 ease: 'easeIn',
                 repeatDelay: 0
             }
@@ -352,6 +377,7 @@ export const MainElement: FC<BoxProps> = ({
             top={top}
             left={left}
             hasDropOver={isOver}
+            newDiscovery={newDiscovery}
             initialOffset={{ x: 0, y: 0 }}
             currentOffset={{ x: 0, y: 0 }}
             onContextMenu={handleContext}
