@@ -22,7 +22,7 @@ jobs:
     name: Publish
     runs-on: ubuntu-latest
     steps:
-    - uses: robinraju/release-downloader@v1.9
+    - uses: robinraju/release-downloader@v1.8
       with: 
         latest: ${{ github.event.inputs.releaseTag == '' }}
         preRelease: ${{ github.event.inputs.includePrerelease }}
@@ -30,8 +30,7 @@ jobs:
         # The name of the file to download.
         # Use this field only to specify filenames other than tarball or zipball, if any.
         # Supports wildcard pattern (eg: '*', '*.deb', '*.zip' etc..)
-        # fileName: "alchemy-unbound-*.zip"
-        zipBall: true
+        fileName: "alchemy-unbound-*.zip"
         out-file-path: "out"
         extract: true
         token: ${{ secrets.GITHUB_TOKEN }}
