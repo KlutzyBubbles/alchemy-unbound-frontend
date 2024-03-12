@@ -63,6 +63,10 @@ jobs:
     #    unzip -o ./out/alchemy-unbound-win32*.zip -d ./out/win32 2&>1 > /dev/null
     - name: Debug out dir
       run: ls out
+    - name: Debug linux dir
+      run: ls out/linux
+    - name: Debug win32 dir
+      run: ls out/win32
     # - name: Set prerelease branch
     #   if: ${{ github.event.release.prerelease }}
     #   run: echo 'RELEASE_BRANCH=prerelease' >> "$GITHUB_ENV"
