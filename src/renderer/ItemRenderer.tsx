@@ -62,7 +62,7 @@ function getMainStyles(
     top?: number,
     isDragging?: boolean,
 ): CSSProperties {
-    console.log(`getMainStyles(${left}, ${top}, ${isDragging})`);
+    //console.log(`getMainStyles(${left}, ${top}, ${isDragging})`);
     const transform = `translate3d(${left}px, ${top}px, 0)`;
     if (isDragging === undefined)
         isDragging = false;

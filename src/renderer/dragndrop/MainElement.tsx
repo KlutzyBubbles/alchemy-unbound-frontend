@@ -21,10 +21,14 @@ export interface BoxProps {
   rawCombine: (a: string, bName: string) => Promise<void>,
   combine: (a: string, b: string) => Promise<void>,
   stopState: (key: string, state: keyof Box) => void,
+  removeBox: (id: string) => void,
   combining: boolean,
   newCombine: boolean,
   newDiscovery: boolean,
   firstDiscovery: boolean,
+  shift: boolean,
+  control: boolean,
+  alt: boolean,
   loading: boolean,
   error: number,
   // combineRaw: (a: string, b: string) => Promise<void>,
@@ -43,6 +47,9 @@ export const MainElement: FC<BoxProps> = ({
     rawCombine,
     stopState,
     combine,
+    removeBox,
+    control,
+    alt,
     combining,
     loading,
     error,
@@ -58,21 +65,26 @@ export const MainElement: FC<BoxProps> = ({
             type: ItemTypes.ELEMENT,
             end: () => {
                 // playSound('drop', 0.5);
-                console.log('end');
+                // console.log('end');
             },
-            item: () => {
+            item: (monitor) => {
+                console.log('item drag', monitor);
                 playSound('pickup', 0.5);
-                return { type: ItemTypes.ELEMENT, id: dragId, left, top, element: element };
+                return { type: control ? ItemTypes.COPY_ELEMENT : ItemTypes.ELEMENT, id: dragId, left, top, element: element, control };
             },
             collect: (monitor) => ({
                 isDragging: monitor.isDragging(),
             }),
+            options: {
+                force: Math.random(),
+                dropEffect: control ? 'copy' : 'move'
+            } as DragSourceOptions
         }),
-        [element, dragId, left, top],
+        [element, dragId, left, top, control],
     );
 
     useEffect(() => {
-        console.log(`Moved ${left}, ${top}`);
+        //console.log(`Moved ${left}, ${top}`);
     }, [top, left]);
 
     useEffect(() => {
@@ -87,12 +99,12 @@ export const MainElement: FC<BoxProps> = ({
 
     useEffect(() => {
         preview(getEmptyImage(), { captureDraggingState: true });
-        console.log(element);
+        //console.log(element);
     }, []);
 
     const [{ isOver }, drop] = useDrop(
         () => ({
-            accept: [ItemTypes.ELEMENT, ItemTypes.SIDE_ELEMENT],
+            accept: [ItemTypes.ELEMENT, ItemTypes.COPY_ELEMENT, ItemTypes.SIDE_ELEMENT],
             drop(item: DragItem, monitor) {
                 if (monitor.didDrop()) {
                     return;
@@ -106,6 +118,9 @@ export const MainElement: FC<BoxProps> = ({
                         console.error('combining ewrror');
                         console.error(e);
                     });
+                } else if (item.type === ItemTypes.COPY_ELEMENT) {
+                    // Create a new and place it
+                    addBox(x, y, item.element, false);
                 } else {
                     // Moving an existing item
                     moveBox(item.id, x, y);
@@ -120,7 +135,7 @@ export const MainElement: FC<BoxProps> = ({
                 }
             },
             canDrop: (item: DragItem, monitor) => {
-                console.log(`Can drop ${item.id} onto ${dragId}`);
+                console.log(`Can drop ${item.id} onto ${dragId}`, item.id);
                 if (monitor.getItem().id === dragId) {
                     return false;
                 }
@@ -139,13 +154,12 @@ export const MainElement: FC<BoxProps> = ({
     const handleContext = () => {
         setDropdownOpen(!dropdownOpen);
     };
-
-    if (isDragging && hideSourceOnDrag) {
-        return <div ref={drag} />;
-    }
   
     const onClick = () => {
-        controls.start('error');
+        if (alt) {
+            removeBox(dragId);
+        }
+        // controls.start('error');
     };
 
     //useEffect(() => {
@@ -181,7 +195,7 @@ export const MainElement: FC<BoxProps> = ({
 
     useEffect(() => {
         (async () => {
-            if (isDragging) {
+            if (isDragging && !control) {
                 controls.start('hide');
             } else {
                 await controls.start('show');
@@ -304,6 +318,7 @@ export const MainElement: FC<BoxProps> = ({
             for (const language of languages) {
                 unknowns[language] = '???';
             }
+            /*
             console.log({
                 name: recipe.name,
                 display: recipe.display,
@@ -334,6 +349,7 @@ export const MainElement: FC<BoxProps> = ({
                     }
                 ]
             });
+            */
             return {
                 name: recipe.name,
                 display: recipe.display,
@@ -368,11 +384,16 @@ export const MainElement: FC<BoxProps> = ({
         }
     };
 
+    console.log('variables', isDragging, control);
+    if (isDragging && hideSourceOnDrag && !control) {
+        return <div ref={drag} />;
+    }
+
     return (
         <ItemRenderer
             element={element}
             type={ItemTypes.MAIN_ELEMENT}
-            dragging={isDragging}
+            dragging={isDragging && !control}
             ref={dragDrop}
             top={top}
             left={left}
@@ -391,13 +412,13 @@ export const MainElement: FC<BoxProps> = ({
                 scale: 0,
                 zIndex: 27,
                 transition: {
-                    duration: 1,
+                    duration: 0.3,
                 }
             }}>
             <Dropdown show={dropdownOpen} onToggle={(nextShow) => setDropdownOpen(nextShow)}>
                 <Dropdown.Menu>
                     {element.recipes.filter((item) => item.discovered).map((recipe) => {
-                        console.log('element recipes', recipe);
+                        // console.log('element recipes', recipe);
                         if (recipe.a.name === '' || recipe.b.name === '') {
                             return (
                                 <Dropdown.Item key={`${recipe.result}`} href="#">

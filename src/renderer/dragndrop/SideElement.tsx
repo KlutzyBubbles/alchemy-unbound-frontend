@@ -26,12 +26,12 @@ export const SideElement: FC<SideElementProps> = ({
             type: ItemTypes.SIDE_ELEMENT,
             end: () => {
                 // playSound('drop', 0.5);
-                console.log('end');
+                // console.log('end');
             },
             item: (monitor) => {
                 playSound('pickup', 0.5);
-                console.log(elementRef.current.getBoundingClientRect());
-                console.log(monitor.getInitialClientOffset());
+                //console.log(elementRef.current.getBoundingClientRect());
+                //console.log(monitor.getInitialClientOffset());
                 const elementPos = elementRef.current.getBoundingClientRect();
                 const mousePos = monitor.getInitialClientOffset();
 

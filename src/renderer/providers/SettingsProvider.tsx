@@ -20,7 +20,7 @@ export const SettingsProvider: FC<SettingsProviderProps> = ({
 
     useEffect(() => {
         (async () => {
-            console.log('Settings updated to', settings);
+            // console.log('Settings updated to', settings);
             await window.SettingsAPI.setSettings(settings);
             // await window.SettingsAPI.saveSettings();
         })();

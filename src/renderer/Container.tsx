@@ -28,7 +28,7 @@ export const ContentContainer: FC = () => {
 
     useEffect(() => {
         (async () => {
-            console.log('Settings updated to', settings);
+            //console.log('Settings updated to', settings);
             setParticleReady(false);
             setCurrentParticles(options[settings.background](settings.dark, settings.fps));
             await initParticlesEngine(async (engine) => {

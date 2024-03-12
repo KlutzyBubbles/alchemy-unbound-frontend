@@ -65,10 +65,10 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     fullscreen: fullscreen
                 });
-                console.log('settings fullscreen', fullscreen, {
-                    ...settings,
-                    fullscreen: fullscreen
-                });
+                //console.log('settings fullscreen', fullscreen, {
+                //    ...settings,
+                //    fullscreen: fullscreen
+                //});
                 window.DisplayAPI.setFullscreen(fullscreen);
             } catch (e) {
                 console.error('Failed to change fullscreen', e);
@@ -83,10 +83,10 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     dark: darkMode
                 });
-                console.log('settings darkMode', darkMode, {
-                    ...settings,
-                    dark: darkMode
-                });
+                //console.log('settings darkMode', darkMode, {
+                //    ...settings,
+                //    dark: darkMode
+                //});
             } catch (e) {
                 console.error('Failed to change darkMode', e);
             }
@@ -100,7 +100,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     offline: offline
                 });
-                console.log('settings offline', offline);
+                //console.log('settings offline', offline);
             } catch (e) {
                 console.error('Failed to change offline', e);
             }
@@ -115,7 +115,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                         ...settings,
                         currentDisplay: currentDisplay.id
                     });
-                    console.log('settings currentDisplay', currentDisplay.id);
+                    //console.log('settings currentDisplay', currentDisplay.id);
                     window.DisplayAPI.moveToDisplay(currentDisplay);
                 }
             } catch (e) {
@@ -131,7 +131,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     language: language
                 });
-                console.log('settings language', language);
+                //console.log('settings language', language);
             } catch (e) {
                 console.error('Failed to move to display', e);
             }
@@ -145,7 +145,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     background: background
                 });
-                console.log('settings background', background);
+                //console.log('settings background', background);
             } catch (e) {
                 console.error('Failed to change background', e);
             }
@@ -154,7 +154,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
 
     const onDisplaySelect: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
         if (e.target.value === 'none') {
-            console.log('Ignoring select');
+            //console.log('Ignoring select');
         } else {
             let selectedId: number | undefined = undefined;
             try {
@@ -167,7 +167,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                 return;
             const display = displays.find((d) => d.id === selectedId);
             if (display === undefined) {
-                console.log('Failed to find selected display');
+                //console.log('Failed to find selected display');
             } else {
                 setCurrentDisplay(display);
             }

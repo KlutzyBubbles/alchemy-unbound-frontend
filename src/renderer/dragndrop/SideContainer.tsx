@@ -41,7 +41,7 @@ export const SideContainer: FC<ContainerProps> = ({
                 if (monitor.didDrop()) {
                     return;
                 }
-                console.log(`removing ${item.id}`);
+                //console.log(`removing ${item.id}`);
                 if (item.id !== undefined) {
                     const { x, y } = getXY(item, monitor);
                     moveBox(item.id, x, y).then(() => {
@@ -149,10 +149,10 @@ export const SideContainer: FC<ContainerProps> = ({
 
     useEffect(() => {
         const sortByOption = sortByOptions[sortBy];
-        console.log('sorting by...', sortByOption, sortAscending);
-        console.log('before sort', filteredElements);
+        //console.log('sorting by...', sortByOption, sortAscending);
+        //console.log('before sort', filteredElements);
         const sortedTemp = sortList(filteredElements.map((x) => x), sortByOption, sortAscending);
-        console.log('after sort', sortedTemp);
+        //console.log('after sort', sortedTemp);
         setFilteredElements(sortedTemp);
     }, [sortBy, sortAscending]);
 

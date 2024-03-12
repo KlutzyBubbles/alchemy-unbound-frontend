@@ -15,6 +15,7 @@ export enum ItemTypes {
     MAIN_ELEMENT = 'main',
     FINAL_ELEMENT = 'final',
     SIDE_ELEMENT = 'side',
+    COPY_ELEMENT = 'copy',
     RECIPE_ELEMENT = 'recipe'
 }
 

@@ -1,5 +1,5 @@
 import update from 'immutability-helper';
-import type { FC } from 'react';
+import type { FC, KeyboardEventHandler } from 'react';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
 
@@ -30,6 +30,9 @@ export const DropContainer: FC<ContainerProps> = ({
     hideSourceOnDrag
 }) => {
     const [elements, setElements] = useState<RecipeElement[]>([]);
+    const [shift, setShift] = useState<boolean>(false);
+    const [alt, setAlt] = useState<boolean>(false);
+    const [control, setControl] = useState<boolean>(false);
     const { settings } = useContext(SettingsContext);
     const { playSound } = useContext(SoundContext);
     const mainElement = useRef<HTMLDivElement>();
@@ -64,6 +67,7 @@ export const DropContainer: FC<ContainerProps> = ({
 
     useEffect(() => {
         getAllRecipes();
+        mainElement.current.focus();
     }, []);
 
     const [boxes, setBoxes] = useState<{
@@ -141,12 +145,12 @@ export const DropContainer: FC<ContainerProps> = ({
         recipe: Recipe,
         recipes: Recipe[]
     }> => {
-        console.log(`backendCombine(${aName}, ${bName})`);
+        //console.log(`backendCombine(${aName}, ${bName})`);
         const combined: CombineOuput | undefined = await window.RecipeAPI.combine(aName, bName);
         if (combined === undefined) {
             throw Error('Unknown error occurred while combining');
         } else {
-            console.log('Found recipe', combined);
+            //console.log('Found recipe', combined);
             if (combined.newDiscovery)
                 playSound('new-discovery');
             if (combined.firstDiscovery)
@@ -154,18 +158,18 @@ export const DropContainer: FC<ContainerProps> = ({
             const elementList = elements.filter((value) => value.name === combined.recipe.result);
             let recipes: Recipe[] = [];
             if (elementList.length === 0) {
-                console.log('No existing element found');
+                //console.log('No existing element found');
                 recipes.push(combined.recipe);
             } else {
                 if (elementList.length > 1) {
                     console.warn('Elements list is more than 1, it should only be 1');
                 }
                 const element = elementList[0];
-                console.log('time to check', element);
+                //console.log('time to check', element);
                 recipes = element.recipes;
                 let recipeExists = false;
                 for (const r of element.recipes) {
-                    console.log('checking babeee', r);
+                    //console.log('checking babeee', r);
                     if ((r.a.name === combined.recipe.a.name && r.b.name === combined.recipe.b.name) || (r.a.name === combined.recipe.b.name && r.b.name === combined.recipe.a.name)) {
                         recipeExists = true;
                         break;
@@ -185,7 +189,7 @@ export const DropContainer: FC<ContainerProps> = ({
     };
 
     const rawCombine = async (a: string, bName: string) => {
-        console.log(`rawCombine(${a}, ${bName})`, boxes);
+        //console.log(`rawCombine(${a}, ${bName})`, boxes);
         if (hasProp(boxes, a)) {
             try {
                 mergeState(a, undefined, 'loading', true);
@@ -221,7 +225,7 @@ export const DropContainer: FC<ContainerProps> = ({
     };
 
     const stopState = async (key: string, state: keyof Box) => {
-        console.log(`stopState(${key}, ${state})`, boxes);
+        //console.log(`stopState(${key}, ${state})`, boxes);
         if (hasProp(boxes, key)) {
             try {
                 mergeState(key, undefined, state, false);
@@ -232,7 +236,7 @@ export const DropContainer: FC<ContainerProps> = ({
     };
 
     const combine = async (a: string, b: string) => {
-        console.log(`combine(${a}, ${b})`, boxes);
+        //console.log(`combine(${a}, ${b})`, boxes);
         if (hasProp(boxes, a) && hasProp(boxes, b)) {
             try {
                 mergeState(a, b, 'loading', true);
@@ -274,13 +278,13 @@ export const DropContainer: FC<ContainerProps> = ({
     };
 
     const removeBox = (id: string) => {
-        console.log(`Remove box ${id}`);
+        //console.log(`Remove box ${id}`);
         if (hasProp(boxes, id)) {
-            console.log('has box');
+            //console.log('has box');
             // var temp = {...boxes};
             // delete temp[id]
             setBoxes((boxes) => {
-                console.log('Setting for remove');
+                //console.log('Setting for remove');
                 const temp = {...boxes};
                 delete temp[id];
                 return temp;
@@ -290,9 +294,9 @@ export const DropContainer: FC<ContainerProps> = ({
 
     const moveBox = (id: string, left: number, top: number): Promise<void> => {
         return new Promise((resolve) => {
-            console.log(`moving ${id}`);
+            //console.log(`moving ${id}`);
             setBoxes((boxes) => {
-                console.log('MErging for move');
+                //console.log('MErging for move');
                 return update(boxes, {
                     [id]: {
                         $merge: { left, top },
@@ -300,7 +304,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 });
             });
             setBoxes((value) => {
-                console.log('resolving for move');
+                //console.log('resolving for move');
                 resolve();
                 return value;
             });
@@ -344,7 +348,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 };
             });
             const wait: () => void = () => {
-                console.log('waiting');
+                //console.log('waiting');
                 setBoxes((value) => {
                     if (hasProp(value, newId)) {
                         resolve(newId);
@@ -361,18 +365,21 @@ export const DropContainer: FC<ContainerProps> = ({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_props, drop] = useDrop(
         () => ({
-            accept: [ItemTypes.ELEMENT, ItemTypes.SIDE_ELEMENT],
+            accept: [ItemTypes.ELEMENT, ItemTypes.COPY_ELEMENT, ItemTypes.SIDE_ELEMENT],
             drop(item: DragItem, monitor) {
                 if (monitor.didDrop()) {
                     return;
                 }
                 let { x, y } = getXY(item, monitor);
+                console.log('dropped', item);
                 if (item.type === ItemTypes.SIDE_ELEMENT) {
                     // Create a new and place it
                     if (item.offset !== undefined) {
                         x -= item.offset.x;
                         y -= item.offset.y;
                     }
+                    addBox(x, y, item.element, false);
+                } else if (item.type === ItemTypes.COPY_ELEMENT) {
                     addBox(x, y, item.element, false);
                 } else {
                     // Moving an existing item
@@ -384,8 +391,11 @@ export const DropContainer: FC<ContainerProps> = ({
                 isOver: monitor.isOver(),
                 isOverCurrent: monitor.isOver({ shallow: true }),
             }),
+            //options: {
+            //    dropEffect: alt ? 'copy' : 'move'
+            //}
         }),
-        [moveBox],
+        [moveBox, alt],
     );
 
     const onSettingsMouseEnter = () => {
@@ -433,6 +443,30 @@ export const DropContainer: FC<ContainerProps> = ({
             rotate: 0
         }
     };
+
+    const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (e) => {
+        if (e.altKey && !alt) {
+            setAlt(true);
+        }
+        if (e.shiftKey && !shift) {
+            setShift(true);
+        }
+        if (e.ctrlKey && !control) {
+            setControl(true);
+        }
+    };
+
+    const handleKeyUp: KeyboardEventHandler<HTMLDivElement> = (e) => {
+        if (!e.altKey && alt) {
+            setAlt(false);
+        }
+        if (!e.shiftKey && shift) {
+            setShift(false);
+        }
+        if (!e.ctrlKey && control) {
+            setControl(false);
+        }
+    };
   
     const elementControls = useAnimation();
 
@@ -444,7 +478,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 gutterSize={2}
                 snapOffset={0}
             >
-                <div ref={mainElement}>
+                <div ref={mainElement} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} tabIndex={0} onBlur={() => mainElement.current.focus()}>
                     <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
                         <AnimatePresence>
                             {Object.keys(boxes).map((key) => {
@@ -465,10 +499,14 @@ export const DropContainer: FC<ContainerProps> = ({
                                             newCombine={newCombining}
                                             newDiscovery={newDiscovery}
                                             firstDiscovery={firstDiscovery}
+                                            shift={shift}
+                                            control={control}
+                                            alt={alt}
                                             loading={loading}
                                             error={error}
                                             hideSourceOnDrag={hideSourceOnDrag}
                                             addBox={addBox}
+                                            removeBox={removeBox}
                                             moveBox={moveBox}
                                             stopState={stopState}
                                             rawCombine={rawCombine}
