@@ -10,11 +10,13 @@ export type SideElementProps = {
   element: RecipeElement
   hideSourceOnDrag?: boolean
   removeBox: (id: string) => void,
+  addBox: (element: RecipeElement, combining: boolean) => Promise<string>
   children?: ReactNode
 }
 
 export const SideElement: FC<SideElementProps> = ({
     element,
+    addBox,
     hideSourceOnDrag,
 }) => {
     const { playSound } = useContext(SoundContext);
@@ -56,6 +58,11 @@ export const SideElement: FC<SideElementProps> = ({
         preview(getEmptyImage(), { captureDraggingState: true });
     }, []);
 
+    const onElementClick = () => {
+        playSound('pickup', 0.5);
+        addBox(element, false);
+    };
+
     const maxDepth = false;
 
     if (isDragging && hideSourceOnDrag) {
@@ -67,6 +74,7 @@ export const SideElement: FC<SideElementProps> = ({
                 drag(ref);
                 elementRef.current = ref;
             }}
+            onClick={onElementClick}
             element={element}
             type={ItemTypes.SIDE_ELEMENT}
             dragging={false}

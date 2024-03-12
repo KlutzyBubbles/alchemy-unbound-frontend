@@ -11,6 +11,7 @@ import { SoundContext } from '../providers/SoundProvider';
 
 export interface ContainerProps {
   removeBox: (id: string) => void,
+  addBox: (element: RecipeElement, combining: boolean) => Promise<string>
   moveBox: (id: string, left: number, top: number) => Promise<void>
   elements: RecipeElement[],
 }
@@ -22,6 +23,7 @@ const filterOptions = ['all', 'base', 'firstDiscovered'];
 export const SideContainer: FC<ContainerProps> = ({
     removeBox,
     moveBox,
+    addBox,
     elements
 }) => {
     const [filteredElements, setFilteredElements] = useState<RecipeElement[]>(elements);
@@ -198,7 +200,7 @@ export const SideContainer: FC<ContainerProps> = ({
                     return discovered;
                 }).map((element) => {
                     //console.log(element.name, element);
-                    return (<SideElement key={element.name} element={element} removeBox={removeBox} />);
+                    return (<SideElement key={element.name} element={element} removeBox={removeBox} addBox={addBox} />);
                 })}
             </div>
             <div className='footer mt-auto'>

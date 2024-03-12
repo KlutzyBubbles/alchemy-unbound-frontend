@@ -1,6 +1,6 @@
 import update from 'immutability-helper';
 import type { FC } from 'react';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
 
 import { MainElement } from './MainElement';
@@ -42,6 +42,7 @@ export const DropContainer: FC<ContainerProps> = ({
     const [elements, setElements] = useState<RecipeElement[]>([]);
     const { settings } = useContext(SettingsContext);
     const { playSound } = useContext(SoundContext);
+    const mainElement = useRef<HTMLDivElement>();
 
     async function getAllRecipes() {
         const data = await window.RecipeAPI.getAllRecipes();
@@ -166,7 +167,6 @@ export const DropContainer: FC<ContainerProps> = ({
                 }
                 const element = elementList[0];
                 console.log('time to check', element);
-                console.log('time to check combioned', combined);
                 recipes = element.recipes;
                 let recipeExists = false;
                 for (const r of element.recipes) {
@@ -297,6 +297,23 @@ export const DropContainer: FC<ContainerProps> = ({
         });
     };
 
+    const addBoxRandomLocation = (element: RecipeElement, combining: boolean): Promise<string> => {
+        const width = mainElement.current.clientWidth;
+        const height = mainElement.current.clientHeight;
+
+        const boxSizing = 0.4;
+        const boxWidth = width * boxSizing;
+        const boxHeight = height * boxSizing;
+
+        const boxX = (width / 2) - (boxWidth / 2);
+        const boxY = (height / 2) - (boxHeight / 2);
+
+        const randomX =  Math.floor(Math.random() * boxWidth);
+        const randomY =  Math.floor(Math.random() * boxHeight);
+
+        return addBox(boxX + randomX, boxY + randomY, element, combining);
+    };
+
     const addBox = (x: number, y: number, element: RecipeElement, combining: boolean): Promise<string> => {
         return new Promise((resolve) => {
             const newId = makeId(10);
@@ -415,7 +432,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 gutterSize={2}
                 snapOffset={0}
             >
-                <div>
+                <div ref={mainElement}>
                     <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
                         <AnimatePresence>
                             {Object.keys(boxes).map((key) => {
@@ -466,7 +483,8 @@ export const DropContainer: FC<ContainerProps> = ({
                 <SideContainer
                     elements={elements}
                     removeBox={removeBox}
-                    moveBox={moveBox}/>
+                    moveBox={moveBox}
+                    addBox={addBoxRandomLocation}/>
             </Split>
         </Fragment>
     );
