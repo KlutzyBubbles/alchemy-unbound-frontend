@@ -22,7 +22,8 @@ jobs:
     name: Publish
     runs-on: ubuntu-latest
     steps:
-    - uses: robinraju/release-downloader@v1.8
+    - name: Download linux zip
+      uses: robinraju/release-downloader@v1.8
       with: 
         latest: ${{ github.event.inputs.releaseTag == '' }}
         # preRelease: ${{ github.event.inputs.includePrerelease }}
@@ -30,8 +31,21 @@ jobs:
         # The name of the file to download.
         # Use this field only to specify filenames other than tarball or zipball, if any.
         # Supports wildcard pattern (eg: '*', '*.deb', '*.zip' etc..)
-        fileName: "alchemy-unbound-*.zip"
-        out-file-path: "out"
+        fileName: "alchemy-unbound-linux*.zip"
+        out-file-path: "out/linux"
+        extract: false
+        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Download windows zip
+      uses: robinraju/release-downloader@v1.8
+      with: 
+        latest: ${{ github.event.inputs.releaseTag == '' }}
+        # preRelease: ${{ github.event.inputs.includePrerelease }}
+        tag: ${{ github.event.inputs.releaseTag }}
+        # The name of the file to download.
+        # Use this field only to specify filenames other than tarball or zipball, if any.
+        # Supports wildcard pattern (eg: '*', '*.deb', '*.zip' etc..)
+        fileName: "alchemy-unbound-win32*.zip"
+        out-file-path: "out/windows"
         extract: false
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Debug used variables
@@ -43,10 +57,10 @@ jobs:
           github: ${{ tojson(github) }}
           prerelease: ${{ github.event.release.prerelease }}
           created: ${{ github.event.release.created_at }}
-    - name: Debug out dir
-      run: |
-        unzip -o ./out/alchemy-unbound-linux*.zip -d ./out/linux 2&>1 > /dev/null
-        unzip -o ./out/alchemy-unbound-win32*.zip -d ./out/win32 2&>1 > /dev/null
+    #- name: Debug out dir
+    #  run: |
+    #    unzip -o ./out/alchemy-unbound-linux*.zip -d ./out/linux 2&>1 > /dev/null
+    #    unzip -o ./out/alchemy-unbound-win32*.zip -d ./out/win32 2&>1 > /dev/null
     - name: Debug out dir
       run: ls out
     # - name: Set prerelease branch
