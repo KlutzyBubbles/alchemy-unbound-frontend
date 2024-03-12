@@ -45,8 +45,8 @@ jobs:
           created: ${{ github.event.release.created_at }}
     - name: Debug out dir
       run: |
-        unzip out/alchemy-unbound-linux*.zip -d out/linux
-        unzip out/alchemy-unbound-win32*.zip -d out/win32
+        unzip -o ./out/alchemy-unbound-linux*.zip -d ./out/linux
+        unzip -o ./out/alchemy-unbound-win32*.zip -d ./out/win32
     - name: Debug out dir
       run: ls out
     # - name: Set prerelease branch
