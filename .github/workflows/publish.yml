@@ -32,7 +32,7 @@ jobs:
         # Supports wildcard pattern (eg: '*', '*.deb', '*.zip' etc..)
         fileName: "alchemy-unbound-*.zip"
         out-file-path: "out"
-        extract: true
+        extract: false
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Debug used variables
       run: |
