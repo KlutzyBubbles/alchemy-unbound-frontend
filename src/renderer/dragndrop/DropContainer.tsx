@@ -286,7 +286,9 @@ export const DropContainer: FC<ContainerProps> = ({
             setBoxes((boxes) => {
                 //console.log('Setting for remove');
                 const temp = {...boxes};
-                delete temp[id];
+                if (hasProp(boxes, id)) {
+                    delete temp[id];
+                }
                 return temp;
             });
         }
@@ -297,11 +299,15 @@ export const DropContainer: FC<ContainerProps> = ({
             //console.log(`moving ${id}`);
             setBoxes((boxes) => {
                 //console.log('MErging for move');
-                return update(boxes, {
-                    [id]: {
-                        $merge: { left, top },
-                    },
-                });
+                if (hasProp(boxes, id)) {
+                    return update(boxes, {
+                        [id]: {
+                            $merge: { left, top },
+                        },
+                    });
+                } else {
+                    return boxes;
+                }
             });
             setBoxes((value) => {
                 //console.log('resolving for move');
@@ -481,7 +487,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 <div ref={mainElement} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} tabIndex={0} onBlur={() => mainElement.current.focus()}>
                     <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
                         <AnimatePresence>
-                            {Object.keys(boxes).map((key) => {
+                            {boxes === undefined ? (<Fragment/>) : Object.keys(boxes).filter((v) => v !== undefined).map((key) => {
                                 const { left, top, element, combining, newCombining, loading, error, newDiscovery, firstDiscovery } = boxes[key];
                                 return (
                                     <motion.div
@@ -527,7 +533,6 @@ export const DropContainer: FC<ContainerProps> = ({
                                 onClick={() => openModal('settings')}>
                                 <IoSettingsOutline/>
                             </motion.div>
-                            <a href="https://ko-fi.com/klutzybubbles" target="_blank" className='btn btn-sm btn-heart float-end mb-2 fs-2 d-flex p-2' rel="noreferrer"><IoHeart /></a>
                             <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('info')}><IoInformationCircleOutline /></div>
                             {settings.offline ? (<div className='btn btn-offline float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('settings')}><IoCloudOfflineOutline /></div>) : (<Fragment/>)}
                         </div>
@@ -542,3 +547,5 @@ export const DropContainer: FC<ContainerProps> = ({
         </Fragment>
     );
 };
+
+// <a href="https://ko-fi.com/klutzybubbles" target="_blank" className='btn btn-sm btn-heart float-end mb-2 fs-2 d-flex p-2' rel="noreferrer"><IoHeart /></a>
