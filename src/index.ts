@@ -1,7 +1,6 @@
 import { app, BrowserWindow, crashReporter, net, protocol, shell } from 'electron';
 import { createDatabase } from './main/database';
 import debug from 'electron-debug';
-import unhandled from 'electron-unhandled';
 import steamworks from '@ai-zen/steamworks.js';
 import { register } from './main/register';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-assembler';
@@ -36,7 +35,6 @@ app.setPath('crashDumps', getFolder() + 'crashes');
 crashReporter.start({ uploadToServer: false });
 
 debug();
-unhandled();
 
 let mainWindow: BrowserWindow | undefined = undefined;
 

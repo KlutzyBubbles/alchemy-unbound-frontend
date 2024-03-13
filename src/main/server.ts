@@ -1,9 +1,10 @@
+import logger from 'electron-log/main';
 import { CombineOuput, ErrorCode, Recipe, TokenHolder } from '../common/types';
 import { getPlaceholderOrder, getRecipe, insertRecipeRow, save, setDiscovered, traverseAndFill } from './database';
 import { isPackaged } from './generic';
 import { getSettings } from './settings';
 import { getWebAuthTicket } from './steam';
-import fetch from 'electron-fetch';
+import fetch, { Response } from 'electron-fetch';
 
 export type RequestErrorResult = {
   code: number,
@@ -31,22 +32,29 @@ async function refreshToken(): Promise<TokenHolder> {
         return await createToken();
     } else {
         if (token.expiryDate < (new Date()).getTime() + 600000) {
-            const response = await fetch(`${endpoint}/session?${token.token}`, {
-                method: 'GET',
-            });
+            let response: Response | undefined = undefined;
+            try {
+                response = await fetch(`${endpoint}/session?${token.token}`, {
+                    method: 'GET',
+                });
+            } catch(e) {
+                logger.error('Failed to make token API request', e);
+                throw(e);
+            }
+            if (response === undefined) {
+                logger.error('Failed to make token API request (undefined)');
+                throw(new Error('Failed to make token API request (undefined)'));
+            }
             if (response.ok) {
                 try {
                     const body: TokenHolder = (await response.json()) as TokenHolder;
                     return body;
                 } catch(e) {
-                    console.error('Failed to make api request');
-                    console.error(e);
+                    logger.error('Failed to format token response data', e);
                     throw(e);
                 }
             } else {
-                console.error(`response error code ${response.status}`);
                 const json = (await response.json()) as RequestErrorResult;
-                console.error(json);
                 if (json.code === ErrorCode.QUERY_INVALID || json.code === ErrorCode.QUERY_UNDEFINED || json.code === ErrorCode.QUERY_MISSING) {
                     throw('Unknown issue with input token');
                 } else if (json.code === ErrorCode.STEAM_TICKET_INVALID) {
@@ -66,22 +74,29 @@ async function createToken(): Promise<TokenHolder> {
     const ticket = await getWebAuthTicket();
     console.log('trying to get token');
     console.log(`${endpoint}/session?steamToken=${ticket.getBytes().toString('hex')}`);
-    const response = await fetch(`${endpoint}/session?steamToken=${ticket.getBytes().toString('hex')}`, {
-        method: 'POST',
-    });
+    let response: Response | undefined = undefined;
+    try {
+        response = await fetch(`${endpoint}/session?steamToken=${ticket.getBytes().toString('hex')}`, {
+            method: 'POST',
+        });
+    } catch(e) {
+        logger.error('Failed to make steam token API request', e);
+        throw(e);
+    }
+    if (response === undefined) {
+        logger.error('Failed to make steam token API request (undefined)');
+        throw(new Error('Failed to make steam token API request (undefined)'));
+    }
     if (response.ok) {
         try {
             const body: TokenHolder = (await response.json()) as TokenHolder;
             return body;
         } catch(e) {
-            console.error('Failed to make api request');
-            console.error(e);
+            logger.error('Failed to format steam token response data', e);
             throw(e);
         }
     } else {
-        console.error(`response error code ${response.status}`);
         const json = (await response.json()) as RequestErrorResult;
-        console.error(json);
         if (json.code === ErrorCode.QUERY_INVALID || json.code === ErrorCode.QUERY_UNDEFINED || json.code === ErrorCode.QUERY_MISSING) {
             throw('Unknown issue with input token');
         } else if (json.code === ErrorCode.STEAM_TICKET_INVALID) {
@@ -98,8 +113,7 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
     try {
         exists = await getRecipe(a, b);
     } catch(e) {
-        console.error('Cannot get recipe');
-        console.error(e);
+        logger.error('Cannot get recipe', e);
         exists = undefined;
     }
     let newDiscovery = false;
@@ -121,7 +135,7 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
             try {
                 tokenResponse = await getToken();
             } catch (e) {
-                console.error('Failed to get token response', e);
+                logger.error('Failed to get token response', e);
             }
             let url = `${endpoint}/api?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
             if (tokenResponse !== undefined) {
@@ -154,8 +168,7 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
                             recipe: traverseAndFill(recipeRow)
                         };
                     } catch(e) {
-                        console.error('Failed to insert recipe');
-                        console.error(e);
+                        logger.error('Failed to insert recipe', e);
                         return {
                             newDiscovery,
                             firstDiscovery,
@@ -175,14 +188,11 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
                         };
                     }
                 } catch(e) {
-                    console.error('Failed to make api request');
-                    console.error(e);
+                    logger.error('Failed to make api request', e);
                     throw(e);
                 }
             } else {
-                console.error(`response error code ${response.status}`);
                 const json = (await response.json()) as RequestErrorResult;
-                console.error(json);
                 if (json.code === ErrorCode.QUERY_INVALID || json.code === ErrorCode.QUERY_UNDEFINED) {
                     throw('Unknown issue with input a/b');
                 } else if (json.code === ErrorCode.AB_NOT_KNOWN) {

@@ -4,6 +4,7 @@ import { getFolder } from './steam';
 import { dirExists } from './utils';
 import { languages } from '../common/settings';
 import baseData from '../base.json';
+import logger from 'electron-log/main';
 
 const DATABASE_VERISON = 1;
 
@@ -20,7 +21,6 @@ export async function save(): Promise<void> {
     if (!(await dirExists(getFolder()))) {
         await fs.mkdir(getFolder(), { recursive: true });
     }
-    console.log('saving db');
     await fs.writeFile(getFolder() + 'db.json', JSON.stringify({
         version: DATABASE_VERISON,
         data: data
@@ -62,15 +62,18 @@ async function loadData(): Promise<RecipeRow[]> {
         if (raw.version === 1) {
             return loadV1(raw.data);
         } else {
-            console.error('Failed to load database because of unknown version, has this been altered?');
-            throw(Error('Failed to load database because of unknown version, has this been altered?'));
+            logger.error(`Failed to load database because of unknown version '${raw.version}', has this been altered?`);
+            throw(Error(`Failed to load database because of unknown version '${raw.version}', has this been altered?`));
         }
     } catch (e) {
         if (e.code === 'ENOENT') {
-            console.log('No file found, returning blank data');
+            logger.info('No database file found, returning blank data');
             // const raw: RecipeRow[] = JSON.parse(await fs.readFile(MAIN_WINDOW_WEBPACK_ENTRY + '/base.json', 'utf-8'));
             // return baseData as RecipeRow[];
             return [];
+        } else {
+            logger.error(`Failed to read database file with error ${e.code}`);
+            throw e;
         }
     }
 }
@@ -79,8 +82,7 @@ export async function createDatabase(): Promise<void> {
     try {
         data = await loadData();
     } catch(e) {
-        console.error('Error reading JSON');
-        console.error(e);
+        logger.error(`Failed to load database '${e.message}'`);
     }
     if (data.length === 0) {
         data = baseData as RecipeRow[];
@@ -100,14 +102,12 @@ function setDatabaseOrder() {
 }
 
 export async function insertRecipeRow(recipe: Omit<RecipeRow, 'order'>): Promise<RecipeRow> {
-    console.log('insertRecipe');
     const recipeRow: RecipeRow = { ...recipe, order: databaseOrder };
     data.push(recipeRow);
     databaseOrder++;
     return recipeRow;
 }
 export async function insertRecipe(recipe: Omit<Recipe, 'order'>): Promise<RecipeRow> {
-    console.log('insertRecipe');
     const recipeRow: RecipeRow = {
         ...recipe,
         order: databaseOrder,
@@ -142,7 +142,6 @@ export function setDiscovered(a: string, b: string, discovered: boolean) {
 }
 
 export async function deleteRecipe(a: string, b: string): Promise<void> {
-    console.log('deleteRecipe');
     data = data.filter((value) => {
         if ((value.a === a && value.b === b) || (value.a === b && value.b === a)) {
             return false;

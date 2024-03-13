@@ -8,6 +8,7 @@ import { loadFull } from 'tsparticles';
 import type { IOptions, RecursivePartial } from '@tsparticles/engine';
 import options from './particles';
 import { SettingsContext } from './providers/SettingsProvider';
+import logger from 'electron-log/renderer';
 
 export type ModalOption = 'settings' | 'info' | 'none'
 
@@ -44,7 +45,7 @@ export const ContentContainer: FC = () => {
                 await window.SettingsAPI.setSettings(settings);
                 await window.SettingsAPI.saveSettings();
             } catch(e) {
-                console.error('Close saving failed', e);
+                logger.error('Close settings saving failed', e);
             }
         }
         setCurrentModal('none');

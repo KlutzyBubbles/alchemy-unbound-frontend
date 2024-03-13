@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import { getFolder, getSteamGameLanguage } from './steam';
 import { dirExists } from './utils';
 import { DEFAULT_SETTINGS, RawSettings, Settings } from '../common/settings';
+import logger from 'electron-log/main';
 
 const SETTINGS_VERISON = 1;
 
@@ -9,7 +10,6 @@ let settings: Settings = DEFAULT_SETTINGS;
 let loaded = false;
 
 export async function saveSettings(): Promise<void> {
-    console.log('saving settings', settings);
     try {
         if (!(await dirExists(getFolder()))) {
             await fs.mkdir(getFolder(), { recursive: true });
@@ -19,7 +19,7 @@ export async function saveSettings(): Promise<void> {
             settings: settings
         }), 'utf-8');
     } catch(e) {
-        console.error('Error saving on main side', e);
+        logger.error('Error saving settings', e);
     }
 }
 
@@ -34,14 +34,13 @@ export async function loadSettings(): Promise<void> {
             loadV1(raw.settings);
             loaded = true;
         } else {
-            console.error('Failed to load settings because of unknown version, has this been altered?');
+            logger.error(`Failed to load settings because of unknown version '${raw.version}', has this been altered?`);
         }
     } catch(e) {
         if (e.code !== 'ENOENT') {
-            console.error('Error reading JSON');
-            console.error(e);
+            logger.error('Error reading settings JSON', e);
         } else {
-            console.log('No settings file found yet');
+            logger.info('Settings file could not be found, initializing with default settings');
             if (settings === null || settings === undefined)
                 settings = DEFAULT_SETTINGS;
             settings.language = getSteamGameLanguage();
@@ -55,17 +54,14 @@ export async function getSettings(): Promise<Settings> {
     if (!loaded) {
         await loadSettings();
     }
-    console.log('returning settings', settings);
     return settings;
 }
 
 export async function setSettings(setTo: Settings) {
-    console.log('setting settings', settings);
     settings = setTo;
 }
 
 export async function getSetting<K extends keyof Settings>(setting: K): Promise<Settings[K]> {
-    console.log('getting setting', setting);
     if (!loaded) {
         await loadSettings();
     }
@@ -76,6 +72,6 @@ export async function setSetting<K extends keyof Settings>(key: K, value: Settin
     try {
         settings[key] = value;
     } catch(e) {
-        console.error('Error setting settings key', e);
+        logger.error('Error setting settings ke', e);
     }
 }
