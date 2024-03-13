@@ -1,50 +1,50 @@
-@include color-mode(dark) {
+@include color-mode(light) {
     .gutter {
-        background-color: $light;
+        background-color: $dark;
         background-repeat: no-repeat;
         background-position: 50%;
     }
 
     .btn-element {
-        @include button-variant($dark, $light, color-contrast($dark), $light, $light, $dark, $light);
+        @include button-variant($light, $dark, color-contrast($light), $dark, $dark, $light, $dark);
         border-radius: $btn-border-radius
     }
 
     .btn-element:active {
-        color: $light
-    }
-
-    .btn-element:hover {
         color: $dark
     }
 
+    .btn-element:hover {
+        color: $light
+    }
+
     .side-container {
-        background-color: $dark;
+        background-color: $light;
     }
 
     .side-container .is-over {
-        background-color: mix($dark, $danger, 20%);
+        background-color: mix($light, $danger, 20%);
     }
 
     .btn-element .btn-holder {
-        background-color: $dark;
+      background-color: $light;
     }
     
     .btn-element:hover > .btn-holder:first-child {
-        background-color: $light;
+      background-color: $dark;
     }
     
 
     .btn-no-outline {
-        @include button-variant($transparent, $transparent, color-contrast($dark), $transparent, $transparent, color-contrast($dark));
+        @include button-variant($transparent, $transparent, color-contrast($light), $transparent, $transparent, color-contrast($light));
     }
     
     .btn-heart {
-        @include button-variant($transparent, $transparent, color-contrast($dark), $transparent, $transparent, $danger);
+        @include button-variant($transparent, $transparent, color-contrast($light), $transparent, $transparent, $danger);
     }
     
     .btn-info {
-        @include button-variant($transparent, $transparent, color-contrast($dark), $transparent, $transparent, $primary);
+        @include button-variant($transparent, $transparent, color-contrast($light), $transparent, $transparent, $primary);
     }
 
     .btn-left-hover {
@@ -55,8 +55,8 @@
     }
     
     .btn-left-hover:hover, .btn-left-hover:active  {
-        color: $dark;
-        background: linear-gradient(to right, $light 50%, $dark 50%);
+        color: $light;
+        background: linear-gradient(to right, $dark 50%, $light 50%);
         background-size: 210% 100%;
         background-position: left bottom;
     }
@@ -69,19 +69,19 @@
     }
     
     .btn-right-hover:hover, .btn-right-hover:active  {
-        color: $dark;
-        background: linear-gradient(to left, $light 50%, $dark 50%);
+        color: $light;
+        background: linear-gradient(to left, $dark 50%, $light 50%);
         background-size: 210% 100%;
         background-position: right bottom;
     }
 
     .side-container .footer {
-        border-top-color: $light;
+        border-top-color: $dark;
         border-top-style: solid;
         border-top-width: 2px;
     }
 
     .modal-dialog {
-        color: $light;
+        color: $dark;
     }
 }

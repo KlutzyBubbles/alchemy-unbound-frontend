@@ -11,6 +11,7 @@
 @import "../../node_modules/bootstrap/scss/bootstrap";
 
 @import "./dark.scss";
+@import "./light.scss";
 
 html, body, #root {
   height: 100%;
@@ -61,11 +62,11 @@ html, body, #root {
 }
 
 .btn-element .btn-holder {
-  background-color: $dark;
+    background-color: $light;
 }
 
 .btn-element:hover > .btn-holder:first-child {
-  background-color: $light;
+    background-color: $dark;
 }
 
 .btn-element .btn-holder,
