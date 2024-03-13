@@ -88,6 +88,18 @@ html, body, #root {
   @include button-variant($transparent, $transparent, color-contrast($light), $transparent, $transparent, $primary);
 }
 
+.btn-advanced {
+  @include button-variant($transparent, $transparent, color-contrast($light), $transparent, $transparent, $warning);
+}
+
+.btn-discord {
+  @include button-variant(#5865F2, #5865F2, color-contrast($dark), #5865F2, #5865F2, color-contrast($dark));
+}
+
+.btn-github {
+    @include button-variant(#010409, #010409, color-contrast($dark), #010409, #010409, color-contrast($dark));
+}
+
 .btn-offline {
   @include button-variant($transparent, $transparent, $danger, $transparent, $transparent, $danger);
 }

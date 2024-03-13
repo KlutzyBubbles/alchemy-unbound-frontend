@@ -43,6 +43,10 @@
         @include button-variant($transparent, $transparent, color-contrast($dark), $transparent, $transparent, $danger);
     }
     
+    .btn-advanced {
+        @include button-variant($transparent, $transparent, color-contrast($dark), $transparent, $transparent, $warning);
+    }
+    
     .btn-info {
         @include button-variant($transparent, $transparent, color-contrast($dark), $transparent, $transparent, $primary);
     }
