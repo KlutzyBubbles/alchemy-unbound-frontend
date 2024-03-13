@@ -6,6 +6,7 @@ import { getFromStore } from '../language';
 import { LoadingContext } from '../providers/LoadingProvider';
 import { IoVolumeHighOutline, IoVolumeLowOutline, IoVolumeMediumOutline, IoVolumeMuteOutline } from 'react-icons/io5';
 import { ConfirmModal } from './ConfirmDialog';
+import logger from 'electron-log/renderer';
 
 export interface SettingsModalProps {
   show: boolean
@@ -37,8 +38,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                 setDisplays(await window.DisplayAPI.getDisplays());
                 setCurrentDisplay(await window.DisplayAPI.getCurrentDisplay());
             } catch (e) {
-                console.error('Failed to load settings (oops)');
-                console.error(e);
+                logger.error('Failed to load settings (oops)', e);
             }
         })();
     }, []);
@@ -65,13 +65,9 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     fullscreen: fullscreen
                 });
-                //console.log('settings fullscreen', fullscreen, {
-                //    ...settings,
-                //    fullscreen: fullscreen
-                //});
                 window.DisplayAPI.setFullscreen(fullscreen);
             } catch (e) {
-                console.error('Failed to change fullscreen', e);
+                logger.error('Failed to change fullscreen', e);
             }
         })();
     }, [fullscreen]);
@@ -83,12 +79,8 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     dark: darkMode
                 });
-                //console.log('settings darkMode', darkMode, {
-                //    ...settings,
-                //    dark: darkMode
-                //});
             } catch (e) {
-                console.error('Failed to change darkMode', e);
+                logger.error('Failed to change darkMode', e);
             }
         })();
     }, [darkMode]);
@@ -100,9 +92,8 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     offline: offline
                 });
-                //console.log('settings offline', offline);
             } catch (e) {
-                console.error('Failed to change offline', e);
+                logger.error('Failed to change offline', e);
             }
         })();
     }, [offline]);
@@ -115,11 +106,10 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                         ...settings,
                         currentDisplay: currentDisplay.id
                     });
-                    //console.log('settings currentDisplay', currentDisplay.id);
                     window.DisplayAPI.moveToDisplay(currentDisplay);
                 }
             } catch (e) {
-                console.error('Failed to move to display', e);
+                logger.error('Failed to move to display', e);
             }
         })();
     }, [currentDisplay]);
@@ -131,9 +121,8 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     language: language
                 });
-                //console.log('settings language', language);
             } catch (e) {
-                console.error('Failed to move to display', e);
+                logger.error('Failed to move to display', e);
             }
         })();
     }, [language]);
@@ -145,9 +134,8 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     ...settings,
                     background: background
                 });
-                //console.log('settings background', background);
             } catch (e) {
-                console.error('Failed to change background', e);
+                logger.error('Failed to change background', e);
             }
         })();
     }, [background]);
@@ -160,7 +148,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
             try {
                 selectedId = parseInt(e.target.value);
             } catch (e) {
-                console.error('Failed to parse number?', e);
+                logger.error('Failed to parse display selected', e);
                 return;
             }
             if (selectedId === undefined)

@@ -9,6 +9,7 @@ import { Box, DragItem, ItemTypes } from '../types';
 import { ItemRenderer } from '../ItemRenderer';
 import { languages } from '../../common/settings';
 import { SoundContext } from '../providers/SoundProvider';
+import logger from 'electron-log/renderer';
 
 export interface BoxProps {
   dragId: string
@@ -115,8 +116,7 @@ export const MainElement: FC<BoxProps> = ({
                     rawCombine(dragId, item.element.name).then(() => {
                         console.log('combined');
                     }).catch((e) => {
-                        console.error('combining ewrror');
-                        console.error(e);
+                        logger.error('Side element combining error', e);
                     });
                 } else if (item.type === ItemTypes.COPY_ELEMENT) {
                     // Create a new and place it
@@ -128,8 +128,7 @@ export const MainElement: FC<BoxProps> = ({
                         combine(dragId, item.id).then(() => {
                             console.log('combined');
                         }).catch((e) => {
-                            console.error('combining ewrror');
-                            console.error(e);
+                            logger.error('Main element combining error', e);
                         });
                     }
                 }

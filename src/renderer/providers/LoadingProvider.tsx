@@ -1,5 +1,6 @@
 import { FC, ReactNode, createContext, useContext, useEffect, useState } from 'react';
 import { SettingsContext } from './SettingsProvider';
+import logger from 'electron-log/renderer';
 
 export const LoadingContext = createContext<{
     loading: boolean
@@ -21,19 +22,12 @@ export const LoadingProvider: FC<SettingsProviderProps> = ({
         (async () => {
             try {
                 const settings = await window.SettingsAPI.getSettings();
-                // console.log('loading done', settings);
                 if (settings === undefined || settings === null) {
                     throw new Error('getSettings returned undefined');
                 }
-                // if (!settings.languageSet) {
-                //     const steamLanguage = await window.SteamAPI.getSteamGameLanguage();
-                //     settings.language = steamLanguage;
-                //     settings.languageSet = true;
-                // }
                 setSettings(settings);
             } catch (e) {
-                console.error('Failed to load settings (oops)');
-                console.error(e);
+                logger.error('Failed to load settings in loader (oops)', e);
             }
             setLoading(false);
         })();

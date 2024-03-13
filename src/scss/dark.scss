@@ -10,6 +10,14 @@
         border-radius: $btn-border-radius
     }
 
+    .btn-element:active {
+        color: $light
+    }
+
+    .btn-element:hover {
+        color: $dark
+    }
+
     .side-container {
         background-color: $dark;
     }
@@ -38,6 +46,7 @@
     }
     
     .btn-left-hover:hover, .btn-left-hover:active  {
+        color: $dark;
         background: linear-gradient(to right, $light 50%, $dark 50%);
         background-size: 210% 100%;
         background-position: left bottom;
@@ -51,6 +60,7 @@
     }
     
     .btn-right-hover:hover, .btn-right-hover:active  {
+        color: $dark;
         background: linear-gradient(to left, $light 50%, $dark 50%);
         background-size: 210% 100%;
         background-position: right bottom;

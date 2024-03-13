@@ -1,5 +1,5 @@
 import update from 'immutability-helper';
-import type { FC, KeyboardEventHandler } from 'react';
+import type { FC, FocusEventHandler, KeyboardEventHandler } from 'react';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
 
@@ -8,13 +8,14 @@ import { CombineOuput, Recipe, RecipeElement } from '../../common/types';
 import { CustomDragLayer } from './DragLayer';
 import Split from 'react-split';
 import { SideContainer } from './SideContainer';
-import { IoCloudOfflineOutline, IoHeart, IoInformationCircleOutline, IoSettingsOutline } from 'react-icons/io5';
+import { IoCloudOfflineOutline, IoInformationCircleOutline, IoSettingsOutline } from 'react-icons/io5';
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../Main';
 import { Box, DragItem, ItemTypes } from '../types';
 import { getXY, hasProp, makeId } from '../utils';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { SoundContext } from '../providers/SoundProvider';
+import logger from 'electron-log/renderer';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
@@ -216,11 +217,11 @@ export const DropContainer: FC<ContainerProps> = ({
             } catch(e) {
                 mergeState(a, undefined, 'loading', false);
                 addError(a, undefined);
-                console.error('Error combining', e);
+                logger.error('Error raw combining', e);
             }
         } else {
-            console.error('One or more of the items doesn\'t exist anymore');
-            throw('One or more of the items doesn\'t exist anymore');
+            logger.warn('One of the items doesn\'t exist anymore');
+            throw('One of the items doesn\'t exist anymore');
         }
     };
 
@@ -230,7 +231,7 @@ export const DropContainer: FC<ContainerProps> = ({
             try {
                 mergeState(key, undefined, state, false);
             } catch(e) {
-                console.error('Error stopping state', e);
+                logger.error('Error stopping state', e);
             }
         }
     };
@@ -269,10 +270,10 @@ export const DropContainer: FC<ContainerProps> = ({
             } catch(e) {
                 mergeState(a, b, 'loading', false);
                 addError(a, b);
-                console.error('Error combining', e);
+                logger.error('Error combining', e);
             }
         } else {
-            console.error('One or more of the items doesn\'t exist anymore');
+            logger.error('One or more of the items doesn\'t exist anymore');
             throw('One or more of the items doesn\'t exist anymore');
         }
     };
@@ -473,6 +474,12 @@ export const DropContainer: FC<ContainerProps> = ({
             setControl(false);
         }
     };
+
+    const handleBlur: FocusEventHandler<HTMLDivElement> = (e) => {
+        if (e.relatedTarget === undefined || e.relatedTarget === null || e.relatedTarget.id !== 'element-search') {
+            mainElement.current.focus();
+        }
+    };
   
     const elementControls = useAnimation();
 
@@ -484,7 +491,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 gutterSize={2}
                 snapOffset={0}
             >
-                <div ref={mainElement} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} tabIndex={0} onBlur={() => mainElement.current.focus()}>
+                <div ref={mainElement} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} tabIndex={0} onBlur={handleBlur}>
                     <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
                         <AnimatePresence>
                             {boxes === undefined ? (<Fragment/>) : Object.keys(boxes).filter((v) => v !== undefined).map((key) => {

@@ -185,7 +185,7 @@ export const SideContainer: FC<ContainerProps> = ({
     const onDirectionClick: MouseEventHandler<HTMLDivElement> = () => {
         setSortAscending(!sortAscending);
     };
-    
+
     return (
         <div className='side-container vh-100 d-flex flex-column position-sticky z-side'>
             <div ref={drop} className={`${isOver ? 'is-over' : ''} overflow-y-scroll overflow-x-hidden h-100`}>
@@ -199,7 +199,6 @@ export const SideContainer: FC<ContainerProps> = ({
                     }
                     return discovered;
                 }).map((element) => {
-                    //console.log(element.name, element);
                     return (<SideElement key={element.name} element={element} removeBox={removeBox} addBox={addBox} />);
                 })}
             </div>
@@ -228,7 +227,8 @@ export const SideContainer: FC<ContainerProps> = ({
                 <div className='row mx-0'>
                     <div className="px-2 mb-3 mt-1">
                         <input
-                            type="email"
+                            type="text"
+                            id="element-search"
                             className="form-control form-control-lg"
                             value={searchText}
                             onChange={onSearchType}

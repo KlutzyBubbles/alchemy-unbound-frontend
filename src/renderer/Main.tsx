@@ -2,7 +2,6 @@ import { DndProvider } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { createRoot } from 'react-dom/client';
 import { SettingsProvider } from './providers/SettingsProvider';
-import { GleamyProvider } from 'gleamy';
 import { ContentContainer } from './Container';
 import { LoadingProvider } from './providers/LoadingProvider';
 import { SoundProvider } from './providers/SoundProvider';
@@ -14,15 +13,13 @@ function App() {
     log.info('Info from app renderer');
     return (
         <DndProvider backend={TouchBackend} options={{ enableTouchEvents: false, enableMouseEvents: true }}>
-            <GleamyProvider>
-                <SettingsProvider>
-                    <LoadingProvider>
-                        <SoundProvider>
-                            <ContentContainer/>
-                        </SoundProvider>
-                    </LoadingProvider>
-                </SettingsProvider>
-            </GleamyProvider>
+            <SettingsProvider>
+                <LoadingProvider>
+                    <SoundProvider>
+                        <ContentContainer/>
+                    </SoundProvider>
+                </LoadingProvider>
+            </SettingsProvider>
         </DndProvider>
     );
 }

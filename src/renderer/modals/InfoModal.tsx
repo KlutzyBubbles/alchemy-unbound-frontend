@@ -2,6 +2,7 @@ import { useState, type FC, useEffect, useContext } from 'react';
 import { Modal, Table } from 'react-bootstrap';
 import { AppVersions, SystemVersion } from '../../common/types';
 import { SettingsContext } from '../providers/SettingsProvider';
+import logger from 'electron-log/renderer';
 
 export interface InfoModalProps {
   show: boolean
@@ -22,7 +23,7 @@ export const InfoModal: FC<InfoModalProps> = ({
                 setAppVersions(await window.GenericAPI.getAppVersions());
                 setSystemInformation(await window.GenericAPI.getSystemInformation());
             } catch (e) {
-                console.error('Failed to load system information', e);
+                logger.error('Failed to load system information', e);
             }
         })();
     }, []);
