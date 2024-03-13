@@ -7,6 +7,7 @@ import { LoadingContext } from '../providers/LoadingProvider';
 import { IoVolumeHighOutline, IoVolumeLowOutline, IoVolumeMediumOutline, IoVolumeMuteOutline } from 'react-icons/io5';
 import { ConfirmModal } from './ConfirmDialog';
 import logger from 'electron-log/renderer';
+import { UpdateContext } from '../providers/UpdateProvider';
 
 export interface SettingsModalProps {
   show: boolean
@@ -31,6 +32,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     const [fps, setFPS] = useState<number>(settings?.fps ?? DEFAULT_SETTINGS.fps);
     const [advanced, setAdvanced] = useState<boolean>(false);
     const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
+    const { setShouldUpdate } = useContext(UpdateContext);
 
     useEffect(() => {
         (async() => {
@@ -184,14 +186,20 @@ export const SettingsModal: FC<SettingsModalProps> = ({
         setAdvanced(!advanced);
     };
 
-    const onResetConfirm = () => {
+    const onResetConfirm = async () => {
         setShowResetConfirm(false);
-        console.log('RESET CONFIRMED');
+        try {
+            console.log('REFSSSITTING');
+            await window.RecipeAPI.reset();
+            setShouldUpdate(true);
+            console.log('setted');
+        } catch (e) {
+            logger.error('Failed resetting data', e);
+        }
     };
 
     const onResetCancel = () => {
         setShowResetConfirm(false);
-        console.log('RESET CANCELLED');
     };
 
     return (

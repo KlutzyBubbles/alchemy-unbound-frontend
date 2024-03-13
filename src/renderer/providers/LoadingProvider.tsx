@@ -8,11 +8,11 @@ export const LoadingContext = createContext<{
     loading: true
 });
 
-interface SettingsProviderProps {
+interface LoadingProviderProps {
     children?: ReactNode
 }
 
-export const LoadingProvider: FC<SettingsProviderProps> = ({
+export const LoadingProvider: FC<LoadingProviderProps> = ({
     children
 }) => {
     const { setSettings } = useContext(SettingsContext);

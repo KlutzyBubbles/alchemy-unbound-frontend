@@ -85,9 +85,24 @@ export async function createDatabase(): Promise<void> {
         logger.error(`Failed to load database '${e.message}'`);
     }
     if (data.length === 0) {
-        data = baseData as RecipeRow[];
+        data = structuredClone(baseData) as RecipeRow[];
         await save();
     }
+    setDatabaseOrder();
+}
+
+export async function resetAndBackup(): Promise<void> {
+    if (!(await dirExists(getFolder()))) {
+        await fs.mkdir(getFolder(), { recursive: true });
+    }
+    console.log('Resetting');
+    await fs.writeFile(getFolder() + `db_backup_${Math.floor((new Date()).getTime() / 1000)}.backup`, JSON.stringify({
+        version: DATABASE_VERISON,
+        data: data
+    }), 'utf-8');
+    data = structuredClone(baseData) as RecipeRow[];
+    await save();
+    console.log('resetted and saved');
     setDatabaseOrder();
 }
 

@@ -6,6 +6,7 @@ import { ContentContainer } from './Container';
 import { LoadingProvider } from './providers/LoadingProvider';
 import { SoundProvider } from './providers/SoundProvider';
 import log from 'electron-log/renderer';
+import { UpdateProvider } from './providers/UpdateProvider';
 
 export type ModalOption = 'settings' | 'info' | 'none'
 
@@ -16,7 +17,9 @@ function App() {
             <SettingsProvider>
                 <LoadingProvider>
                     <SoundProvider>
-                        <ContentContainer/>
+                        <UpdateProvider>
+                            <ContentContainer/>
+                        </UpdateProvider>
                     </SoundProvider>
                 </LoadingProvider>
             </SettingsProvider>

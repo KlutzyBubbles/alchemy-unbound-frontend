@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { Recipe } from '../common/types';
-import { deleteRecipe, getAllRecipes, getRecipe, insertRecipe, save } from '../main/database';
+import { deleteRecipe, getAllRecipes, getRecipe, insertRecipe, resetAndBackup, save } from '../main/database';
 import { combine } from '../main/server';
 import { RecipeChannel } from '../common/ipc';
 
@@ -13,6 +13,7 @@ export interface IRecipeAPI {
     combine: typeof combine,
     getAllRecipes: typeof getAllRecipes,
     save: typeof save,
+    reset: typeof resetAndBackup,
 }
 
 contextBridge.exposeInMainWorld(RecipeAPIName, {
@@ -22,4 +23,5 @@ contextBridge.exposeInMainWorld(RecipeAPIName, {
     combine: (a: string, b: string) => ipcRenderer.invoke(RecipeChannel.COMBINE, a, b),
     getAllRecipes: () => ipcRenderer.invoke(RecipeChannel.GET_ALL),
     save: () => ipcRenderer.invoke(RecipeChannel.SAVE),
+    reset: () => ipcRenderer.invoke(RecipeChannel.RESET),
 });

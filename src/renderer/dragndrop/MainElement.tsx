@@ -70,7 +70,6 @@ export const MainElement: FC<BoxProps> = ({
             },
             item: (monitor) => {
                 console.log('item drag', monitor);
-                playSound('pickup', 0.5);
                 return { type: control ? ItemTypes.COPY_ELEMENT : ItemTypes.ELEMENT, id: dragId, left, top, element: element, control };
             },
             collect: (monitor) => ({
@@ -403,6 +402,11 @@ export const MainElement: FC<BoxProps> = ({
             onContextMenu={handleContext}
             onBlur={() => setDropdownOpen(false)}
             onClick={onClick}
+            onMouseDown={() => {
+                if (!alt) {
+                    playSound('pickup', 0.5);
+                }
+            }}
             variants={customVariants}
             animate={controls}
             disabled={loading}

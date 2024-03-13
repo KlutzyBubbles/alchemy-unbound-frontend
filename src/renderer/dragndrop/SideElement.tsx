@@ -29,9 +29,6 @@ export const SideElement: FC<SideElementProps> = ({
                 // console.log('end');
             },
             item: (monitor) => {
-                playSound('pickup', 0.5);
-                //console.log(elementRef.current.getBoundingClientRect());
-                //console.log(monitor.getInitialClientOffset());
                 const elementPos = elementRef.current.getBoundingClientRect();
                 const mousePos = monitor.getInitialClientOffset();
 
@@ -59,7 +56,7 @@ export const SideElement: FC<SideElementProps> = ({
     }, []);
 
     const onElementClick = () => {
-        playSound('pickup', 0.5);
+        // playSound('pickup', 0.5);
         addBox(element, false);
     };
 
@@ -74,6 +71,7 @@ export const SideElement: FC<SideElementProps> = ({
                 drag(ref);
                 elementRef.current = ref;
             }}
+            onMouseDown={() => playSound('pickup', 0.5)}
             onClick={onElementClick}
             element={element}
             type={ItemTypes.SIDE_ELEMENT}

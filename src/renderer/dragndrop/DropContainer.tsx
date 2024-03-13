@@ -16,6 +16,7 @@ import { getXY, hasProp, makeId } from '../utils';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { SoundContext } from '../providers/SoundProvider';
 import logger from 'electron-log/renderer';
+import { UpdateContext } from '../providers/UpdateProvider';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
@@ -37,6 +38,7 @@ export const DropContainer: FC<ContainerProps> = ({
     const { settings } = useContext(SettingsContext);
     const { playSound } = useContext(SoundContext);
     const mainElement = useRef<HTMLDivElement>();
+    const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
 
     async function getAllRecipes() {
         const data = await window.RecipeAPI.getAllRecipes();
@@ -70,6 +72,18 @@ export const DropContainer: FC<ContainerProps> = ({
         getAllRecipes();
         mainElement.current.focus();
     }, []);
+
+    useEffect(() => {
+        console.log('LSHOULC PDAUTE', shouldUpdate);
+        (async () => {
+            if (shouldUpdate) {
+                console.log('LSHOULC PDAUTE');
+                await refreshRecipes();
+                setBoxes(() => { return {}; });
+                setShouldUpdate(false);
+            }
+        })();
+    }, [shouldUpdate]);
 
     const [boxes, setBoxes] = useState<{
         [key: string]: Box
@@ -196,6 +210,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 mergeState(a, undefined, 'loading', true);
                 const { recipe, recipes, newDiscovery, firstDiscovery } = await backendCombine(boxes[a].element.name, bName);
                 mergeState(a, undefined, 'loading', false);
+                playSound('drop', 0.5);
                 setBoxes((boxes) => {
                     const temp = update(boxes, {
                         [a]: {

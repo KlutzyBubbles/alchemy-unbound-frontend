@@ -23,6 +23,7 @@ export type ItemRendererProps = {
     onContextMenu?: MouseEventHandler<HTMLDivElement>
     onBlur?: FocusEventHandler<HTMLDivElement>
     onClick?: MouseEventHandler<HTMLDivElement>
+    onMouseDown?: MouseEventHandler<HTMLDivElement>
     newDiscovery?: boolean
     variants?: Variants
     animate?: boolean | AnimationControls | TargetAndTransition | VariantLabels
@@ -91,6 +92,7 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
         onContextMenu,
         onBlur,
         onClick,
+        onMouseDown,
         variants,
         animate,
         exit
@@ -169,6 +171,7 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
             onContextMenu={onContextMenu}
             onBlur={onBlur}
             onClick={onClick}
+            onMouseDown={onMouseDown}
             variants={variants}
             animate={animate}
             exit={exit}
