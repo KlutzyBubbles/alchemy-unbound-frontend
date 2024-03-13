@@ -16,10 +16,6 @@ export function getXY(item: DragItem, monitor: DropTargetMonitor): XYCoord {
     };
 }
 
-export function hasProp<O extends NonNullable<unknown>, K extends keyof O>(o: O, k: K): boolean {
-    return Object.prototype.hasOwnProperty.call(o, k);
-}
-
 export function makeId(length: number) {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

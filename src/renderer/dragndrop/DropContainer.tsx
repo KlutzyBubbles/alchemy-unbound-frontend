@@ -12,11 +12,12 @@ import { IoCloudOfflineOutline, IoInformationCircleOutline, IoSettingsOutline } 
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../Main';
 import { Box, DragItem, ItemTypes } from '../types';
-import { getXY, hasProp, makeId } from '../utils';
+import { getXY, makeId } from '../utils';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { SoundContext } from '../providers/SoundProvider';
 import logger from 'electron-log/renderer';
 import { UpdateContext } from '../providers/UpdateProvider';
+import { hasProp } from '../../common/utils';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void

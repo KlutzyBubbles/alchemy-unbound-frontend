@@ -1,5 +1,5 @@
 import { useState, type FC, useEffect, useContext, Fragment, ChangeEventHandler } from 'react';
-import { Button, Collapse, Form, Modal } from 'react-bootstrap';
+import { Alert, Button, Collapse, Form, Modal } from 'react-bootstrap';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { BackgroundType, BackgroundTypeList, DEFAULT_SETTINGS, Language, languageDisplay, languages } from '../../common/settings';
 import { getFromStore } from '../language';
@@ -32,6 +32,8 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     const [fps, setFPS] = useState<number>(settings?.fps ?? DEFAULT_SETTINGS.fps);
     const [advanced, setAdvanced] = useState<boolean>(false);
     const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
+    const [errorText, setErrorText] = useState<string>('');
+    const [successText, setSuccessText] = useState<string>('');
     const { setShouldUpdate } = useContext(UpdateContext);
 
     useEffect(() => {
@@ -202,6 +204,39 @@ export const SettingsModal: FC<SettingsModalProps> = ({
         setShowResetConfirm(false);
     };
 
+    const exportFile = async () => {
+        try {
+            setErrorText('');
+            setSuccessText('');
+            const result = await window.RecipeAPI.export();
+            if (!result) {
+                setErrorText('User cancelled operation');
+            } else {
+                setSuccessText('Exported');
+            }
+        } catch (e) {
+            console.error(e);
+            setErrorText(e.message);
+        }
+    };
+
+    const importFile = async () => {
+        try {
+            setErrorText('');
+            setSuccessText('');
+            const result = await window.RecipeAPI.import();
+            if (!result) {
+                setErrorText('User cancelled operation');
+            } else {
+                setSuccessText('Imported');
+                setShouldUpdate(true);
+            }
+        } catch (e) {
+            console.error(e);
+            setErrorText(e.message);
+        }
+    };
+
     return (
         <Fragment>
             <ConfirmModal onCancel={onResetCancel} onConfirm={onResetConfirm} show={showResetConfirm}>
@@ -316,12 +351,26 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                         <input type="range" className="form-range mt-2" min="15" max="360" step="1" value={fps} disabled={background === 'blank'} onChange={(e) => setFPS(parseInt(e.target.value))}/>
                                     </div>
                                 </div>
+                                <div className='row px-3'>
+                                    {errorText !== '' ?
+                                        <Alert variant="danger" onClose={() => setErrorText('')} dismissible>
+                                            <span>{errorText}</span>
+                                        </Alert>
+                                        : (<Fragment/>)}
+                                </div>
+                                <div className='row px-3'>
+                                    {successText !== '' ?
+                                        <Alert variant="success" onClose={() => setSuccessText('')} dismissible>
+                                            <span>{successText}</span>
+                                        </Alert>
+                                        : (<Fragment/>)}
+                                </div>
                                 <div className='row'>
                                     <div className='col-6 col-md-4 col-lg-4 pt-2 d-grid'>
-                                        <div className='btn btn-primary disabled'>{getFromStore('importButton', settings.language)}</div>
+                                        <div className='btn btn-primary' onClick={importFile}>{getFromStore('importButton', settings.language)}</div>
                                     </div>
                                     <div className='col-6 col-md-4 col-lg-4 pt-2 d-grid'>
-                                        <div className='btn btn-primary disabled'>{getFromStore('exportButton', settings.language)}</div>
+                                        <div className='btn btn-primary' onClick={exportFile}>{getFromStore('exportButton', settings.language)}</div>
                                     </div>
                                     <div className='col-12 col-md-4 col-lg-4 pt-2 d-grid'>
                                         <div className='btn btn-outline-danger' onClick={() => setShowResetConfirm(true)}>{getFromStore('resetButton', settings.language)}</div>

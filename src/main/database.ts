@@ -5,6 +5,8 @@ import { dirExists } from './utils';
 import { languages } from '../common/settings';
 import baseData from '../base.json';
 import logger from 'electron-log/main';
+import { BrowserWindow, dialog } from 'electron';
+import { hasProp } from '../common/utils';
 
 const DATABASE_VERISON = 1;
 
@@ -104,6 +106,107 @@ export async function resetAndBackup(): Promise<void> {
     await save();
     console.log('resetted and saved');
     setDatabaseOrder();
+}
+
+export async function importFile(): Promise<boolean> {
+    //const windows = BrowserWindow.getAllWindows();
+    //if (windows.length <= 0) {
+    //    throw new Error('Browser window doesnt exist');
+    //}
+    const fileDialog = await dialog.showOpenDialog({
+        filters: [{
+            name: 'JSON Database',
+            extensions: ['json']
+        }],
+        properties: [
+            'openFile'
+        ],
+    });
+    if (fileDialog.canceled) {
+        return false;
+    }
+    if (fileDialog.filePaths.length === 0) {
+        return false;
+    } else {
+        const filePath = fileDialog.filePaths[0];
+        let text: string = undefined;
+        try {
+            text = await fs.readFile(filePath, 'utf-8');
+        } catch (e) {
+            if (e.code === 'ENOENT') {
+                return false;
+            } else {
+                logger.error(`Failed to read imported database file with error ${e.code}`);
+                throw new Error('Failed to read database file');
+            }
+        }
+        if (text === undefined || text === null) {
+            return false;
+        }
+        let raw = undefined;
+        try {
+            raw = JSON.parse(text);
+        } catch (e) {
+            logger.error('Failed to translate imported database to JSON');
+            throw new Error('Imported a malformed JSON');
+        }
+        if (raw === undefined || raw === null) {
+            return false;
+        }
+        if (!hasProp(raw, 'version') || !hasProp(raw, 'data') || !Array.isArray(raw.data)) {
+            throw new Error('Malformed database file selected');
+        }
+        let version = -1;
+        try {
+            version = parseInt(raw.version);
+        } catch (e) {
+            logger.error('Failed to translate imported database to JSON');
+            throw new Error('Imported database version isnt supported');
+        }
+        if (version < 1) {
+            throw new Error('Database version isnt supported');
+        }
+        if (raw.version === 1) {
+            try {
+                data = loadV1(raw.data);
+                return true;
+            } catch (e) {
+                throw new Error('Failed loading the database from version');
+            }
+        } else {
+            logger.error(`Unknown imported version '${raw.version}'`);
+            throw new Error(`Unknown imported version '${raw.version}'`);
+        }
+    }
+}
+
+export async function exportDatabase(): Promise<boolean> {
+    //const windows = BrowserWindow.getAllWindows();
+    //if (windows.length <= 0) {
+    //    throw new Error('Browser window doesnt exist');
+    //}
+    const fileDialog = await dialog.showSaveDialog({
+        filters: [{
+            name: 'JSON Database',
+            extensions: ['json']
+        }],
+        properties: [
+            'createDirectory',
+            'showOverwriteConfirmation'
+        ],
+    });
+    if (fileDialog.canceled || fileDialog.filePath === undefined || fileDialog.filePath === null) {
+        return false;
+    }
+    try {
+        await fs.writeFile(fileDialog.filePath, JSON.stringify({
+            version: DATABASE_VERISON,
+            data: data
+        }), 'utf-8');
+        return true;
+    } catch (e) {
+        throw new Error('Failed to save database file');
+    }
 }
 
 function setDatabaseOrder() {

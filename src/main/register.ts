@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import { Recipe } from '../common/types';
-import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup } from './database';
+import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, importFile, exportDatabase } from './database';
 import { combine } from './server';
 import { DisplayChannel, GenericChannel, RecipeChannel, SettingsChannel, SteamChannel } from '../common/ipc';
 import { Settings } from '../common/settings';
@@ -32,6 +32,12 @@ export function register() {
     });
     ipcMain.handle(RecipeChannel.RESET, async () => {
         return resetAndBackup();
+    });
+    ipcMain.handle(RecipeChannel.IMPORT, async () => {
+        return importFile();
+    });
+    ipcMain.handle(RecipeChannel.EXPORT, async () => {
+        return exportDatabase();
     });
 
     // Settings handlers

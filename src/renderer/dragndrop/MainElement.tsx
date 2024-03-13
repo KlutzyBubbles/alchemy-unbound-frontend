@@ -1,4 +1,4 @@
-import { useState, type FC, type ReactNode, useEffect, useContext } from 'react';
+import { useState, type FC, type ReactNode, useEffect, useContext, useRef } from 'react';
 import { ConnectableElement, DragSourceOptions, useDrag, useDrop } from 'react-dnd';
 import { BasicElement, Languages, Recipe, RecipeElement } from '../../common/types';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -60,6 +60,7 @@ export const MainElement: FC<BoxProps> = ({
         drag(node, options);
         drop(node, options);
     };
+    const mounted = useRef(false);
     
     const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
         () => ({
@@ -88,17 +89,21 @@ export const MainElement: FC<BoxProps> = ({
     }, [top, left]);
 
     useEffect(() => {
-        if (newDiscovery) {
+        if (newDiscovery && mounted.current) {
             controls.start('newItem').then(() => {
-                controls.start('newItemAway').then(() => {
-                    stopState(dragId, 'newDiscovery');
-                });
+                if (mounted.current) {
+                    controls.start('newItemAway').then(() => {
+                        stopState(dragId, 'newDiscovery');
+                    });
+                }
             });
         }
     }, [newDiscovery]);
 
     useEffect(() => {
+        mounted.current = true;
         preview(getEmptyImage(), { captureDraggingState: true });
+        return () => { mounted.current = false; };
         //console.log(element);
     }, []);
 
@@ -167,38 +172,46 @@ export const MainElement: FC<BoxProps> = ({
 
     useEffect(() => {
         (async () => {
-            controls.start('error');
+            if (mounted.current) {
+                controls.start('error');
+            }
         })();
     }, [error]);
 
     useEffect(() => {
         (async () => {
-            if (loading) {
-                controls.start('flash');
-            } else {
-                controls.start('stopFlash');
+            if (mounted.current) {
+                if (loading) {
+                    controls.start('flash');
+                } else {
+                    controls.start('stopFlash');
+                }
             }
         })();
     }, [loading]);
 
     useEffect(() => {
         (async () => {
-            if (combining) {
-                controls.start('spin');
-            } else {
-                controls.start('stopSpin');
+            if (mounted.current) {
+                if (combining) {
+                    controls.start('spin');
+                } else {
+                    controls.start('stopSpin');
+                }
             }
         })();
     }, [combining]);
 
     useEffect(() => {
         (async () => {
-            if (isDragging && !control) {
-                controls.start('hide');
-            } else {
-                await controls.start('show');
-                if (loading)
-                    controls.start('flash');
+            if (mounted.current) {
+                if (isDragging && !control) {
+                    controls.start('hide');
+                } else {
+                    await controls.start('show');
+                    if (loading)
+                        controls.start('flash');
+                }
             }
         })();
     }, [isDragging]);

@@ -5,7 +5,9 @@ export enum RecipeChannel {
     COMBINE = 'recipe:combine',
     GET_ALL = 'recipe:getAll',
     SAVE = 'recipe:save',
-    RESET = 'recipe:reset'
+    RESET = 'recipe:reset',
+    IMPORT = 'recipe:import',
+    EXPORT = 'recipe:export'
 }
 
 export enum SettingsChannel {
