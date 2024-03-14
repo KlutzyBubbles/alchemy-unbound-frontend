@@ -1,6 +1,6 @@
 import update from 'immutability-helper';
 import type { FC, FocusEventHandler, KeyboardEventHandler } from 'react';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
 
 import { MainElement } from './MainElement';
@@ -40,6 +40,9 @@ export const DropContainer: FC<ContainerProps> = ({
     const { playSound } = useContext(SoundContext);
     const mainElement = useRef<HTMLDivElement>();
     const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
+    const [boxes, setBoxes] = useState<{
+        [key: string]: Box
+    }>({});
 
     async function getAllRecipes() {
         const data = await window.RecipeAPI.getAllRecipes();
@@ -85,10 +88,6 @@ export const DropContainer: FC<ContainerProps> = ({
             }
         })();
     }, [shouldUpdate]);
-
-    const [boxes, setBoxes] = useState<{
-        [key: string]: Box
-      }>({});
 
     const mergeState = async <K extends keyof Box, T extends Box[K]>(a: string, b: string | undefined, state: K, value: T) => {
         if (b === undefined) {
@@ -253,11 +252,23 @@ export const DropContainer: FC<ContainerProps> = ({
     };
 
     const combine = async (a: string, b: string) => {
-        //console.log(`combine(${a}, ${b})`, boxes);
-        if (hasProp(boxes, a) && hasProp(boxes, b)) {
+        let workingBoxes: {
+            [key: string]: Box
+        } = {};
+        await new Promise<void>((resolve) => {
+            setBoxes((boxes) => {
+                console.log(`combineInternal(${a}, ${b})`, boxes);
+                workingBoxes = boxes;
+                resolve();
+                return boxes;
+            });
+        });
+        console.log(`combine(${a}, ${b})`, workingBoxes);
+        console.log(hasProp(workingBoxes, a), hasProp(workingBoxes, b));
+        if (hasProp(workingBoxes, a) && hasProp(workingBoxes, b)) {
             try {
                 mergeState(a, b, 'loading', true);
-                const { recipe, recipes } = await backendCombine(boxes[a].element.name, boxes[b].element.name);
+                const { recipe, recipes } = await backendCombine(workingBoxes[a].element.name, workingBoxes[b].element.name);
                 mergeState(a, b, 'loading', false);
                 playSound('drop', 0.5);
                 console.log('updatingboxes', {
@@ -294,64 +305,42 @@ export const DropContainer: FC<ContainerProps> = ({
         }
     };
 
-    const removeBox = (id: string) => {
-        //console.log(`Remove box ${id}`);
-        if (hasProp(boxes, id)) {
-            //console.log('has box');
-            // var temp = {...boxes};
-            // delete temp[id]
-            setBoxes((boxes) => {
+    const removeBox = useCallback((id: string) => {
+        setBoxes((boxes) => {
+            if (hasProp(boxes, id)) {
+                console.log('setting boxes', boxes);
                 //console.log('Setting for remove');
                 const temp = {...boxes};
                 if (hasProp(boxes, id)) {
                     delete temp[id];
                 }
                 return temp;
-            });
-        }
-    };
+            }
+            return boxes;
+        });
+    }, [setBoxes]);
 
-    const moveBox = (id: string, left: number, top: number): Promise<void> => {
+    const moveBox = useCallback((id: string, left: number, top: number): Promise<void> => {
         return new Promise((resolve) => {
             //console.log(`moving ${id}`);
             setBoxes((boxes) => {
                 //console.log('MErging for move');
                 if (hasProp(boxes, id)) {
+                    resolve();
                     return update(boxes, {
                         [id]: {
                             $merge: { left, top },
                         },
                     });
                 } else {
+                    resolve();
                     return boxes;
                 }
             });
-            setBoxes((value) => {
-                //console.log('resolving for move');
-                resolve();
-                return value;
-            });
         });
-    };
-
-    const addBoxRandomLocation = (element: RecipeElement, combining: boolean): Promise<string> => {
-        const width = mainElement.current.clientWidth;
-        const height = mainElement.current.clientHeight;
-
-        const boxSizing = 0.4;
-        const boxWidth = width * boxSizing;
-        const boxHeight = height * boxSizing;
-
-        const boxX = (width / 2) - (boxWidth / 2);
-        const boxY = (height / 2) - (boxHeight / 2);
-
-        const randomX =  Math.floor(Math.random() * boxWidth);
-        const randomY =  Math.floor(Math.random() * boxHeight);
-
-        return addBox(boxX + randomX, boxY + randomY, element, combining);
-    };
-
-    const addBox = (x: number, y: number, element: RecipeElement, combining: boolean): Promise<string> => {
+    }, [setBoxes]);
+    
+    const addBox = useCallback((x: number, y: number, element: RecipeElement, combining: boolean): Promise<string> => {
         return new Promise((resolve) => {
             const newId = makeId(10);
             setBoxes((boxes) => {
@@ -383,7 +372,24 @@ export const DropContainer: FC<ContainerProps> = ({
             };
             setTimeout(wait, 200);
         });
-    };
+    }, [setBoxes]);
+
+    const addBoxRandomLocation = useCallback((element: RecipeElement, combining: boolean): Promise<string> => {
+        const width = mainElement.current.clientWidth;
+        const height = mainElement.current.clientHeight;
+
+        const boxSizing = 0.4;
+        const boxWidth = width * boxSizing;
+        const boxHeight = height * boxSizing;
+
+        const boxX = (width / 2) - (boxWidth / 2);
+        const boxY = (height / 2) - (boxHeight / 2);
+
+        const randomX =  Math.floor(Math.random() * boxWidth);
+        const randomY =  Math.floor(Math.random() * boxHeight);
+
+        return addBox(boxX + randomX, boxY + randomY, element, combining);
+    }, [addBox]);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_props, drop] = useDrop(
@@ -409,14 +415,7 @@ export const DropContainer: FC<ContainerProps> = ({
                     moveBox(item.id, x, y);
                 }
                 return undefined;
-            },
-            collect: (monitor) => ({
-                isOver: monitor.isOver(),
-                isOverCurrent: monitor.isOver({ shallow: true }),
-            }),
-            //options: {
-            //    dropEffect: alt ? 'copy' : 'move'
-            //}
+            }
         }),
         [moveBox, alt],
     );

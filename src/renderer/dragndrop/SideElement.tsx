@@ -1,4 +1,4 @@
-import { useEffect, type FC, type ReactNode, useContext, useRef } from 'react';
+import { useEffect, type FC, type ReactNode, useContext, useRef, memo } from 'react';
 import { XYCoord, useDrag } from 'react-dnd';
 import { RecipeElement } from '../../common/types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -14,7 +14,7 @@ export type SideElementProps = {
   children?: ReactNode
 }
 
-export const SideElement: FC<SideElementProps> = ({
+const SideElementInternal: FC<SideElementProps> = ({
     element,
     addBox,
     hideSourceOnDrag,
@@ -56,7 +56,6 @@ export const SideElement: FC<SideElementProps> = ({
     }, []);
 
     const onElementClick = () => {
-        // playSound('pickup', 0.5);
         addBox(element, false);
     };
 
@@ -79,3 +78,8 @@ export const SideElement: FC<SideElementProps> = ({
             maxDepth={maxDepth}/>
     );
 };
+
+
+export const SideElement = memo(SideElementInternal, (prevProps, nextProps) => {
+    return prevProps.element.name === nextProps.element.name;
+});

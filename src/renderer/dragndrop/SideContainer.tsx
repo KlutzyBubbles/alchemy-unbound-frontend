@@ -1,4 +1,4 @@
-import { useState, type ChangeEventHandler, type FC, useEffect, useContext, MouseEventHandler } from 'react';
+import { useState, type ChangeEventHandler, type FC, useEffect, useContext, MouseEventHandler, memo } from 'react';
 import { useDrop } from 'react-dnd';
 import { RecipeElement } from '../../common/types';
 import { SideElement } from './SideElement';
@@ -8,6 +8,7 @@ import { SettingsContext } from '../providers/SettingsProvider';
 import { IoArrowDown, IoArrowUp, IoFilterOutline } from 'react-icons/io5';
 import { getFromStore } from '../language';
 import { SoundContext } from '../providers/SoundProvider';
+import { arrayEquals } from '../../common/utils';
 
 export interface ContainerProps {
   removeBox: (id: string) => void,
@@ -20,7 +21,7 @@ const sortByOptions = ['discovered', 'name', 'emoji', 'depth'];
 
 const filterOptions = ['all', 'base', 'firstDiscovered'];
 
-export const SideContainer: FC<ContainerProps> = ({
+export const SideContainerInternal: FC<ContainerProps> = ({
     removeBox,
     moveBox,
     addBox,
@@ -54,7 +55,7 @@ export const SideContainer: FC<ContainerProps> = ({
             },
             collect: (monitor) => ({
                 isOver: monitor.isOver(),
-                isOverCurrent: monitor.isOver({ shallow: true }),
+                // isOverCurrent: monitor.isOver({ shallow: true }),
             }),
         }),
         [removeBox],
@@ -245,3 +246,27 @@ export const SideContainer: FC<ContainerProps> = ({
         </div>
     );
 };
+
+export const SideContainer = memo(SideContainerInternal, (prevProps, nextProps) => {
+    if (prevProps.elements.map((item) => item.name) === nextProps.elements.map((item) => item.name)) {
+        console.log('Exact Same');
+        return true;
+    }
+    if (prevProps.elements.length !== nextProps.elements.length) {
+        console.log('Diff Length');
+        return false;
+    }
+    for (let i = 0; i < prevProps.elements.length; i++) {
+        if (prevProps.elements[i].name !== nextProps.elements[i].name) {
+            console.log('Diff name');
+            return false;
+        }
+        if (!arrayEquals(
+            prevProps.elements[i].recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.discovered),
+            nextProps.elements[i].recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.discovered))) {
+            return false;
+        }
+    }
+    console.log('Some Same');
+    return true;
+});
