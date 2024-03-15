@@ -172,6 +172,9 @@ export const DropContainer: FC<ContainerProps> = ({
             throw Error('Unknown error occurred while combining');
         } else {
             console.log('Found recipe', combined);
+            if (combined.recipe.result === '69') {
+                window.SteamAPI.activateAchievement('nice');
+            }
             const stats = await window.StatsAPI.getStats();
             if (combined.newDiscovery) {
                 playSound('new-discovery');
