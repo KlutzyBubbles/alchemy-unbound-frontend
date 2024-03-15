@@ -6,6 +6,7 @@ import logger from 'electron-log/renderer';
 import { BsDiscord, BsGithub } from 'react-icons/bs';
 import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
 import { StatsContext } from '../providers/StatsProvider';
+import { getFromStore } from '../language';
 
 
 export interface InfoModalProps {
@@ -42,47 +43,47 @@ export const InfoModal: FC<InfoModalProps> = ({
             <Modal.Body>
                 <div className='row'>
                     <div className='col-12 col-lg-6'>
-                        <p>Developed by KlutzyBubbles</p>
-                        <p>Steam assets by Piney</p>
+                        <p>{getFromStore('developedBy', settings.language)} KlutzyBubbles</p>
+                        <p>{getFromStore('steamAssetsBy', settings.language)} Piney</p>
                     </div>
                     <div className='col-12 col-lg-6'>
-                        <h4>Stats (Beta)</h4>
+                        <h4>{getFromStore('stats', settings.language)} (Beta)</h4>
                         <Table striped bordered hover size="sm">
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Base</th>
-                                    <th>AI</th>
-                                    <th>Total</th>
+                                    <th>{getFromStore('base', settings.language)}</th>
+                                    <th>{getFromStore('ai', settings.language)}</th>
+                                    <th>{getFromStore('total', settings.language)}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Recipes Found</td>
+                                    <td>{getFromStore('recipesFound', settings.language)}</td>
                                     <td>{stats.baseRecipesFound}</td>
                                     <td>{stats.aiRecipesFound}</td>
                                     <td>{stats.baseRecipesFound + stats.aiRecipesFound}</td>
                                 </tr>
                                 <tr>
-                                    <td>Results Found</td>
+                                    <td>{getFromStore('resultsFound', settings.language)}</td>
                                     <td>{stats.baseResultsFound}</td>
                                     <td>{stats.aiResultsFound}</td>
                                     <td>{stats.baseResultsFound + stats.aiResultsFound}</td>
                                 </tr>
                                 <tr>
-                                    <td>Highest Depth</td>
+                                    <td>{getFromStore('highestDepth', settings.language)}</td>
                                     <td>{stats.baseHighestDepth}</td>
                                     <td>{stats.aiHighestDepth}</td>
                                     <td>{stats.baseHighestDepth + stats.aiHighestDepth}</td>
                                 </tr>
                                 <tr>
-                                    <td>First Discoveries</td>
+                                    <td>{getFromStore('firstDiscoveries', settings.language)}</td>
                                     <td></td>
                                     <td></td>
                                     <td>{stats.firstDiscoveries}</td>
                                 </tr>
                                 <tr>
-                                    <td>Items Combined</td>
+                                    <td>{getFromStore('itemsCombined', settings.language)}</td>
                                     <td></td>
                                     <td></td>
                                     <td>{stats.itemsCombined}</td>

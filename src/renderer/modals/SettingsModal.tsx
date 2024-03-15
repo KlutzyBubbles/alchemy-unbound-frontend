@@ -213,9 +213,9 @@ export const SettingsModal: FC<SettingsModalProps> = ({
             setSuccessText('');
             const result = await window.RecipeAPI.export();
             if (!result) {
-                setErrorText('User cancelled operation');
+                setErrorText(getFromStore('userCancelled', settings.language));
             } else {
-                setSuccessText('Exported');
+                setSuccessText(getFromStore('exported', settings.language));
             }
         } catch (e) {
             console.error(e);
@@ -229,9 +229,9 @@ export const SettingsModal: FC<SettingsModalProps> = ({
             setSuccessText('');
             const result = await window.RecipeAPI.import();
             if (!result) {
-                setErrorText('User cancelled operation');
+                setErrorText(getFromStore('userCancelled', settings.language));
             } else {
-                setSuccessText('Imported');
+                setSuccessText(getFromStore('imported', settings.language));
                 setShouldUpdate(true);
             }
         } catch (e) {
@@ -243,8 +243,8 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     return (
         <Fragment>
             <ConfirmModal onCancel={onResetCancel} onConfirm={onResetConfirm} show={showResetConfirm}>
-                <h5>Are you sure you want to reset your save data?</h5>
-                <p>A backup will be created however this will NOT be saved to steam cloud</p>
+                <h5>{getFromStore('resetTitle', settings.language)}</h5>
+                <p>{getFromStore('resetText', settings.language)}</p>
             </ConfirmModal>
             <Modal show={show} onHide={handleHideInside} centered size="xl" data-bs-theme={darkMode ? 'dark' : 'light'}>
                 <Modal.Header closeButton data-bs-theme={darkMode ? 'dark' : 'light'}>
