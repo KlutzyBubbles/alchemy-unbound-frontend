@@ -60,6 +60,7 @@ export const MainElement: FC<BoxProps> = ({
         drag(node, options);
         drop(node, options);
     };
+    const [recipes, setRecipes] = useState<Recipe[]>(element.recipes);
     const mounted = useRef(false);
     
     const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
@@ -154,7 +155,12 @@ export const MainElement: FC<BoxProps> = ({
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
-    const handleContext = () => {
+    const handleContext = async () => {
+        try {
+            setRecipes(await window.RecipeAPI.getRecipesFor(element.name));
+        } catch (e) {
+            logger.error('Context getting failed', e);
+        }
         setDropdownOpen(!dropdownOpen);
     };
   
@@ -433,7 +439,7 @@ export const MainElement: FC<BoxProps> = ({
             }}>
             <Dropdown show={dropdownOpen} onToggle={(nextShow) => setDropdownOpen(nextShow)}>
                 <Dropdown.Menu>
-                    {element.recipes.filter((item) => item.discovered).map((recipe) => {
+                    {recipes.filter((item) => item.discovered).map((recipe) => {
                         // console.log('element recipes', recipe);
                         if (recipe.a.name === '' || recipe.b.name === '') {
                             return (

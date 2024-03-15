@@ -1,13 +1,15 @@
 import { ipcMain } from 'electron';
 import { Recipe } from '../common/types';
-import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, importFile, exportDatabase } from './database';
+import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, importFile, exportDatabase, getRecipesFor } from './database';
 import { combine } from './server';
-import { DisplayChannel, GenericChannel, RecipeChannel, SettingsChannel, SteamChannel } from '../common/ipc';
+import { DisplayChannel, GenericChannel, RecipeChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
 import { Settings } from '../common/settings';
 import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './settings';
 import { getAppVersions, isPackaged, getSystemInformation, quit } from './generic';
 import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from './display';
 import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated } from './steam';
+import { getStats, loadStats, saveStats, setStat, setStats } from './stats';
+import { Stats } from '../common/stats';
 
 
 export function register() {
@@ -26,6 +28,9 @@ export function register() {
     });
     ipcMain.handle(RecipeChannel.GET_ALL, async () => {
         return getAllRecipes();
+    });
+    ipcMain.handle(RecipeChannel.GET_FOR, async (_, result: string) => {
+        return getRecipesFor(result);
     });
     ipcMain.handle(RecipeChannel.SAVE, async () => {
         return save();
@@ -56,7 +61,24 @@ export function register() {
     ipcMain.handle(SettingsChannel.SAVE, async () => {
         return saveSettings();
     });
-    getSteamGameLanguage;
+
+    // Stats handlers
+    ipcMain.handle(StatsChannel.SET_VALUE, async (_, key: keyof Stats, value: Stats[keyof Stats]) => {
+        return setStat(key, value);
+    });
+    ipcMain.handle(StatsChannel.GET, async () => {
+        return getStats();
+    });
+    ipcMain.handle(StatsChannel.SET, async (_, stats: Stats) => {
+        return setStats(stats);
+    });
+    ipcMain.handle(StatsChannel.LOAD, async () => {
+        return loadStats();
+    });
+    ipcMain.handle(StatsChannel.SAVE, async () => {
+        return saveStats();
+    });
+
     // Generic handlers
     ipcMain.handle(GenericChannel.GET_VERSIONS, async () => {
         return getAppVersions();

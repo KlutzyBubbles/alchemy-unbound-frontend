@@ -79,6 +79,9 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     useEffect(() => {
         (async() => {
             try {
+                if (!darkMode) {
+                    window.SteamAPI.activateAchievement('flashbang');
+                }
                 setSettings({
                     ...settings,
                     dark: darkMode

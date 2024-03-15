@@ -18,6 +18,9 @@ import { SoundContext } from '../providers/SoundProvider';
 import logger from 'electron-log/renderer';
 import { UpdateContext } from '../providers/UpdateProvider';
 import { hasProp } from '../../common/utils';
+import { LoadingContext } from '../providers/LoadingProvider';
+import { StatsContext } from '../providers/StatsProvider';
+import { unlockCheck } from '../utils/achievements';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
@@ -37,9 +40,11 @@ export const DropContainer: FC<ContainerProps> = ({
     const [alt, setAlt] = useState<boolean>(false);
     const [control, setControl] = useState<boolean>(false);
     const { settings } = useContext(SettingsContext);
+    const { setLoading } = useContext(LoadingContext);
     const { playSound } = useContext(SoundContext);
     const mainElement = useRef<HTMLDivElement>();
     const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
+    const { setStats } = useContext(StatsContext);
     const [boxes, setBoxes] = useState<{
         [key: string]: Box
     }>({});
@@ -85,6 +90,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 await refreshRecipes();
                 setBoxes(() => { return {}; });
                 setShouldUpdate(false);
+                setLoading(true);
             }
         })();
     }, [shouldUpdate]);
@@ -154,23 +160,42 @@ export const DropContainer: FC<ContainerProps> = ({
         }
     };
 
-    const backendCombine = async(aName: string, bName: string): Promise<{
+    const backendCombine = async (aName: string, bName: string): Promise<{
         newDiscovery: boolean,
         firstDiscovery: boolean,
         recipe: Recipe,
         recipes: Recipe[]
     }> => {
-        //console.log(`backendCombine(${aName}, ${bName})`);
+        console.log(`backendCombine(${aName}, ${bName})`);
         const combined: CombineOuput | undefined = await window.RecipeAPI.combine(aName, bName);
         if (combined === undefined) {
             throw Error('Unknown error occurred while combining');
         } else {
-            //console.log('Found recipe', combined);
-            if (combined.newDiscovery)
+            console.log('Found recipe', combined);
+            const stats = await window.StatsAPI.getStats();
+            if (combined.newDiscovery) {
                 playSound('new-discovery');
-            if (combined.firstDiscovery)
+                if (combined.recipe.base) {
+                    stats.baseRecipesFound += 1;
+                } else {
+                    stats.aiRecipesFound += 1;
+                }
+            }
+            if (combined.firstDiscovery) {
                 playSound('first-discovery');
+                stats.firstDiscoveries += 1;
+            }
+            if (combined.recipe.base) {
+                if (combined.recipe.depth > stats.baseHighestDepth) {
+                    stats.baseHighestDepth = combined.recipe.depth;
+                }
+            } else {
+                if (combined.recipe.depth > stats.aiHighestDepth) {
+                    stats.aiHighestDepth = combined.recipe.depth;
+                }
+            }
             const elementList = elements.filter((value) => value.name === combined.recipe.result);
+            console.log('found elements', elementList);
             let recipes: Recipe[] = [];
             if (elementList.length === 0) {
                 //console.log('No existing element found');
@@ -180,12 +205,22 @@ export const DropContainer: FC<ContainerProps> = ({
                     console.warn('Elements list is more than 1, it should only be 1');
                 }
                 const element = elementList[0];
-                //console.log('time to check', element);
+                console.log('time to check', element.recipes);
                 recipes = element.recipes;
                 let recipeExists = false;
+                let newResultCount = 0;
+                let newResult = false;
                 for (const r of element.recipes) {
-                    //console.log('checking babeee', r);
-                    if ((r.a.name === combined.recipe.a.name && r.b.name === combined.recipe.b.name) || (r.a.name === combined.recipe.b.name && r.b.name === combined.recipe.a.name)) {
+                    if (r.discovered) {
+                        newResultCount += 1;
+                    }
+                }
+                for (const r of element.recipes) {
+                    if (((r.a.name === combined.recipe.a.name && r.b.name === combined.recipe.b.name) || (r.a.name === combined.recipe.b.name && r.b.name === combined.recipe.a.name))) {
+                        console.log('recipeExists', r, combined.recipe);
+                        if (combined.newDiscovery && newResultCount <= 1) {
+                            newResult = true;
+                        }
                         recipeExists = true;
                         break;
                     }
@@ -193,7 +228,18 @@ export const DropContainer: FC<ContainerProps> = ({
                 if (!recipeExists) {
                     recipes.push(combined.recipe);
                 }
+                if (newResult) {
+                    if (combined.recipe.base) {
+                        stats.baseResultsFound += 1;
+                    } else {
+                        stats.aiResultsFound += 1;
+                    }
+                }
+                console.log('recipessss', recipes);
             }
+            stats.itemsCombined += 1;
+            unlockCheck(stats);
+            setStats(stats);
             return {
                 newDiscovery: combined.newDiscovery,
                 firstDiscovery: combined.firstDiscovery,
@@ -204,13 +250,25 @@ export const DropContainer: FC<ContainerProps> = ({
     };
 
     const rawCombine = async (a: string, bName: string) => {
+        let workingBoxes: {
+            [key: string]: Box
+        } = {};
+        await new Promise<void>((resolve) => {
+            setBoxes((boxes) => {
+                console.log(`combineInternal(${a}, ${name})`, boxes);
+                workingBoxes = boxes;
+                resolve();
+                return boxes;
+            });
+        });
         //console.log(`rawCombine(${a}, ${bName})`, boxes);
-        if (hasProp(boxes, a)) {
+        if (hasProp(workingBoxes, a)) {
             try {
                 mergeState(a, undefined, 'loading', true);
-                const { recipe, recipes, newDiscovery, firstDiscovery } = await backendCombine(boxes[a].element.name, bName);
+                const { recipe, newDiscovery, firstDiscovery } = await backendCombine(workingBoxes[a].element.name, bName);
                 mergeState(a, undefined, 'loading', false);
                 playSound('drop', 0.5);
+                const updatedRecipes = await window.RecipeAPI.getRecipesFor(recipe.result);
                 setBoxes((boxes) => {
                     const temp = update(boxes, {
                         [a]: {
@@ -221,7 +279,7 @@ export const DropContainer: FC<ContainerProps> = ({
                                     name: recipe.result,
                                     display: recipe.display,
                                     emoji: recipe.emoji,
-                                    recipes: recipes
+                                    recipes: updatedRecipes
                                 }
                             },
                         }
@@ -268,7 +326,7 @@ export const DropContainer: FC<ContainerProps> = ({
         if (hasProp(workingBoxes, a) && hasProp(workingBoxes, b)) {
             try {
                 mergeState(a, b, 'loading', true);
-                const { recipe, recipes } = await backendCombine(workingBoxes[a].element.name, workingBoxes[b].element.name);
+                const { recipe, recipes, newDiscovery, firstDiscovery } = await backendCombine(workingBoxes[a].element.name, workingBoxes[b].element.name);
                 mergeState(a, b, 'loading', false);
                 playSound('drop', 0.5);
                 console.log('updatingboxes', {
@@ -277,15 +335,19 @@ export const DropContainer: FC<ContainerProps> = ({
                     emoji: recipe.emoji,
                     recipes: recipes
                 });
+                const updatedRecipes = await window.RecipeAPI.getRecipesFor(recipe.result);
+                console.log('Resulintg updaterd recipes', recipe.result, updatedRecipes);
                 setBoxes((boxes) => {
                     const temp = update(boxes, {
                         [a]: {
                             $merge: {
+                                newDiscovery: newDiscovery,
+                                firstDiscovery: firstDiscovery,
                                 element: {
                                     name: recipe.result,
                                     display: recipe.display,
                                     emoji: recipe.emoji,
-                                    recipes: recipes
+                                    recipes: updatedRecipes
                                 }
                             },
                         }

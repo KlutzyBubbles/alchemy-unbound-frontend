@@ -1,4 +1,4 @@
-import { Language } from 'src/common/settings';
+import { Language } from '../../common/settings';
 import { LanguageStore } from './store';
 
 export function getFromStore(name: string, language: Language): string {

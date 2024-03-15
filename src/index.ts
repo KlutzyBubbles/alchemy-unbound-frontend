@@ -8,6 +8,8 @@ import { getFolder } from './main/steam';
 import path from 'path';
 import log from 'electron-log/main';
 import util from 'util';
+import { saveStats } from './main/stats';
+import { saveSettings } from './main/settings';
 
 log.transports.file.resolvePathFn = (variables) => {
     const filename = variables.fileName ?? 'current.log';
@@ -17,6 +19,8 @@ log.transports.file.transforms.push(({ message }) => {
     const text = util.format(...message.data);
     return [`[${message.date.toLocaleTimeString()}] [${message.variables.processType}] [${message.level}] ${text}`];
 });
+log.transports.file.level = 'info';
+log.transports.console.level = 'debug';
 log.initialize();
 log.info('Initialized logger main');
 
@@ -84,9 +88,36 @@ app.on('ready', createWindow);
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
+    log.error('Saving thinggiieiei');
+    console.log('saving staefts');
+    saveStats().then(() => {
+        console.log('Saved stats');
+    }).catch((e) => {
+        log.error('Failed to save stats', e);
+    });
+    saveSettings().then(() => {
+        console.log('Saved settings');
+    }).catch((e) => {
+        log.error('Failed to save settings', e);
+    });
     if (process.platform !== 'darwin') {
         app.quit();
     }
+});
+
+app.on('will-quit', () => {
+    log.error('Saving things');
+    console.log('saving stats');
+    saveStats().then(() => {
+        console.log('Saved stats');
+    }).catch((e) => {
+        log.error('Failed to save stats', e);
+    });
+    saveSettings().then(() => {
+        console.log('Saved settings');
+    }).catch((e) => {
+        log.error('Failed to save settings', e);
+    });
 });
 
 app.on('activate', () => {

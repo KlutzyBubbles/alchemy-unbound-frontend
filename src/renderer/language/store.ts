@@ -1,4 +1,4 @@
-import { Languages } from 'src/common/types';
+import { Languages } from '../../common/types';
 
 export const LanguageStore: {
     [key: string]: Languages

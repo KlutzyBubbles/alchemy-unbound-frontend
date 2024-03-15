@@ -158,6 +158,9 @@ export const SideContainerInternal: FC<ContainerProps> = ({
     }, [sortBy, sortAscending]);
 
     const onSearchType: ChangeEventHandler<HTMLInputElement> = (e) => {
+        if (e.target.value.toLocaleLowerCase() === 'send help') {
+            window.SteamAPI.activateAchievement('help');
+        }
         setSearchText(e.target.value.toLocaleLowerCase());
     };
 
@@ -249,16 +252,13 @@ export const SideContainerInternal: FC<ContainerProps> = ({
 
 export const SideContainer = memo(SideContainerInternal, (prevProps, nextProps) => {
     if (prevProps.elements.map((item) => item.name) === nextProps.elements.map((item) => item.name)) {
-        console.log('Exact Same');
         return true;
     }
     if (prevProps.elements.length !== nextProps.elements.length) {
-        console.log('Diff Length');
         return false;
     }
     for (let i = 0; i < prevProps.elements.length; i++) {
         if (prevProps.elements[i].name !== nextProps.elements[i].name) {
-            console.log('Diff name');
             return false;
         }
         if (!arrayEquals(
@@ -267,6 +267,5 @@ export const SideContainer = memo(SideContainerInternal, (prevProps, nextProps) 
             return false;
         }
     }
-    console.log('Some Same');
     return true;
 });

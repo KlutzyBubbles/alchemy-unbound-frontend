@@ -1,6 +1,7 @@
 import { Language, languages } from '../common/settings';
 import steamworks from '@ai-zen/steamworks.js';
 import { PlayerSteamId, auth } from '@ai-zen/steamworks.js/client';
+import logger from 'electron-log/main';
 
 export const APP_ID = 2858840;
 
@@ -34,7 +35,10 @@ export function getSteamGameLanguage(): Language {
 }
 
 export function activateAchievement(achievement: string) {
-    getSteamworksClient().achievement.activate(achievement);
+    if (!isAchievementActivated(achievement)) {
+        logger.info(`Unlocking achievement ${achievement}`);
+        getSteamworksClient().achievement.activate(achievement);
+    }
 }
 
 export function isAchievementActivated(achievement: string): boolean {

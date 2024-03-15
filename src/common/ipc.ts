@@ -4,6 +4,7 @@ export enum RecipeChannel {
     GET = 'recipe:get',
     COMBINE = 'recipe:combine',
     GET_ALL = 'recipe:getAll',
+    GET_FOR = 'recipe:getFor',
     SAVE = 'recipe:save',
     RESET = 'recipe:reset',
     IMPORT = 'recipe:import',
@@ -16,6 +17,14 @@ export enum SettingsChannel {
     SET_VALUE = 'settings:setSetting',
     GET = 'settings:get',
     SAVE = 'settings:save'
+}
+
+export enum StatsChannel {
+    LOAD = 'stats:load',
+    SET = 'stats:set',
+    SET_VALUE = 'stats:setStat',
+    GET = 'stats:get',
+    SAVE = 'stats:save'
 }
 
 export enum GenericChannel {

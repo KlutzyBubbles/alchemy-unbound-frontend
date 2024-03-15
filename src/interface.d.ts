@@ -4,6 +4,7 @@ import { IGenericAPI, GenericAPIName } from './preload/generic';
 import { DisplayAPIName, IDisplayAPI } from './preload/display';
 import { ISteamAPI, SteamAPIName } from './preload/steam';
 import 'react';
+import { IStatsAPI, StatsAPIName } from './preload/stats';
 
 declare module 'react' {
     interface CSSProperties {
@@ -18,6 +19,7 @@ declare global {
         [GenericAPIName]: IGenericAPI
         [DisplayAPIName]: IDisplayAPI
         [SteamAPIName]: ISteamAPI
+        [StatsAPIName]: IStatsAPI
     }
 }
 declare module 'vanta/dist/vanta.birds.min';

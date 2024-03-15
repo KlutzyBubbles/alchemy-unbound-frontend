@@ -5,6 +5,7 @@ import { SettingsContext } from '../providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { BsDiscord, BsGithub } from 'react-icons/bs';
 import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
+import { StatsContext } from '../providers/StatsProvider';
 
 
 export interface InfoModalProps {
@@ -17,6 +18,7 @@ export const InfoModal: FC<InfoModalProps> = ({
     handleHide
 }) => {
     const { settings } = useContext(SettingsContext);
+    const { stats } = useContext(StatsContext);
     const [appVersions, setAppVersions] = useState<AppVersions>({ node: '', electron: '', chrome: '', app: ''});
     const [systemInformation, setSystemInformation] = useState<SystemVersion>({ arch: '', platform: '', version: '' });
     const [advanced, setAdvanced] = useState<boolean>(false);
@@ -38,9 +40,57 @@ export const InfoModal: FC<InfoModalProps> = ({
                 <Modal.Title>Alchemy Unbound</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <p>Developed by KlutzyBubbles</p>
-                <p>Steam assets by Piney</p>
-                
+                <div className='row'>
+                    <div className='col-12 col-lg-6'>
+                        <p>Developed by KlutzyBubbles</p>
+                        <p>Steam assets by Piney</p>
+                    </div>
+                    <div className='col-12 col-lg-6'>
+                        <h4>Stats (Beta)</h4>
+                        <Table striped bordered hover size="sm">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Base</th>
+                                    <th>AI</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Recipes Found</td>
+                                    <td>{stats.baseRecipesFound}</td>
+                                    <td>{stats.aiRecipesFound}</td>
+                                    <td>{stats.baseRecipesFound + stats.aiRecipesFound}</td>
+                                </tr>
+                                <tr>
+                                    <td>Results Found</td>
+                                    <td>{stats.baseResultsFound}</td>
+                                    <td>{stats.aiResultsFound}</td>
+                                    <td>{stats.baseResultsFound + stats.aiResultsFound}</td>
+                                </tr>
+                                <tr>
+                                    <td>Highest Depth</td>
+                                    <td>{stats.baseHighestDepth}</td>
+                                    <td>{stats.aiHighestDepth}</td>
+                                    <td>{stats.baseHighestDepth + stats.aiHighestDepth}</td>
+                                </tr>
+                                <tr>
+                                    <td>First Discoveries</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>{stats.firstDiscoveries}</td>
+                                </tr>
+                                <tr>
+                                    <td>Items Combined</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>{stats.itemsCombined}</td>
+                                </tr>
+                            </tbody>
+                        </Table>
+                    </div>
+                </div>
                 <Collapse in={advanced}>
                     <div>
                         <Table striped bordered hover size="sm">
