@@ -3,6 +3,8 @@ import { SettingsContext } from './SettingsProvider';
 import logger from 'electron-log/renderer';
 import { StatsContext } from './StatsProvider';
 import { unlockCheck } from '../utils/achievements';
+import { ElementsContext } from './ElementProvider';
+import { getAllRecipes } from '../utils';
 
 export const LoadingContext = createContext<{
     loading: boolean
@@ -21,12 +23,23 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
 }) => {
     const { setSettings } = useContext(SettingsContext);
     const { setStats } = useContext(StatsContext);
+    const { setElements } = useContext(ElementsContext);
     const [loading, setLoading] = useState<boolean>(true);
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout>(undefined);
 
     useEffect(() => {
         (async () => {
             if (loading) {
+                try {
+                    const elements = await getAllRecipes();
+                    if (elements === undefined || elements === null) {
+                        throw new Error('getAllRecipes returned undefined');
+                    }
+                    logger.info('Setting elements from load', elements.length);
+                    setElements(elements);
+                } catch (e) {
+                    logger.error('Failed to load elements in loader (oops)', e);
+                }
                 try {
                     const settings = await window.SettingsAPI.getSettings();
                     if (settings === undefined || settings === null) {

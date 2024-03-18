@@ -61,6 +61,10 @@ html, body, #root {
     background-color: var(--#{$prefix}-btn-hover-bg);
 }
 
+.btn-element.holo .btn-holder {
+    background-color: transparent;
+}
+
 .btn-element .btn-holder {
     background-color: $light;
 }
@@ -142,10 +146,38 @@ html, body, #root {
     border-top-width: 2px;
 }
 
+.dropdown-menu {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
 @keyframes spin {
     from {transform: translate(-50%, -50%) rotate(0);}
     to   {transform: translate(-50%, -50%) rotate(360deg);}
 }
+
+// .element.generated > .btn-holder:first-child > .glare:first-child > .shine:first-child > .holder:first-child::after {
+//     content: "";
+//     position: absolute;
+// 
+//     //display: block;
+//     //width: 50px;
+//     //height: 10px;
+//     //padding: 0;
+//     //background-color: $success;
+//     //transform: rotate(45deg);
+//     //top: 0px;
+//     //right: -20px;
+// 
+//     height: 100%;
+//     width: 15px;
+//     top: 0px;
+//     right: 0px;
+//     background-image: radial-gradient(circle at center, $success 4px, transparent 5px);
+//     background-size: 15px 15px;
+//     background-position: top center, bottom center;
+//     background-repeat: no-repeat;
+// }
 
 .highlight {
     border-radius: $btn-border-radius;
@@ -225,7 +257,7 @@ html, body, #root {
 
 // @include customZ($zindex-levels);
 
-.element.holo {
+.element.holo > .btn-holder:first-child {
     background-image: url('../images/holo.avif');  
     //-webkit-background-clip: text;
     //-webkit-text-fill-color: transparent;

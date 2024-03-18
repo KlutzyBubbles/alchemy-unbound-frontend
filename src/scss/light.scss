@@ -33,7 +33,13 @@
     .btn-element:hover > .btn-holder:first-child {
       background-color: $dark;
     }
-    
+
+    .highlight {
+        &::before {
+          background: #00000000 url("../images/new_dark.png") no-repeat;
+          background-size: 100%;
+        }
+    }
 
     .btn-no-outline {
         @include button-variant($transparent, $transparent, color-contrast($light), $transparent, $transparent, color-contrast($light));

@@ -282,7 +282,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                         <div className='row'>
                             <div className='col-12'>
                                 <div className="form-check form-switch form-switch-lg">
-                                    <input className="form-check-input" type="checkbox" role="switch" id="setOffline" onChange={() => setOffline(!offline)} checked={offline} disabled/>
+                                    <input className="form-check-input" type="checkbox" role="switch" id="setOffline" onChange={() => setOffline(!offline)} checked={offline}/>
                                     <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setOffline">{getFromStore('offline', settings.language)}</label>
                                 </div>
                             </div>

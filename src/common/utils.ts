@@ -12,3 +12,7 @@ export function arrayEquals(a: unknown[], b: unknown[]) {
         a.length === b.length &&
         a.every((val, index) => val === b[index]);
 }
+
+export async function timeoutPromise(promise: Promise<unknown>, time: number) {
+    return Promise.race([promise, new Promise((_resolve, reject) => setTimeout(() => reject(new Error('Timeout reached')), time))]);
+}

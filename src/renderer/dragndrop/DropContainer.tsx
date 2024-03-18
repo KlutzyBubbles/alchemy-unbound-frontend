@@ -12,7 +12,7 @@ import { IoCloudOfflineOutline, IoInformationCircleOutline, IoSettingsOutline } 
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../Main';
 import { Box, DragItem, ItemTypes } from '../types';
-import { getXY, makeId } from '../utils';
+import { getAllRecipes, getXY, makeId } from '../utils';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { SoundContext } from '../providers/SoundProvider';
 import logger from 'electron-log/renderer';
@@ -21,6 +21,7 @@ import { hasProp } from '../../common/utils';
 import { LoadingContext } from '../providers/LoadingProvider';
 import { StatsContext } from '../providers/StatsProvider';
 import { unlockCheck } from '../utils/achievements';
+import { ElementsContext } from '../providers/ElementProvider';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
@@ -35,7 +36,8 @@ export const DropContainer: FC<ContainerProps> = ({
     openModal,
     hideSourceOnDrag
 }) => {
-    const [elements, setElements] = useState<RecipeElement[]>([]);
+    const { elements, setElements } = useContext(ElementsContext);
+    // const [elements, setElements] = useState<RecipeElement[]>([]);
     const [shift, setShift] = useState<boolean>(false);
     const [alt, setAlt] = useState<boolean>(false);
     const [control, setControl] = useState<boolean>(false);
@@ -49,36 +51,13 @@ export const DropContainer: FC<ContainerProps> = ({
         [key: string]: Box
     }>({});
 
-    async function getAllRecipes() {
-        const data = await window.RecipeAPI.getAllRecipes();
-
-        if (data) {
-            const namesUnique = [...new Set(data.map(item => item.result))];
-
-            const formattedData: RecipeElement[] = [];
-            for (const name of namesUnique) {
-                const recipes = data.filter((item) => item.result === name);
-                if (recipes.length === 0) {
-                    console.warn(`Invalid recipe data for name ${name}`);
-                } else {
-                    formattedData.push({
-                        name: name,
-                        display: recipes[0].display,
-                        emoji: recipes[0].emoji,
-                        recipes: recipes
-                    });
-                }
-            }
-            setElements(formattedData);
-        }
-    }
-
     async function refreshRecipes() {
-        await getAllRecipes();
+        const working = await getAllRecipes();
+        setElements(working);
     }
 
     useEffect(() => {
-        getAllRecipes();
+        // refreshRecipes();
         mainElement.current.focus();
     }, []);
 
@@ -626,7 +605,7 @@ export const DropContainer: FC<ContainerProps> = ({
                     </div>
                 </div>
                 <SideContainer
-                    elements={elements}
+                    // elements={elements}
                     removeBox={removeBox}
                     moveBox={moveBox}
                     addBox={addBoxRandomLocation}/>

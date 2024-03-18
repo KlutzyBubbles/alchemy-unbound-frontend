@@ -11,13 +11,14 @@ export type RequestErrorResult = {
   message: string
 }
 
-let endpoint = 'http://localhost:5001';
+// let endpoint = 'http://localhost:5001';
+let endpoint = 'https://api.alchemyunbound.net';
 if (isPackaged()) {
     // Production
-    endpoint = 'https://alchemyunbound.net';
+    endpoint = 'https://api.alchemyunbound.net';
 }
 
-const token: TokenHolder | undefined = undefined;
+let token: TokenHolder | undefined = undefined;
 
 export async function getToken(): Promise<TokenHolder> {
     if (token === undefined) {
@@ -48,6 +49,7 @@ async function refreshToken(): Promise<TokenHolder> {
             if (response.ok) {
                 try {
                     const body: TokenHolder = (await response.json()) as TokenHolder;
+                    token = body;
                     return body;
                 } catch(e) {
                     logger.error('Failed to format token response data', e);
@@ -90,6 +92,7 @@ async function createToken(): Promise<TokenHolder> {
     if (response.ok) {
         try {
             const body: TokenHolder = (await response.json()) as TokenHolder;
+            token = body;
             return body;
         } catch(e) {
             logger.error('Failed to format steam token response data', e);

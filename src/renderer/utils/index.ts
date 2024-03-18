@@ -1,5 +1,6 @@
 import { DropTargetMonitor, XYCoord } from 'react-dnd';
 import { DragItem } from '../types';
+import { RecipeElement } from '../../common/types';
 
 export function getXY(item: DragItem, monitor: DropTargetMonitor): XYCoord {
     const delta = monitor.getClientOffset() as XYCoord;
@@ -26,4 +27,28 @@ export function makeId(length: number) {
         counter += 1;
     }
     return result;
+}
+
+export async function getAllRecipes(): Promise<RecipeElement[]> {
+    const data = await window.RecipeAPI.getAllRecipes();
+    if (data) {
+        const namesUnique = [...new Set(data.map(item => item.result))];
+
+        const formattedData: RecipeElement[] = [];
+        for (const name of namesUnique) {
+            const recipes = data.filter((item) => item.result === name);
+            if (recipes.length === 0) {
+                console.warn(`Invalid recipe data for name ${name}`);
+            } else {
+                formattedData.push({
+                    name: name,
+                    display: recipes[0].display,
+                    emoji: recipes[0].emoji,
+                    recipes: recipes
+                });
+            }
+        }
+        return formattedData;
+    }
+    return [];
 }

@@ -1,4 +1,4 @@
-import { useState, type ChangeEventHandler, type FC, useEffect, useContext, MouseEventHandler, memo } from 'react';
+import { useState, type ChangeEventHandler, type FC, useEffect, useContext, MouseEventHandler } from 'react';
 import { useDrop } from 'react-dnd';
 import { RecipeElement } from '../../common/types';
 import { SideElement } from './SideElement';
@@ -8,25 +8,27 @@ import { SettingsContext } from '../providers/SettingsProvider';
 import { IoArrowDown, IoArrowUp, IoFilterOutline } from 'react-icons/io5';
 import { getFromStore } from '../language';
 import { SoundContext } from '../providers/SoundProvider';
-import { arrayEquals } from '../../common/utils';
+// import { arrayEquals } from '../../common/utils';
+import { ElementsContext } from '../providers/ElementProvider';
 
 export interface ContainerProps {
   removeBox: (id: string) => void,
   addBox: (element: RecipeElement, combining: boolean) => Promise<string>
   moveBox: (id: string, left: number, top: number) => Promise<void>
-  elements: RecipeElement[],
+  // elements: RecipeElement[],
 }
 
 const sortByOptions = ['discovered', 'name', 'emoji', 'depth'];
 
 const filterOptions = ['all', 'base', 'firstDiscovered'];
 
-export const SideContainerInternal: FC<ContainerProps> = ({
+export const SideContainer: FC<ContainerProps> = ({
     removeBox,
     moveBox,
     addBox,
-    elements
+    // elements
 }) => {
+    const { elements } = useContext(ElementsContext);
     const [filteredElements, setFilteredElements] = useState<RecipeElement[]>(elements);
     const [sortBy, setSortBy] = useState<number>(0);
     const [sortAscending, setSortAscending] = useState<boolean>(false);
@@ -192,7 +194,7 @@ export const SideContainerInternal: FC<ContainerProps> = ({
 
     return (
         <div className='side-container vh-100 d-flex flex-column position-sticky z-side'>
-            <div ref={drop} className={`${isOver ? 'is-over' : ''} overflow-y-scroll overflow-x-hidden h-100`}>
+            <div ref={drop} className={`${isOver ? 'is-over' : ''} overflow-y-scroll overflow-x-hidden h-100 pb-2`}>
                 {filteredElements.filter((item) => {
                     let discovered = false;
                     for (const recipe of item.recipes) {
@@ -250,22 +252,22 @@ export const SideContainerInternal: FC<ContainerProps> = ({
     );
 };
 
-export const SideContainer = memo(SideContainerInternal, (prevProps, nextProps) => {
-    if (prevProps.elements.map((item) => item.name) === nextProps.elements.map((item) => item.name)) {
-        return true;
-    }
-    if (prevProps.elements.length !== nextProps.elements.length) {
-        return false;
-    }
-    for (let i = 0; i < prevProps.elements.length; i++) {
-        if (prevProps.elements[i].name !== nextProps.elements[i].name) {
-            return false;
-        }
-        if (!arrayEquals(
-            prevProps.elements[i].recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.discovered),
-            nextProps.elements[i].recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.discovered))) {
-            return false;
-        }
-    }
-    return true;
-});
+// export const SideContainer = memo(SideContainerInternal, (prevProps, nextProps) => {
+//     if (prevProps.elements.map((item) => item.name) === nextProps.elements.map((item) => item.name)) {
+//         return true;
+//     }
+//     if (prevProps.elements.length !== nextProps.elements.length) {
+//         return false;
+//     }
+//     for (let i = 0; i < prevProps.elements.length; i++) {
+//         if (prevProps.elements[i].name !== nextProps.elements[i].name) {
+//             return false;
+//         }
+//         if (!arrayEquals(
+//             prevProps.elements[i].recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.discovered),
+//             nextProps.elements[i].recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.discovered))) {
+//             return false;
+//         }
+//     }
+//     return true;
+// });

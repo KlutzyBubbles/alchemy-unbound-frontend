@@ -8,6 +8,7 @@ import { SoundProvider } from './providers/SoundProvider';
 import log from 'electron-log/renderer';
 import { UpdateProvider } from './providers/UpdateProvider';
 import { StatsProvider } from './providers/StatsProvider';
+import { ElementsProvider } from './providers/ElementProvider';
 
 export type ModalOption = 'settings' | 'info' | 'none'
 
@@ -17,13 +18,15 @@ function App() {
         <DndProvider backend={TouchBackend} options={{ enableTouchEvents: false, enableMouseEvents: true }}>
             <SettingsProvider>
                 <StatsProvider>
-                    <LoadingProvider>
-                        <SoundProvider>
-                            <UpdateProvider>
-                                <ContentContainer/>
-                            </UpdateProvider>
-                        </SoundProvider>
-                    </LoadingProvider>
+                    <ElementsProvider>
+                        <LoadingProvider>
+                            <SoundProvider>
+                                <UpdateProvider>
+                                    <ContentContainer/>
+                                </UpdateProvider>
+                            </SoundProvider>
+                        </LoadingProvider>
+                    </ElementsProvider>
                 </StatsProvider>
             </SettingsProvider>
         </DndProvider>

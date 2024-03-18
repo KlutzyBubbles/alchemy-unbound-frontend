@@ -5,6 +5,7 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DragItem, ItemTypes } from '../types';
 import { ItemRenderer } from '../ItemRenderer';
 import { SoundContext } from '../providers/SoundProvider';
+import { arrayEquals } from '../../common/utils';
 
 export type SideElementProps = {
   element: RecipeElement
@@ -79,7 +80,14 @@ const SideElementInternal: FC<SideElementProps> = ({
     );
 };
 
-
 export const SideElement = memo(SideElementInternal, (prevProps, nextProps) => {
-    return prevProps.element.name === nextProps.element.name;
+    if (prevProps.element.name !== nextProps.element.name) {
+        return false;
+    }
+    if (!arrayEquals(
+        prevProps.element.recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.first),
+        nextProps.element.recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.first))) {
+        return false;
+    }
+    return true;
 });

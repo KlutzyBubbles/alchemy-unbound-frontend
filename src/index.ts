@@ -10,6 +10,7 @@ import log from 'electron-log/main';
 import util from 'util';
 import { saveStats } from './main/stats';
 import { saveSettings } from './main/settings';
+import { timeoutPromise } from './common/utils';
 
 log.transports.file.resolvePathFn = (variables) => {
     const filename = variables.fileName ?? 'current.log';
@@ -108,12 +109,12 @@ app.on('window-all-closed', () => {
 app.on('will-quit', () => {
     log.error('Saving things');
     console.log('saving stats');
-    saveStats().then(() => {
+    timeoutPromise(saveStats(), 10000).then(() => {
         console.log('Saved stats');
     }).catch((e) => {
         log.error('Failed to save stats', e);
     });
-    saveSettings().then(() => {
+    timeoutPromise(saveSettings(), 10000).then(() => {
         console.log('Saved settings');
     }).catch((e) => {
         log.error('Failed to save settings', e);

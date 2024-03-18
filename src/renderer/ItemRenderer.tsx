@@ -152,12 +152,62 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
         setBase(baseCheck);
     }, [element]);
 
+    if (type === ItemTypes.SIDE_ELEMENT) {
+        return (
+            <div
+                className={`${type}-element btn btn-element ${type === ItemTypes.SIDE_ELEMENT ? dragging ? '' : 'mt-2 ms-2' : ''} p-0
+                element
+                ${firstDiscovered ? 'holo' : ''}
+                ${base ? 'foil' : 'generated'}
+                ${maxDepth ? 'rainbow' : ''}
+                ${dragging ? 'shadow' : ''}
+                z-${dragging ? 'dragging' : destroying ? 'destroying' : type}Element 
+                ${dragging ? 'position-absolute': ''}
+                ${hasDropOver ? 'active': ''}
+                ${newDiscovery ? 'highlight highlight-black-white': ''}
+                ${disabled ? 'disabled': ''}`}
+                ref={ref}
+                data-type={firstDiscovered ? 'holo' : base ? 'foil' : maxDepth ? 'rainbow' : 'none'}
+                // onMouseMove={handleMove}
+                onContextMenu={onContextMenu}
+                onBlur={onBlur}
+                onClick={onClick}
+                onMouseDown={onMouseDown}
+                style={{
+                    ...getItemStyles(initialOffset, currentOffset),
+                    // zIndex: dragging ? 69 : 50,
+                    // backgroundPosition: `var(${xy.x}px) var(${xy.y}px)`,
+                    '--pointer-x': '50%',
+                    '--pointer-y': '50%',
+                    '--pointer-from-center': 0,
+                    '--pointer-from-top': 0.5,
+                    '--pointer-from-left': 0.5,
+                    '--card-opacity': 1,
+                    '--rotate-x': '0deg',
+                    '--rotate-y': '0deg',
+                    '--background-x': '50%',
+                    '--background-y': '50%'
+                }}
+            >
+                <div className='btn-holder h-100 w-100'>
+                    <div className='glare h-100 w-100'>
+                        <div className='shine h-100 w-100'>
+                            <div className={`holder ${firstDiscovered ? '' : 'not-holo'} py-2 px-2 h-100 w-100`}>
+                                {element.emoji} {element.display[settings.language]}
+                                {children}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     return (
         <motion.div
-            className={`${type}-element btn btn-element ${type === ItemTypes.SIDE_ELEMENT ? dragging ? '' : 'mt-2 ms-2' : ''} p-0
+            className={`${type}-element btn btn-element p-0
             element
             ${firstDiscovered ? 'holo' : ''}
-            ${base ? 'foil' : ''}
+            ${base ? 'foil' : 'generated'}
             ${maxDepth ? 'rainbow' : ''}
             ${dragging ? 'shadow' : ''}
             z-${dragging ? 'dragging' : destroying ? 'destroying' : type}Element 
