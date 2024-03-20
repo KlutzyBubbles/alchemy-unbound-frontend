@@ -142,7 +142,7 @@ export type RawSettings = {
 export const DEFAULT_SETTINGS: Settings = {
     dark: true,
     fullscreen: true,
-    offline: true,
+    offline: false,
     currentDisplay: 1,
     background: 'line',
     sidebar: 'right',

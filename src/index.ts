@@ -1,4 +1,4 @@
-import { app, BrowserWindow, crashReporter, net, protocol, shell } from 'electron';
+import { app, BrowserWindow, crashReporter, Menu, net, protocol, shell } from 'electron';
 import { createDatabase } from './main/database';
 import debug from 'electron-debug';
 import steamworks from '@ai-zen/steamworks.js';
@@ -38,6 +38,8 @@ if (require('electron-squirrel-startup')) {
 
 app.setPath('crashDumps', getFolder() + 'crashes');
 crashReporter.start({ uploadToServer: false });
+
+Menu.setApplicationMenu(null);
 
 debug();
 

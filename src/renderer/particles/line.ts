@@ -13,7 +13,7 @@ export const lineOptions: (dark: boolean, fps: number) => RecursivePartial<IOpti
             number: {
                 value: 30,
                 density: {
-                    enable: true,
+                    enable: false,
                     width: 800,
                     height: 800
                 }
@@ -50,7 +50,7 @@ export const lineOptions: (dark: boolean, fps: number) => RecursivePartial<IOpti
             },
             move: {
                 enable: true,
-                speed: 1.5993602558976416,
+                speed: 1.6,
                 direction: 'none',
                 random: false,
                 straight: false,
@@ -76,7 +76,7 @@ export const lineOptions: (dark: boolean, fps: number) => RecursivePartial<IOpti
                     mode: 'push'
                 },
                 resize: {
-                    enable: true
+                    enable: false
                 }
             },
             modes: {
