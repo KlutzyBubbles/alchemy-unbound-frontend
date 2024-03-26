@@ -5,6 +5,8 @@ import { StatsContext } from './StatsProvider';
 import { unlockCheck } from '../utils/achievements';
 import { ElementsContext } from './ElementProvider';
 import { getAllRecipes } from '../utils';
+import { InfoContext } from './InfoProvider';
+import { SUPPORTER_DLC } from '../../common/types';
 
 export const LoadingContext = createContext<{
     loading: boolean
@@ -24,12 +26,23 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
     const { setSettings } = useContext(SettingsContext);
     const { setStats } = useContext(StatsContext);
     const { setElements } = useContext(ElementsContext);
+    const { setIsProduction, setHasSupporterTheme } = useContext(InfoContext);
     const [loading, setLoading] = useState<boolean>(true);
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout>(undefined);
 
     useEffect(() => {
         (async () => {
             if (loading) {
+                try {
+                    setIsProduction(await window.GenericAPI.isPackaged());
+                } catch (e) {
+                    logger.error('Failed to load production check', e);
+                }
+                try {
+                    setHasSupporterTheme(await window.SteamAPI.isDlcInstalled(SUPPORTER_DLC));
+                } catch (e) {
+                    logger.error('Failed to load production check', e);
+                }
                 try {
                     const elements = await getAllRecipes();
                     if (elements === undefined || elements === null) {

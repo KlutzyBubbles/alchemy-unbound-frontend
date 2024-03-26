@@ -26,7 +26,7 @@ export const SideContainer: FC<ContainerProps> = ({
     removeBox,
     moveBox,
     addBox,
-    // elements
+    // elements                     
 }) => {
     const { elements } = useContext(ElementsContext);
     const [filteredElements, setFilteredElements] = useState<RecipeElement[]>(elements);

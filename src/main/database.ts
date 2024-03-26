@@ -4,8 +4,9 @@ import { getFolder } from './steam';
 import { dirExists } from './utils';
 import { languages } from '../common/settings';
 import baseData from '../base.json';
+// import baseData from '../allDiscovered.json';
 import logger from 'electron-log/main';
-import { BrowserWindow, dialog } from 'electron';
+import { dialog } from 'electron';
 import { hasProp } from '../common/utils';
 
 const DATABASE_VERISON = 1;
@@ -109,10 +110,6 @@ export async function resetAndBackup(): Promise<void> {
 }
 
 export async function importFile(): Promise<boolean> {
-    //const windows = BrowserWindow.getAllWindows();
-    //if (windows.length <= 0) {
-    //    throw new Error('Browser window doesnt exist');
-    //}
     const fileDialog = await dialog.showOpenDialog({
         filters: [{
             name: 'JSON Database',
@@ -181,10 +178,6 @@ export async function importFile(): Promise<boolean> {
 }
 
 export async function exportDatabase(): Promise<boolean> {
-    //const windows = BrowserWindow.getAllWindows();
-    //if (windows.length <= 0) {
-    //    throw new Error('Browser window doesnt exist');
-    //}
     const fileDialog = await dialog.showSaveDialog({
         filters: [{
             name: 'JSON Database',
@@ -284,6 +277,14 @@ export async function getRecipesFor(result: string): Promise<Recipe[]> {
         formatted.push(traverseAndFill(recipe));
     }
     return formatted;
+}
+
+export async function getBaseHint(): Promise<Recipe> {
+    const alreadyFound = [...new Set(data.filter((value) => value.discovered).map((item) => item.result))];
+    let undiscovered = data.filter((value) => !alreadyFound.includes(value.result));
+    undiscovered = undiscovered.filter((item) => alreadyFound.includes(item.a) && alreadyFound.includes(item.b));
+    undiscovered = undiscovered.sort((a, b) => a.depth - b.depth);
+    return traverseAndFill(undiscovered[0]);
 }
 
 export async function getAllRecipes(): Promise<Recipe[]> {

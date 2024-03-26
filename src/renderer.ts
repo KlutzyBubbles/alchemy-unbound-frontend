@@ -15,7 +15,8 @@ import './renderer/Main';
         }
         test += '; font-size: 40px; padding: 0 64px 440px 20px;';
     
-        console.log('%c %s', test, 'You shouln\'t be here');
+        // console.log('%c %s', test, 'You shouln\'t be here');
+        console.log('%c %s', test, 'You have been VAC banned');
     } else {
         console.log('Rendered');
     }

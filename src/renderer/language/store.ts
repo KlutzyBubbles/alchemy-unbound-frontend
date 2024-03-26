@@ -767,5 +767,22 @@ export const LanguageStore: {
         portuguese: 'O usuário cancelou a operação',
         tchinese: '用户取消了操作',
         koreana: '사용자가 작업을 취소했습니다'
+    },
+    alchemyUnbound: {
+        english: 'Alchemy Unbound',
+        schinese: 'Alchemy Unbound',
+        russian: 'Alchemy Unbound',
+        spanish: 'el Alchemy Unbound',
+        french: 'Baguette Unbound',
+        japanese: 'Alchemy Unboundu',
+        indonesian: 'Alchemy Unbound',
+        german: 'Alchemy Unbound',
+        latam: 'Alchemy Unbound',
+        italian: 'Alchemy Unbound',
+        dutch: 'Alchemy Unbound',
+        polish: 'Alchemy Unbound',
+        portuguese: 'Alchemy Unboundo',
+        tchinese: 'Alchemy Unbound',
+        koreana: 'Alchemy Unbound'
     }
 };

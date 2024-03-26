@@ -8,7 +8,8 @@ export enum RecipeChannel {
     SAVE = 'recipe:save',
     RESET = 'recipe:reset',
     IMPORT = 'recipe:import',
-    EXPORT = 'recipe:export'
+    EXPORT = 'recipe:export',
+    BASE_HINT = 'recipe:baseHint'
 }
 
 export enum SettingsChannel {
@@ -46,4 +47,5 @@ export enum SteamChannel {
     CHECK_ACHIEVEMENT = 'steam:checkAchievement',
     GET_ID = 'steam:getId',
     GET_LANGUAGE = 'steam:getLanguage',
+    CHECK_DLC = 'steam:isDlcInstaled',
 }

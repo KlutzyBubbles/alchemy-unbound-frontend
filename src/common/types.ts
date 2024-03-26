@@ -87,3 +87,5 @@ export enum ErrorCode {
 export type SoundFile = 'new-discovery' | 'first-discovery' | 'pickup' | 'side-drop' | 'drop'
 
 export const SoundFiles: SoundFile[] = ['first-discovery', 'new-discovery', 'pickup', 'side-drop', 'drop'];
+
+export const SUPPORTER_DLC = 2911170;

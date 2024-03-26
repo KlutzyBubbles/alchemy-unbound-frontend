@@ -45,6 +45,10 @@ export function isAchievementActivated(achievement: string): boolean {
     return getSteamworksClient().achievement.isActivated(achievement);
 }
 
+export function isDlcInstalled(appid: number): boolean {
+    return getSteamworksClient().apps.isDlcInstalled(appid);
+}
+
 export function getFolder() {
     const steamId = getSteamId().steamId64;
     // windows

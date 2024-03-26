@@ -1,13 +1,13 @@
 import { ipcMain } from 'electron';
 import { Recipe } from '../common/types';
-import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, importFile, exportDatabase, getRecipesFor } from './database';
+import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, importFile, exportDatabase, getRecipesFor, getBaseHint } from './database';
 import { combine } from './server';
 import { DisplayChannel, GenericChannel, RecipeChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
 import { Settings } from '../common/settings';
 import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './settings';
 import { getAppVersions, isPackaged, getSystemInformation, quit } from './generic';
 import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from './display';
-import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated } from './steam';
+import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated, isDlcInstalled } from './steam';
 import { getStats, loadStats, saveStats, setStat, setStats } from './stats';
 import { Stats } from '../common/stats';
 
@@ -43,6 +43,9 @@ export function register() {
     });
     ipcMain.handle(RecipeChannel.EXPORT, async () => {
         return exportDatabase();
+    });
+    ipcMain.handle(RecipeChannel.BASE_HINT, async () => {
+        return getBaseHint();
     });
 
     // Settings handlers
@@ -113,6 +116,9 @@ export function register() {
     });
     ipcMain.handle(SteamChannel.CHECK_ACHIEVEMENT, async (_, achievement: string) => {
         return isAchievementActivated(achievement);
+    });
+    ipcMain.handle(SteamChannel.CHECK_DLC, async (_, appid: number) => {
+        return isDlcInstalled(appid);
     });
     ipcMain.handle(SteamChannel.GET_ID, async () => {
         return getSteamId();

@@ -1,6 +1,7 @@
 import { DropTargetMonitor, XYCoord } from 'react-dnd';
 import { DragItem } from '../types';
-import { RecipeElement } from '../../common/types';
+import { BasicElement, Languages, Recipe, RecipeElement } from '../../common/types';
+import { languages } from '../../common/settings';
 
 export function getXY(item: DragItem, monitor: DropTargetMonitor): XYCoord {
     const delta = monitor.getClientOffset() as XYCoord;
@@ -51,4 +52,85 @@ export async function getAllRecipes(): Promise<RecipeElement[]> {
         return formattedData;
     }
     return [];
+}
+
+export function mockElement(recipe: Recipe | BasicElement): RecipeElement {
+    if ('result' in recipe) {
+        return {
+            name: recipe.result,
+            display: recipe.display,
+            emoji: recipe.emoji,
+            recipes: [
+                recipe
+            ]
+        };
+    } else {
+        const unknowns: Partial<Languages> = {};
+        for (const language of languages) {
+            unknowns[language] = '???';
+        }
+        /*
+        console.log({
+            name: recipe.name,
+            display: recipe.display,
+            emoji: recipe.emoji,
+            recipes: [
+                {
+                    ...recipe,
+                    order: 0,
+                    result: recipe.name,
+                    a: {
+                        name: '',
+                        display: unknowns as Languages,
+                        emoji: '❓',
+                        depth: 0,
+                        first: 0,
+                        who_discovered: '',
+                        base: 0
+                    },
+                    b: {
+                        name: '',
+                        display: unknowns as Languages,
+                        emoji: '❓',
+                        depth: 0,
+                        first: 0,
+                        who_discovered: '',
+                        base: 0
+                    }
+                }
+            ]
+        });
+        */
+        return {
+            name: recipe.name,
+            display: recipe.display,
+            emoji: recipe.emoji,
+            recipes: [
+                {
+                    ...recipe,
+                    order: 0,
+                    result: recipe.name,
+                    discovered: 1,
+                    a: {
+                        name: '',
+                        display: unknowns as Languages,
+                        emoji: '❓',
+                        depth: 0,
+                        first: 0,
+                        who_discovered: '',
+                        base: 0
+                    },
+                    b: {
+                        name: '',
+                        display: unknowns as Languages,
+                        emoji: '❓',
+                        depth: 0,
+                        first: 0,
+                        who_discovered: '',
+                        base: 0
+                    }
+                }
+            ]
+        };
+    }
 }

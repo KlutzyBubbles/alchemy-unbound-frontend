@@ -8,11 +8,11 @@ import { CombineOuput, Recipe, RecipeElement } from '../../common/types';
 import { CustomDragLayer } from './DragLayer';
 import Split from 'react-split';
 import { SideContainer } from './SideContainer';
-import { IoCloudOfflineOutline, IoInformationCircleOutline, IoSettingsOutline } from 'react-icons/io5';
+import { IoCloudOfflineOutline, IoHelpOutline, IoInformationCircleOutline, IoSettingsOutline } from 'react-icons/io5';
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../Main';
 import { Box, DragItem, ItemTypes } from '../types';
-import { getAllRecipes, getXY, makeId } from '../utils';
+import { getAllRecipes, getXY, makeId, mockElement } from '../utils';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { SoundContext } from '../providers/SoundProvider';
 import logger from 'electron-log/renderer';
@@ -22,6 +22,9 @@ import { LoadingContext } from '../providers/LoadingProvider';
 import { StatsContext } from '../providers/StatsProvider';
 import { unlockCheck } from '../utils/achievements';
 import { ElementsContext } from '../providers/ElementProvider';
+import { ItemRenderer } from '../ItemRenderer';
+import { getPlaceholderLanguage } from '../language';
+import { InfoContext } from '../providers/InfoProvider';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
@@ -47,6 +50,9 @@ export const DropContainer: FC<ContainerProps> = ({
     const mainElement = useRef<HTMLDivElement>();
     const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
     const { setStats } = useContext(StatsContext);
+    const [hintOpen, setHintOpen] = useState<boolean>(false);
+    const [currentHint, setCurrentHint] = useState<Recipe>(undefined);
+    const { isProduction } = useContext(InfoContext);
     const [boxes, setBoxes] = useState<{
         [key: string]: Box
     }>({});
@@ -153,6 +159,9 @@ export const DropContainer: FC<ContainerProps> = ({
             console.log('Found recipe', combined);
             if (combined.recipe.result === '69') {
                 window.SteamAPI.activateAchievement('nice');
+            }
+            if (currentHint !== undefined && combined.recipe.result === currentHint.result) {
+                setCurrentHint(undefined);
             }
             const stats = await window.StatsAPI.getStats();
             if (combined.newDiscovery) {
@@ -535,11 +544,21 @@ export const DropContainer: FC<ContainerProps> = ({
     };
 
     const handleBlur: FocusEventHandler<HTMLDivElement> = (e) => {
-        if (e.relatedTarget === undefined || e.relatedTarget === null || e.relatedTarget.id !== 'element-search') {
+        if (e.relatedTarget === undefined || e.relatedTarget === null || (e.relatedTarget.id !== 'element-search' && e.relatedTarget.id !== 'hint-dropdown')) {
             mainElement.current.focus();
         }
     };
   
+    const hintShow = () => {
+        setHintOpen(true);
+        (async () => {
+            if (currentHint === undefined) {
+                const recipe = await window.RecipeAPI.getBaseHint();
+                setCurrentHint(recipe);
+            }
+        })();
+    };
+
     const elementControls = useAnimation();
 
     return (
@@ -600,6 +619,74 @@ export const DropContainer: FC<ContainerProps> = ({
                                 <IoSettingsOutline/>
                             </motion.div>
                             <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('info')}><IoInformationCircleOutline /></div>
+                            {isProduction ? (<Fragment/>) : (
+                                <div className="dropstart float-end mb-2 fs-2">
+                                    <button className="btn btn-secondary btn btn-info fs-2 p-2 d-flex" type="button" data-bs-toggle="dropdown" aria-expanded="false" onClick={() => hintShow()} onBlur={() => setHintOpen(false)}>
+                                        <IoHelpOutline />
+                                    </button>
+                                    <div className={`dropdown-menu ${ hintOpen ? 'show' : '' }`}>
+                                        {currentHint === undefined ? (
+                                            <div className='dropdown-item'>
+                                                <ItemRenderer
+                                                    element={mockElement({
+                                                        name: '?',
+                                                        display: getPlaceholderLanguage('?'),
+                                                        emoji: '?',
+                                                        depth: 0,
+                                                        first: 0,
+                                                        who_discovered: '',
+                                                        base: 1
+                                                    })}
+                                                    type={ItemTypes.RECIPE_ELEMENT}
+                                                    dragging={false}/>
+                                                    +
+                                                <ItemRenderer
+                                                    element={mockElement({
+                                                        name: '?',
+                                                        display: getPlaceholderLanguage('?'),
+                                                        emoji: '?',
+                                                        depth: 0,
+                                                        first: 0,
+                                                        who_discovered: '',
+                                                        base: 1
+                                                    })}
+                                                    type={ItemTypes.RECIPE_ELEMENT}
+                                                    dragging={false}/>
+                                                    =
+                                                <ItemRenderer
+                                                    element={mockElement({
+                                                        name: '?',
+                                                        display: getPlaceholderLanguage('?'),
+                                                        emoji: '?',
+                                                        depth: 0,
+                                                        first: 0,
+                                                        who_discovered: '',
+                                                        base: 1
+                                                    })}
+                                                    type={ItemTypes.RECIPE_ELEMENT}
+                                                    dragging={false}/>
+                                            </div>
+                                        ) : (
+                                            <div className='dropdown-item'>
+                                                <ItemRenderer
+                                                    element={mockElement(currentHint.a)}
+                                                    type={ItemTypes.RECIPE_ELEMENT}
+                                                    dragging={false}/>
+                                                <span className='fs-3'>+</span>
+                                                <ItemRenderer
+                                                    element={mockElement(currentHint.b)}
+                                                    type={ItemTypes.RECIPE_ELEMENT}
+                                                    dragging={false}/>
+                                                <span className='fs-3'>=</span>
+                                                <ItemRenderer
+                                                    element={mockElement(currentHint)}
+                                                    type={ItemTypes.RECIPE_ELEMENT}
+                                                    dragging={false}/>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                             {settings.offline ? (<div className='btn btn-offline float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('settings')}><IoCloudOfflineOutline /></div>) : (<Fragment/>)}
                         </div>
                     </div>
@@ -615,3 +702,32 @@ export const DropContainer: FC<ContainerProps> = ({
 };
 
 // <a href="https://ko-fi.com/klutzybubbles" target="_blank" className='btn btn-sm btn-heart float-end mb-2 fs-2 d-flex p-2' rel="noreferrer"><IoHeart /></a>
+/*
+
+                                        {recipes.filter((item) => item.discovered).map((recipe) => {
+                                            // console.log('element recipes', recipe);
+                                            if (recipe.a.name === '' || recipe.b.name === '') {
+                                                return (
+                                                    <Dropdown.Item key={`${recipe.result}`} href="#">
+                                                        <ItemRenderer
+                                                            element={mockElement(recipe)}
+                                                            type={ItemTypes.RECIPE_ELEMENT}
+                                                            dragging={false}/>
+                                                    </Dropdown.Item>);
+                                            }
+                                            return (
+                                                <Dropdown.Item key={`${recipe.a.name}${recipe.b.name}`} href="#">
+                                                    <ItemRenderer
+                                                        element={mockElement(recipe.a)}
+                                                        type={ItemTypes.RECIPE_ELEMENT}
+                                                        dragging={false}/>
+                                                        +
+                                                    <ItemRenderer
+                                                        element={mockElement(recipe.b)}
+                                                        type={ItemTypes.RECIPE_ELEMENT}
+                                                        dragging={false}/>
+                                                </Dropdown.Item>
+                                            );
+                                        })}
+*/
+

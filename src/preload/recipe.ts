@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { Recipe } from '../common/types';
-import { deleteRecipe, exportDatabase, getAllRecipes, getRecipe, getRecipesFor, importFile, insertRecipe, resetAndBackup, save } from '../main/database';
+import { deleteRecipe, exportDatabase, getAllRecipes, getBaseHint, getRecipe, getRecipesFor, importFile, insertRecipe, resetAndBackup, save } from '../main/database';
 import { combine } from '../main/server';
 import { RecipeChannel } from '../common/ipc';
 
@@ -17,6 +17,7 @@ export interface IRecipeAPI {
     reset: typeof resetAndBackup,
     import: typeof importFile,
     export: typeof exportDatabase,
+    getBaseHint: typeof getBaseHint,
 }
 
 contextBridge.exposeInMainWorld(RecipeAPIName, {
@@ -30,4 +31,5 @@ contextBridge.exposeInMainWorld(RecipeAPIName, {
     reset: () => ipcRenderer.invoke(RecipeChannel.RESET),
     import: () => ipcRenderer.invoke(RecipeChannel.IMPORT),
     export: () => ipcRenderer.invoke(RecipeChannel.EXPORT),
+    getBaseHint: () => ipcRenderer.invoke(RecipeChannel.BASE_HINT),
 });

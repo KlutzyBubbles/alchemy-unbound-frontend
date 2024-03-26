@@ -1,13 +1,12 @@
 import { useState, type FC, type ReactNode, useEffect, useContext, useRef } from 'react';
 import { ConnectableElement, DragSourceOptions, useDrag, useDrop } from 'react-dnd';
-import { BasicElement, Languages, Recipe, RecipeElement } from '../../common/types';
+import { Recipe, RecipeElement } from '../../common/types';
 import Dropdown from 'react-bootstrap/Dropdown';
-import { getXY } from '../utils';
+import { getXY, mockElement } from '../utils';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { Variants, useAnimation } from 'framer-motion';
 import { Box, DragItem, ItemTypes } from '../types';
 import { ItemRenderer } from '../ItemRenderer';
-import { languages } from '../../common/settings';
 import { SoundContext } from '../providers/SoundProvider';
 import logger from 'electron-log/renderer';
 
@@ -319,87 +318,6 @@ export const MainElement: FC<BoxProps> = ({
     };
 
     const controls = useAnimation();
-  
-    const mockElement = (recipe: Recipe | BasicElement): RecipeElement => {
-        if ('result' in recipe) {
-            return {
-                name: recipe.result,
-                display: recipe.display,
-                emoji: recipe.emoji,
-                recipes: [
-                    recipe
-                ]
-            };
-        } else {
-            const unknowns: Partial<Languages> = {};
-            for (const language of languages) {
-                unknowns[language] = '???';
-            }
-            /*
-            console.log({
-                name: recipe.name,
-                display: recipe.display,
-                emoji: recipe.emoji,
-                recipes: [
-                    {
-                        ...recipe,
-                        order: 0,
-                        result: recipe.name,
-                        a: {
-                            name: '',
-                            display: unknowns as Languages,
-                            emoji: '❓',
-                            depth: 0,
-                            first: 0,
-                            who_discovered: '',
-                            base: 0
-                        },
-                        b: {
-                            name: '',
-                            display: unknowns as Languages,
-                            emoji: '❓',
-                            depth: 0,
-                            first: 0,
-                            who_discovered: '',
-                            base: 0
-                        }
-                    }
-                ]
-            });
-            */
-            return {
-                name: recipe.name,
-                display: recipe.display,
-                emoji: recipe.emoji,
-                recipes: [
-                    {
-                        ...recipe,
-                        order: 0,
-                        result: recipe.name,
-                        discovered: 1,
-                        a: {
-                            name: '',
-                            display: unknowns as Languages,
-                            emoji: '❓',
-                            depth: 0,
-                            first: 0,
-                            who_discovered: '',
-                            base: 0
-                        },
-                        b: {
-                            name: '',
-                            display: unknowns as Languages,
-                            emoji: '❓',
-                            depth: 0,
-                            first: 0,
-                            who_discovered: '',
-                            base: 0
-                        }
-                    }
-                ]
-            };
-        }
-    };
 
     console.log('variables', isDragging, control);
     if (isDragging && hideSourceOnDrag && !control) {

@@ -11,8 +11,8 @@ export type RequestErrorResult = {
   message: string
 }
 
-// let endpoint = 'http://localhost:5001';
-let endpoint = 'https://api.alchemyunbound.net';
+let endpoint = 'http://localhost:5001';
+// let endpoint = 'https://api.alchemyunbound.net';
 if (isPackaged()) {
     // Production
     endpoint = 'https://api.alchemyunbound.net';
@@ -35,6 +35,7 @@ async function refreshToken(): Promise<TokenHolder> {
         if (token.expiryDate < (new Date()).getTime() + 600000) {
             let response: Response | undefined = undefined;
             try {
+                console.log('token request url', `${endpoint}/session?${token.token}`);
                 response = await fetch(`${endpoint}/session?${token.token}`, {
                     method: 'GET',
                 });
@@ -49,6 +50,7 @@ async function refreshToken(): Promise<TokenHolder> {
             if (response.ok) {
                 try {
                     const body: TokenHolder = (await response.json()) as TokenHolder;
+                    console.log('token response body', body);
                     token = body;
                     return body;
                 } catch(e) {
@@ -92,6 +94,7 @@ async function createToken(): Promise<TokenHolder> {
     if (response.ok) {
         try {
             const body: TokenHolder = (await response.json()) as TokenHolder;
+            console.log('token response body', body);
             token = body;
             return body;
         } catch(e) {
@@ -144,11 +147,12 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
             if (tokenResponse !== undefined) {
                 url += `&token=${tokenResponse.token}`;
             }
-            console.log(url);
+            console.log('combine url: ', url);
             const response = await fetch(url);
             if (response.ok) {
                 try {
                     const body: Recipe = (await response.json()) as Recipe;
+                    console.log('combine response body', body);
                     newDiscovery = true;
                     firstDiscovery = body.first ? true : false;
                     try {
