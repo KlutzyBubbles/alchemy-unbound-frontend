@@ -1,5 +1,6 @@
 import { BasicElement, Languages, Recipe, RecipeRow } from '../common/types';
 import { promises as fs } from 'fs';
+import { Compressed, compress, decompress } from 'compress-json';
 import { getFolder } from './steam';
 import { dirExists } from './utils';
 import { languages } from '../common/settings';
@@ -9,7 +10,7 @@ import logger from 'electron-log/main';
 import { dialog } from 'electron';
 import { hasProp } from '../common/utils';
 
-const DATABASE_VERISON = 1;
+const DATABASE_VERISON = 2;
 
 let data: RecipeRow[] = [];
 let databaseOrder = 0;
@@ -26,7 +27,7 @@ export async function save(): Promise<void> {
     }
     await fs.writeFile(getFolder() + 'db.json', JSON.stringify({
         version: DATABASE_VERISON,
-        data: data
+        data: compress(data.filter((item) => item.discovered))
     }), 'utf-8');
     //let existing: RecipeRow[] = [];
     //try {
@@ -59,11 +60,30 @@ function loadV1(loaded: Record<string, unknown>[]): RecipeRow[] {
     return loaded as RecipeRow[];
 }
 
+function loadV2(loaded: Compressed): RecipeRow[] {
+    const tempData = decompress(loaded) as RecipeRow[];
+    for (const baseItem of structuredClone(baseData)) {
+        let hasDiscovered = false;
+        for (const tempItem of tempData) {
+            if ((tempItem.a === baseItem.a && tempItem.b === baseItem.b) || (tempItem.a === baseItem.b && tempItem.b === baseItem.a)) {
+                hasDiscovered = true;
+                break;
+            }
+        }
+        if (!hasDiscovered) {
+            tempData.push(baseItem);
+        }
+    }
+    return tempData;
+}
+
 async function loadData(): Promise<RecipeRow[]> {
     try {
         const raw = JSON.parse(await fs.readFile(getFolder() + 'db.json', 'utf-8'));
         if (raw.version === 1) {
             return loadV1(raw.data);
+        } else if (raw.version === 2) {
+            return loadV2(raw.data);
         } else {
             logger.error(`Failed to load database because of unknown version '${raw.version}', has this been altered?`);
             throw(Error(`Failed to load database because of unknown version '${raw.version}', has this been altered?`));
@@ -101,7 +121,7 @@ export async function resetAndBackup(): Promise<void> {
     console.log('Resetting');
     await fs.writeFile(getFolder() + `db_backup_${Math.floor((new Date()).getTime() / 1000)}.backup`, JSON.stringify({
         version: DATABASE_VERISON,
-        data: data
+        data: compress(data.filter((item) => item.discovered))
     }), 'utf-8');
     data = structuredClone(baseData) as RecipeRow[];
     await save();
@@ -170,6 +190,13 @@ export async function importFile(): Promise<boolean> {
             } catch (e) {
                 throw new Error('Failed loading the database from version');
             }
+        } else if (raw.version === 2) {
+            try {
+                data = loadV2(raw.data);
+                return true;
+            } catch (e) {
+                throw new Error('Failed loading the database from version');
+            }
         } else {
             logger.error(`Unknown imported version '${raw.version}'`);
             throw new Error(`Unknown imported version '${raw.version}'`);
@@ -194,7 +221,7 @@ export async function exportDatabase(): Promise<boolean> {
     try {
         await fs.writeFile(fileDialog.filePath, JSON.stringify({
             version: DATABASE_VERISON,
-            data: data
+            data: compress(data.filter((item) => item.discovered))
         }), 'utf-8');
         return true;
     } catch (e) {
