@@ -1,10 +1,8 @@
 import { FC, ReactNode, createContext, useContext, useEffect, useState } from 'react';
 import { SettingsContext } from './SettingsProvider';
 import logger from 'electron-log/renderer';
-import { StatsContext } from './StatsProvider';
+// import { StatsContext } from './StatsProvider';
 import { unlockCheck } from '../utils/achievements';
-import { ElementsContext } from './ElementProvider';
-import { getAllRecipes } from '../utils';
 import { InfoContext } from './InfoProvider';
 import { SUPPORTER_DLC } from '../../common/types';
 
@@ -24,8 +22,6 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
     children
 }) => {
     const { setSettings } = useContext(SettingsContext);
-    const { setStats } = useContext(StatsContext);
-    const { setElements } = useContext(ElementsContext);
     const { setIsProduction, setHasSupporterTheme } = useContext(InfoContext);
     const [loading, setLoading] = useState<boolean>(true);
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout>(undefined);
@@ -42,16 +38,6 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
                     setHasSupporterTheme(await window.SteamAPI.isDlcInstalled(SUPPORTER_DLC));
                 } catch (e) {
                     logger.error('Failed to load production check', e);
-                }
-                try {
-                    const elements = await getAllRecipes();
-                    if (elements === undefined || elements === null) {
-                        throw new Error('getAllRecipes returned undefined');
-                    }
-                    logger.info('Setting elements from load', elements.length);
-                    setElements(elements);
-                } catch (e) {
-                    logger.error('Failed to load elements in loader (oops)', e);
                 }
                 try {
                     const settings = await window.SettingsAPI.getSettings(true);
@@ -103,7 +89,8 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
                     stats.baseHighestDepth = baseHighestDepth;
                     stats.aiHighestDepth = aiHighestDepth;
                     logger.info('Setting stats from load', stats);
-                    setStats(stats);
+                    await window.StatsAPI.setStats(stats);
+                    // setStats(stats);
                 } catch (e) {
                     logger.error('Failed to load database and stats in loader (oops)', e);
                 }

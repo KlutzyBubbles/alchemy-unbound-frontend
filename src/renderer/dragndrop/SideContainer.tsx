@@ -9,13 +9,13 @@ import { IoArrowDown, IoArrowUp, IoFilterOutline } from 'react-icons/io5';
 import { getFromStore } from '../language';
 import { SoundContext } from '../providers/SoundProvider';
 // import { arrayEquals } from '../../common/utils';
-import { ElementsContext } from '../providers/ElementProvider';
+//import { ElementsContext } from '../providers/ElementProvider';
 
 export interface ContainerProps {
   removeBox: (id: string) => void,
   addBox: (element: RecipeElement, combining: boolean) => Promise<string>
   moveBox: (id: string, left: number, top: number) => Promise<void>
-  // elements: RecipeElement[],
+  elements: RecipeElement[],
 }
 
 const sortByOptions = ['discovered', 'name', 'emoji', 'depth'];
@@ -26,9 +26,9 @@ export const SideContainer: FC<ContainerProps> = ({
     removeBox,
     moveBox,
     addBox,
-    // elements                     
+    elements                     
 }) => {
-    const { elements } = useContext(ElementsContext);
+    // const { elements } = useContext(ElementsContext);
     const [filteredElements, setFilteredElements] = useState<RecipeElement[]>(elements);
     const [sortBy, setSortBy] = useState<number>(0);
     const [sortAscending, setSortAscending] = useState<boolean>(false);

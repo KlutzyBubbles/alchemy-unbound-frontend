@@ -5,8 +5,9 @@ import { SettingsContext } from '../providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { BsDiscord, BsGithub } from 'react-icons/bs';
 import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
-import { StatsContext } from '../providers/StatsProvider';
+// import { StatsContext } from '../providers/StatsProvider';
 import { getFromStore } from '../language';
+import { DEFAULT_STATS, Stats } from '../../common/stats';
 
 
 export interface InfoModalProps {
@@ -19,10 +20,11 @@ export const InfoModal: FC<InfoModalProps> = ({
     handleHide
 }) => {
     const { settings } = useContext(SettingsContext);
-    const { stats } = useContext(StatsContext);
+    // const { stats } = useContext(StatsContext);
     const [appVersions, setAppVersions] = useState<AppVersions>({ node: '', electron: '', chrome: '', app: ''});
     const [systemInformation, setSystemInformation] = useState<SystemVersion>({ arch: '', platform: '', version: '' });
     const [advanced, setAdvanced] = useState<boolean>(false);
+    const [stats, setStats] = useState<Stats>(DEFAULT_STATS);
 
     useEffect(() => {
         (async () => {
@@ -34,6 +36,16 @@ export const InfoModal: FC<InfoModalProps> = ({
             }
         })();
     }, []);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                setStats(await window.StatsAPI.getStats());
+            } catch (e) {
+                logger.error('Failed to load stats', e);
+            }
+        })();
+    }, [show]);
 
     return (
         <Modal show={show} onHide={handleHide} centered size="xl" data-bs-theme={settings.dark ? 'dark' : 'light'}>

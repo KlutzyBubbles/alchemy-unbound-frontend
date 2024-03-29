@@ -19,9 +19,9 @@ import logger from 'electron-log/renderer';
 import { UpdateContext } from '../providers/UpdateProvider';
 import { hasProp } from '../../common/utils';
 import { LoadingContext } from '../providers/LoadingProvider';
-import { StatsContext } from '../providers/StatsProvider';
+// import { StatsContext } from '../providers/StatsProvider';
 import { unlockCheck } from '../utils/achievements';
-import { ElementsContext } from '../providers/ElementProvider';
+// import { ElementsContext } from '../providers/ElementProvider';
 import { ItemRenderer } from '../ItemRenderer';
 import { getPlaceholderLanguage } from '../language';
 import { InfoContext } from '../providers/InfoProvider';
@@ -39,8 +39,8 @@ export const DropContainer: FC<ContainerProps> = ({
     openModal,
     hideSourceOnDrag
 }) => {
-    const { elements, setElements } = useContext(ElementsContext);
-    // const [elements, setElements] = useState<RecipeElement[]>([]);
+    // const { elements, setElements } = useContext(ElementsContext);
+    const [elements, setElements] = useState<RecipeElement[]>([]);
     const [shift, setShift] = useState<boolean>(false);
     const [alt, setAlt] = useState<boolean>(false);
     const [control, setControl] = useState<boolean>(false);
@@ -49,7 +49,7 @@ export const DropContainer: FC<ContainerProps> = ({
     const { playSound } = useContext(SoundContext);
     const mainElement = useRef<HTMLDivElement>();
     const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
-    const { setStats } = useContext(StatsContext);
+    //const { setStats } = useContext(StatsContext);
     const [hintOpen, setHintOpen] = useState<boolean>(false);
     const [currentHint, setCurrentHint] = useState<Recipe>(undefined);
     const { isProduction } = useContext(InfoContext);
@@ -63,7 +63,7 @@ export const DropContainer: FC<ContainerProps> = ({
     }
 
     useEffect(() => {
-        // refreshRecipes();
+        refreshRecipes();
         mainElement.current.focus();
     }, []);
 
@@ -230,7 +230,8 @@ export const DropContainer: FC<ContainerProps> = ({
             }
             stats.itemsCombined += 1;
             unlockCheck(stats);
-            setStats(stats);
+            await window.StatsAPI.setStats(stats);
+            // setStats(stats);
             return {
                 newDiscovery: combined.newDiscovery,
                 firstDiscovery: combined.firstDiscovery,
@@ -692,7 +693,7 @@ export const DropContainer: FC<ContainerProps> = ({
                     </div>
                 </div>
                 <SideContainer
-                    // elements={elements}
+                    elements={elements}
                     removeBox={removeBox}
                     moveBox={moveBox}
                     addBox={addBoxRandomLocation}/>
