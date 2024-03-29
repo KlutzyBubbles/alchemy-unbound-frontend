@@ -54,7 +54,7 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
                     logger.error('Failed to load elements in loader (oops)', e);
                 }
                 try {
-                    const settings = await window.SettingsAPI.getSettings();
+                    const settings = await window.SettingsAPI.getSettings(true);
                     if (settings === undefined || settings === null) {
                         throw new Error('getSettings returned undefined');
                     }

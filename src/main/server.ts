@@ -136,7 +136,7 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
             recipe: exists
         };
     } else {
-        if (!(await getSettings()).offline) {
+        if (!(await getSettings(false)).offline) {
             let tokenResponse: TokenHolder | undefined = undefined;
             try {
                 tokenResponse = await getToken();

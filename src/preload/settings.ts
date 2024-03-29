@@ -14,7 +14,7 @@ export interface ISettingsAPI {
 }
 
 contextBridge.exposeInMainWorld(SettingsAPIName, {
-    getSettings: () => ipcRenderer.invoke(SettingsChannel.GET),
+    getSettings: (force: boolean) => ipcRenderer.invoke(SettingsChannel.GET, force),
     setSetting: (key: keyof Settings, value: Settings[keyof Settings]) => ipcRenderer.invoke(SettingsChannel.SET_VALUE, key, value),
     setSettings: (settings: Settings) => ipcRenderer.invoke(SettingsChannel.SET, settings),
     saveSettings: () => ipcRenderer.invoke(SettingsChannel.SAVE),

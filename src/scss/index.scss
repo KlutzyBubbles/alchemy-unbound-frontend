@@ -47,6 +47,11 @@ html, body, #root {
     background-color: $light;
 }
 
+.full-size {
+    height: 100vh;
+    width: 100vw;
+}
+
 .side-container .is-over {
     background-color: mix($light, $danger, 20%);
 }
@@ -304,8 +309,27 @@ html, body, #root {
   
     --clip-trainer: inset(14.5% 8.5% 48.2% 8.5%);
     --clip-borders: inset(2.8% 4% round 2.55% / 1.5%);
+
+    content-visibility: auto;
+    contain-intrinsic-size: auto 100px;
 }
-  
+
+.overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    top: 40%;
+    left: 0px;
+    // opacity: 0.5;
+    // filter: alpha(opacity=50);
+}
+
+.spinner-lg {
+    width: 100px;
+    height: 100px;
+}
+
 .shine,
 .shine {
     will-change: transform, opacity, background-image, background-size,

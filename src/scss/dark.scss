@@ -20,6 +20,14 @@
         background-color: $dark;
     }
 
+    .bg-theme {
+        background-color: $dark;
+    }
+
+    .overlay .spinner-border {
+        color: $light;
+    }
+
     .side-container .is-over {
         background-color: mix($dark, $danger, 20%);
     }

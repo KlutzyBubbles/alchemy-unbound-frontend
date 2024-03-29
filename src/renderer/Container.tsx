@@ -9,11 +9,13 @@ import type { IOptions, RecursivePartial } from '@tsparticles/engine';
 import options from './particles';
 import { SettingsContext } from './providers/SettingsProvider';
 import logger from 'electron-log/renderer';
+import { LoadingContext } from './providers/LoadingProvider';
 
 export type ModalOption = 'settings' | 'info' | 'none'
 
 export const ContentContainer: FC = () => {
     const { settings } = useContext(SettingsContext);
+    const { loading } = useContext(LoadingContext);
     const [currentModal, setCurrentModal] = useState<ModalOption>('none');
     const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.dark, settings.fps));
     const [particleReady, setParticleReady] = useState<boolean>(false);
@@ -53,18 +55,34 @@ export const ContentContainer: FC = () => {
 
     const openModal = (option: ModalOption) => setCurrentModal(option);
 
-    return (
-        <Container fluid={true} className='h-100 p-0 bg-light overflow-hidden' data-bs-theme={settings.dark ? 'dark' : 'light'}>
-            <Row className='h-100 p-0 m-0'>
-                {particleReady ? <Particles
-                    className='z-particles'
-                    id="backgroundParticles"
-                    options={currentParticles}
-                /> : <Fragment/>}
-                <DropContainer hideSourceOnDrag={false} openModal={openModal}/>
-            </Row>
-            <SettingsModal show={currentModal === 'settings'} handleHide={handleModalClose} />
-            <InfoModal show={currentModal === 'info'} handleHide={handleModalClose} />
-        </Container>
-    );
+    if (loading) {
+        return (
+            <div data-bs-theme={settings.dark ? 'dark' : 'light'}>
+                <Container fluid={true} className='p-0 bg-theme full-size overflow-hidden' data-bs-theme={settings.dark ? 'dark' : 'light'}>
+                    <div className='overlay'>
+                        <div className={`${loading ? 'd-flex' : 'd-none'} justify-content-center`}>
+                            <div className="spinner-border spinner-lg" role="loading"/>
+                        </div>
+                    </div>
+                </Container>
+            </div>
+        );
+    } else {
+        return (
+            <div data-bs-theme={settings.dark ? 'dark' : 'light'}>
+                <Container fluid={true} className='h-100 p-0 bg-theme overflow-hidden' data-bs-theme={settings.dark ? 'dark' : 'light'}>
+                    <Row className='h-100 p-0 m-0'>
+                        {particleReady ? <Particles
+                            className='z-particles'
+                            id="backgroundParticles"
+                            options={currentParticles}
+                        /> : <Fragment/>}
+                        <DropContainer hideSourceOnDrag={false} openModal={openModal}/>
+                    </Row>
+                    <SettingsModal show={currentModal === 'settings'} handleHide={handleModalClose} />
+                    <InfoModal show={currentModal === 'info'} handleHide={handleModalClose} />
+                </Container>
+            </div>
+        );
+    }
 };

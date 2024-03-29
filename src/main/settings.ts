@@ -31,6 +31,7 @@ export async function loadSettings(): Promise<void> {
     try {
         const raw = JSON.parse(await fs.readFile(getFolder() + 'settings.json', 'utf-8'));
         if (raw.version === 1) {
+            logger.info('Found settings V1', raw.settings);
             loadV1(raw.settings);
             loaded = true;
         } else {
@@ -46,12 +47,15 @@ export async function loadSettings(): Promise<void> {
             settings.language = getSteamGameLanguage();
         }
     }
-    if (settings === null || settings === undefined)
+    if (settings === null || settings === undefined) {
+        logger.warn('Failed to load settings, using defaults');
         settings = DEFAULT_SETTINGS;
+    }
 }
 
-export async function getSettings(): Promise<Settings> {
-    if (!loaded) {
+export async function getSettings(force: boolean): Promise<Settings> {
+    logger.debug('getSettings', force);
+    if (!loaded || force) {
         await loadSettings();
     }
     return settings;

@@ -22,6 +22,14 @@
         background-color: $light;
     }
 
+    .bg-theme {
+        background-color: $light;
+    }
+
+    .overlay .spinner-border {
+        color: $dark;
+    }
+
     .side-container .is-over {
         background-color: mix($light, $danger, 20%);
     }

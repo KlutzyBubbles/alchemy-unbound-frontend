@@ -52,8 +52,8 @@ export function register() {
     ipcMain.handle(SettingsChannel.SET_VALUE, async (_, key: keyof Settings, value: Settings[keyof Settings]) => {
         return setSetting(key, value);
     });
-    ipcMain.handle(SettingsChannel.GET, async () => {
-        return getSettings();
+    ipcMain.handle(SettingsChannel.GET, async (_, force: boolean) => {
+        return getSettings(force);
     });
     ipcMain.handle(SettingsChannel.SET, async (_, settings: Settings) => {
         return setSettings(settings);
