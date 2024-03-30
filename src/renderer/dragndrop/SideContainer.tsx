@@ -8,8 +8,6 @@ import { SettingsContext } from '../providers/SettingsProvider';
 import { IoArrowDown, IoArrowUp, IoFilterOutline } from 'react-icons/io5';
 import { getFromStore } from '../language';
 import { SoundContext } from '../providers/SoundProvider';
-// import { arrayEquals } from '../../common/utils';
-//import { ElementsContext } from '../providers/ElementProvider';
 
 export interface ContainerProps {
   removeBox: (id: string) => void,
@@ -28,7 +26,6 @@ export const SideContainer: FC<ContainerProps> = ({
     addBox,
     elements                     
 }) => {
-    // const { elements } = useContext(ElementsContext);
     const [filteredElements, setFilteredElements] = useState<RecipeElement[]>(elements);
     const [sortBy, setSortBy] = useState<number>(0);
     const [sortAscending, setSortAscending] = useState<boolean>(false);
@@ -44,7 +41,6 @@ export const SideContainer: FC<ContainerProps> = ({
                 if (monitor.didDrop()) {
                     return;
                 }
-                //console.log(`removing ${item.id}`);
                 if (item.id !== undefined) {
                     const { x, y } = getXY(item, monitor);
                     moveBox(item.id, x, y).then(() => {
@@ -57,7 +53,6 @@ export const SideContainer: FC<ContainerProps> = ({
             },
             collect: (monitor) => ({
                 isOver: monitor.isOver(),
-                // isOverCurrent: monitor.isOver({ shallow: true }),
             }),
         }),
         [removeBox],
@@ -152,10 +147,7 @@ export const SideContainer: FC<ContainerProps> = ({
 
     useEffect(() => {
         const sortByOption = sortByOptions[sortBy];
-        //console.log('sorting by...', sortByOption, sortAscending);
-        //console.log('before sort', filteredElements);
         const sortedTemp = sortList(filteredElements.map((x) => x), sortByOption, sortAscending);
-        //console.log('after sort', sortedTemp);
         setFilteredElements(sortedTemp);
     }, [sortBy, sortAscending]);
 

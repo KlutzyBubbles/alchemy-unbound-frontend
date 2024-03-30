@@ -1,7 +1,6 @@
 import { FC, ReactNode, createContext, useContext, useEffect, useState } from 'react';
 import { SettingsContext } from './SettingsProvider';
 import logger from 'electron-log/renderer';
-// import { StatsContext } from './StatsProvider';
 import { unlockCheck } from '../utils/achievements';
 import { InfoContext } from './InfoProvider';
 import { SUPPORTER_DLC } from '../../common/types';

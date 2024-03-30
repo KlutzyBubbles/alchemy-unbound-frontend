@@ -19,16 +19,13 @@ import logger from 'electron-log/renderer';
 import { UpdateContext } from '../providers/UpdateProvider';
 import { hasProp } from '../../common/utils';
 import { LoadingContext } from '../providers/LoadingProvider';
-// import { StatsContext } from '../providers/StatsProvider';
 import { unlockCheck } from '../utils/achievements';
-// import { ElementsContext } from '../providers/ElementProvider';
 import { ItemRenderer } from '../ItemRenderer';
 import { getPlaceholderLanguage } from '../language';
 import { InfoContext } from '../providers/InfoProvider';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
-  hideSourceOnDrag: boolean
 }
 
 export interface ContainerState {
@@ -36,10 +33,8 @@ export interface ContainerState {
 }
 
 export const DropContainer: FC<ContainerProps> = ({
-    openModal,
-    hideSourceOnDrag
+    openModal
 }) => {
-    // const { elements, setElements } = useContext(ElementsContext);
     const [elements, setElements] = useState<RecipeElement[]>([]);
     const [shift, setShift] = useState<boolean>(false);
     const [alt, setAlt] = useState<boolean>(false);
@@ -49,7 +44,6 @@ export const DropContainer: FC<ContainerProps> = ({
     const { playSound } = useContext(SoundContext);
     const mainElement = useRef<HTMLDivElement>();
     const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
-    //const { setStats } = useContext(StatsContext);
     const [hintOpen, setHintOpen] = useState<boolean>(false);
     const [currentHint, setCurrentHint] = useState<Recipe>(undefined);
     const { isProduction } = useContext(InfoContext);
@@ -607,7 +601,6 @@ export const DropContainer: FC<ContainerProps> = ({
                                             alt={alt}
                                             loading={loading}
                                             error={error}
-                                            hideSourceOnDrag={hideSourceOnDrag}
                                             addBox={addBox}
                                             removeBox={removeBox}
                                             moveBox={moveBox}

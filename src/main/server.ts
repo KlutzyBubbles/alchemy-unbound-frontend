@@ -35,7 +35,7 @@ async function refreshToken(): Promise<TokenHolder> {
         if (token.expiryDate < (new Date()).getTime() + 600000) {
             let response: Response | undefined = undefined;
             try {
-                console.log('token request url', `${endpoint}/session?token=${token.token}`);
+                logger.debug('token request url', `${endpoint}/session?token=${token.token}`);
                 response = await fetch(`${endpoint}/session?token=${token.token}`, {
                     method: 'GET',
                 });
@@ -50,7 +50,7 @@ async function refreshToken(): Promise<TokenHolder> {
             if (response.ok) {
                 try {
                     const body: TokenHolder = (await response.json()) as TokenHolder;
-                    console.log('token response body', body);
+                    logger.debug('token response body', body);
                     token = body;
                     return body;
                 } catch(e) {
@@ -78,8 +78,7 @@ async function refreshToken(): Promise<TokenHolder> {
 
 async function createToken(): Promise<TokenHolder> {
     const ticket = await getWebAuthTicket();
-    console.log('trying to get token');
-    console.log(`${endpoint}/session?steamToken=${ticket.getBytes().toString('hex')}`);
+    logger.debug('trying to get token', `${endpoint}/session?steamToken=${ticket.getBytes().toString('hex')}`);
     let response: Response | undefined = undefined;
     try {
         response = await fetch(`${endpoint}/session?steamToken=${ticket.getBytes().toString('hex')}&steamLanguage=${getSteamGameLanguage()}`, {
@@ -96,7 +95,7 @@ async function createToken(): Promise<TokenHolder> {
     if (response.ok) {
         try {
             const body: TokenHolder = (await response.json()) as TokenHolder;
-            console.log('token response body', body);
+            logger.debug('token response body', body);
             token = body;
             return body;
         } catch(e) {
@@ -149,12 +148,12 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
             if (tokenResponse !== undefined) {
                 url += `&token=${tokenResponse.token}`;
             }
-            console.log('combine url: ', url);
+            logger.debug('combine url: ', url);
             const response = await fetch(url);
             if (response.ok) {
                 try {
                     const body: Recipe = (await response.json()) as Recipe;
-                    console.log('combine response body', body);
+                    logger.debug('combine response body', body);
                     newDiscovery = true;
                     firstDiscovery = body.first ? true : false;
                     try {

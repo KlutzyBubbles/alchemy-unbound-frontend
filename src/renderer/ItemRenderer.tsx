@@ -19,7 +19,6 @@ export type ItemRendererProps = {
     currentOffset?: XYCoord
     top?: number
     left?: number
-    hideSourceOnDrag?: boolean
     onContextMenu?: MouseEventHandler<HTMLDivElement>
     onBlur?: FocusEventHandler<HTMLDivElement>
     onClick?: MouseEventHandler<HTMLDivElement>
@@ -47,8 +46,6 @@ function getItemStyles(
         return {};
     }
 
-    // console.log(`getItemStyles(${JSON.stringify(initialOffset)}, ${JSON.stringify(currentOffset)})`);
-
     const { x, y } = currentOffset;
 
     const transform = `translate(${x}px, ${y}px)`;
@@ -63,7 +60,6 @@ function getMainStyles(
     top?: number,
     isDragging?: boolean,
 ): CSSProperties {
-    //console.log(`getMainStyles(${left}, ${top}, ${isDragging})`);
     const transform = `translate3d(${left}px, ${top}px, 0)`;
     if (isDragging === undefined)
         isDragging = false;

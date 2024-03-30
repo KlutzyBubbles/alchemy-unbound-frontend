@@ -17,16 +17,11 @@ export const UpdateProvider: FC<UpdateProviderProps> = ({
 }) => {
     const [shouldUpdate, setShouldUpdate] = useState<boolean>(false);
 
-    const wrapper = (update: boolean) => {
-        console.log('Update wreapper', update);
-        setShouldUpdate(update);
-    };
-
     return (
         <UpdateContext.Provider
             value={{
                 shouldUpdate,
-                setShouldUpdate: wrapper
+                setShouldUpdate
             }}
         >
             {children}

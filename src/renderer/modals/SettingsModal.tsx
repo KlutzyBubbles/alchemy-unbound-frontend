@@ -150,9 +150,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     }, [background]);
 
     const onDisplaySelect: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
-        if (e.target.value === 'none') {
-            //console.log('Ignoring select');
-        } else {
+        if (e.target.value !== 'none') {
             let selectedId: number | undefined = undefined;
             try {
                 selectedId = parseInt(e.target.value);
@@ -163,9 +161,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
             if (selectedId === undefined)
                 return;
             const display = displays.find((d) => d.id === selectedId);
-            if (display === undefined) {
-                //console.log('Failed to find selected display');
-            } else {
+            if (display !== undefined) {
                 setCurrentDisplay(display);
             }
         }
@@ -200,10 +196,8 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     const onResetConfirm = async () => {
         setShowResetConfirm(false);
         try {
-            console.log('REFSSSITTING');
             await window.RecipeAPI.reset();
             setShouldUpdate(true);
-            console.log('setted');
         } catch (e) {
             logger.error('Failed resetting data', e);
         }
@@ -224,7 +218,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                 setSuccessText(getFromStore('exported', settings.language));
             }
         } catch (e) {
-            console.error(e);
+            logger.error('Failed to export file', e);
             setErrorText(e.message);
         }
     };
@@ -241,7 +235,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                 setShouldUpdate(true);
             }
         } catch (e) {
-            console.error(e);
+            logger.error('Failed to import file', e);
             setErrorText(e.message);
         }
     };

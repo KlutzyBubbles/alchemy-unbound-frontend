@@ -1,4 +1,5 @@
 import { BrowserWindow, screen } from 'electron';
+import logger from 'electron-log/main';
 
 export function getDisplays(): Electron.Display[] {
     return screen.getAllDisplays();
@@ -14,6 +15,7 @@ export function getCurrentDisplay(): Electron.Display {
 
 export function moveToDisplay(display: Electron.Display) {
     const windows = BrowserWindow.getAllWindows();
+    logger.debug(`moveToDisplay ${windows.length} ${display.id}`);
     if (windows.length > 0) {
         windows.forEach((window) => {
             window.setPosition(display.bounds.x + 50, display.bounds.y + 50, false);
@@ -24,10 +26,10 @@ export function moveToDisplay(display: Electron.Display) {
 export function setFullscreen(fullscreen: boolean) {
     const windows = BrowserWindow.getAllWindows();
     BrowserWindow.getFocusedWindow()?.setFullScreen(fullscreen);
-    console.log(`setFullscreen ${windows.length} ${fullscreen}`);
+    logger.debug(`setFullscreen ${windows.length} ${fullscreen}`);
     if (windows.length > 0) {
         windows.forEach((window) => {
-            console.log(`settings fullscreen for ${window.id}`);
+            logger.debug(`settings fullscreen for ${window.id}`);
             window.setFullScreen(fullscreen);
         });
     }

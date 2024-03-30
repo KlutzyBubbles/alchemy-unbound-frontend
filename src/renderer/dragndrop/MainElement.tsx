@@ -15,7 +15,6 @@ export interface BoxProps {
   left: number
   top: number
   element: RecipeElement
-  hideSourceOnDrag?: boolean
   addBox: (x: number, y: number, element: RecipeElement, combining: boolean) => Promise<string>
   moveBox: (id: string, left: number, top: number) => Promise<void>
   rawCombine: (a: string, bName: string) => Promise<void>,
@@ -40,7 +39,6 @@ export const MainElement: FC<BoxProps> = ({
     left,
     top,
     element,
-    hideSourceOnDrag,
     newDiscovery,
     addBox,
     moveBox,
@@ -65,12 +63,7 @@ export const MainElement: FC<BoxProps> = ({
     const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
         () => ({
             type: ItemTypes.ELEMENT,
-            end: () => {
-                // playSound('drop', 0.5);
-                // console.log('end');
-            },
-            item: (monitor) => {
-                console.log('item drag', monitor);
+            item: () => {
                 return { type: control ? ItemTypes.COPY_ELEMENT : ItemTypes.ELEMENT, id: dragId, left, top, element: element, control };
             },
             collect: (monitor) => ({
@@ -83,10 +76,6 @@ export const MainElement: FC<BoxProps> = ({
         }),
         [element, dragId, left, top, control],
     );
-
-    useEffect(() => {
-        //console.log(`Moved ${left}, ${top}`);
-    }, [top, left]);
 
     useEffect(() => {
         if (newDiscovery && mounted.current) {
@@ -104,7 +93,6 @@ export const MainElement: FC<BoxProps> = ({
         mounted.current = true;
         preview(getEmptyImage(), { captureDraggingState: true });
         return () => { mounted.current = false; };
-        //console.log(element);
     }, []);
 
     const [{ isOver }, drop] = useDrop(
@@ -118,7 +106,7 @@ export const MainElement: FC<BoxProps> = ({
                 if (item.type === ItemTypes.SIDE_ELEMENT) {
                     // Create a new and place it
                     rawCombine(dragId, item.element.name).then(() => {
-                        console.log('combined');
+                        logger.info('combined: ', dragId, item.element.name);
                     }).catch((e) => {
                         logger.error('Side element combining error', e);
                     });
@@ -130,7 +118,7 @@ export const MainElement: FC<BoxProps> = ({
                     moveBox(item.id, x, y);
                     if (dragId !== item.id) {
                         combine(dragId, item.id).then(() => {
-                            console.log('combined');
+                            logger.info('combined: ', dragId, item.id);
                         }).catch((e) => {
                             logger.error('Main element combining error', e);
                         });
@@ -138,7 +126,6 @@ export const MainElement: FC<BoxProps> = ({
                 }
             },
             canDrop: (item: DragItem, monitor) => {
-                console.log(`Can drop ${item.id} onto ${dragId}`, item.id);
                 if (monitor.getItem().id === dragId) {
                     return false;
                 }
@@ -169,11 +156,6 @@ export const MainElement: FC<BoxProps> = ({
         }
         // controls.start('error');
     };
-
-    //useEffect(() => {
-    //    setHasDropOver(isOver);
-    //    console.log(`IsOver changed ${isOver}`);
-    //}, [isOver]);
 
     useEffect(() => {
         (async () => {
@@ -319,11 +301,6 @@ export const MainElement: FC<BoxProps> = ({
 
     const controls = useAnimation();
 
-    console.log('variables', isDragging, control);
-    if (isDragging && hideSourceOnDrag && !control) {
-        return <div ref={drag} />;
-    }
-
     return (
         <ItemRenderer
             element={element}
@@ -358,7 +335,6 @@ export const MainElement: FC<BoxProps> = ({
             <Dropdown show={dropdownOpen} onToggle={(nextShow) => setDropdownOpen(nextShow)}>
                 <Dropdown.Menu>
                     {recipes.filter((item) => item.discovered).map((recipe) => {
-                        // console.log('element recipes', recipe);
                         if (recipe.a.name === '' || recipe.b.name === '') {
                             return (
                                 <Dropdown.Item key={`${recipe.result}`} href="#">

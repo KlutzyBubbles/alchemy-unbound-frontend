@@ -2,6 +2,7 @@ import { DropTargetMonitor, XYCoord } from 'react-dnd';
 import { DragItem } from '../types';
 import { BasicElement, Languages, Recipe, RecipeElement } from '../../common/types';
 import { languages } from '../../common/settings';
+import logger from 'electron-log/renderer';
 
 export function getXY(item: DragItem, monitor: DropTargetMonitor): XYCoord {
     const delta = monitor.getClientOffset() as XYCoord;
@@ -39,7 +40,7 @@ export async function getAllRecipes(): Promise<RecipeElement[]> {
         for (const name of namesUnique) {
             const recipes = data.filter((item) => item.result === name);
             if (recipes.length === 0) {
-                console.warn(`Invalid recipe data for name ${name}`);
+                logger.warn(`Invalid recipe data for name ${name}`);
             } else {
                 formattedData.push({
                     name: name,
@@ -69,38 +70,6 @@ export function mockElement(recipe: Recipe | BasicElement): RecipeElement {
         for (const language of languages) {
             unknowns[language] = '???';
         }
-        /*
-        console.log({
-            name: recipe.name,
-            display: recipe.display,
-            emoji: recipe.emoji,
-            recipes: [
-                {
-                    ...recipe,
-                    order: 0,
-                    result: recipe.name,
-                    a: {
-                        name: '',
-                        display: unknowns as Languages,
-                        emoji: '❓',
-                        depth: 0,
-                        first: 0,
-                        who_discovered: '',
-                        base: 0
-                    },
-                    b: {
-                        name: '',
-                        display: unknowns as Languages,
-                        emoji: '❓',
-                        depth: 0,
-                        first: 0,
-                        who_discovered: '',
-                        base: 0
-                    }
-                }
-            ]
-        });
-        */
         return {
             name: recipe.name,
             display: recipe.display,

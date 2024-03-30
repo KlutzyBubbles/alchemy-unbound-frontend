@@ -29,4 +29,4 @@ export interface Box {
     newDiscovery: boolean,
     error: number,
     element: RecipeElement
-  }
+}

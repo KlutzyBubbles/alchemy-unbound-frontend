@@ -9,7 +9,6 @@ import { arrayEquals } from '../../common/utils';
 
 export type SideElementProps = {
   element: RecipeElement
-  hideSourceOnDrag?: boolean
   removeBox: (id: string) => void,
   addBox: (element: RecipeElement, combining: boolean) => Promise<string>
   children?: ReactNode
@@ -18,17 +17,13 @@ export type SideElementProps = {
 const SideElementInternal: FC<SideElementProps> = ({
     element,
     addBox,
-    hideSourceOnDrag,
 }) => {
     const { playSound } = useContext(SoundContext);
     const elementRef = useRef<HTMLInputElement>(null);
-    const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_, drag, preview] = useDrag<DragItem, unknown, unknown>(
         () => ({
             type: ItemTypes.SIDE_ELEMENT,
-            end: () => {
-                // playSound('drop', 0.5);
-                // console.log('end');
-            },
             item: (monitor) => {
                 const elementPos = elementRef.current.getBoundingClientRect();
                 const mousePos = monitor.getInitialClientOffset();
@@ -42,9 +37,6 @@ const SideElementInternal: FC<SideElementProps> = ({
                 }
                 return { type: ItemTypes.SIDE_ELEMENT, element: element, offset: offset };
             },
-            collect: (monitor) => ({
-                isDragging: monitor.isDragging()
-            }),
             options: {
                 dropEffect: 'copy'
             },
@@ -62,9 +54,6 @@ const SideElementInternal: FC<SideElementProps> = ({
 
     const maxDepth = false;
 
-    if (isDragging && hideSourceOnDrag) {
-        return <div ref={drag} />;
-    }
     return (
         <ItemRenderer
             ref={(ref) => {

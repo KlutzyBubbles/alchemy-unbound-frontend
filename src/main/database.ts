@@ -21,14 +21,18 @@ export function getPlaceholderOrder(): number {
     return temp;
 }
 
+async function saveToFile(filename: string, fullpath = false) {
+    await fs.writeFile(fullpath ? filename : getFolder() + filename, JSON.stringify({
+        version: DATABASE_VERISON,
+        data: compress(data.filter((item) => item.discovered))
+    }), 'utf-8');
+}
+
 export async function save(): Promise<void> {
     if (!(await dirExists(getFolder()))) {
         await fs.mkdir(getFolder(), { recursive: true });
     }
-    await fs.writeFile(getFolder() + 'db.json', JSON.stringify({
-        version: DATABASE_VERISON,
-        data: compress(data.filter((item) => item.discovered))
-    }), 'utf-8');
+    await saveToFile('db.json');
     //let existing: RecipeRow[] = [];
     //try {
     //    if (fileExists(getFolder() + 'db.json')) {
@@ -137,14 +141,9 @@ export async function resetAndBackup(): Promise<void> {
     if (!(await dirExists(getFolder()))) {
         await fs.mkdir(getFolder(), { recursive: true });
     }
-    console.log('Resetting');
-    await fs.writeFile(getFolder() + `db_backup_${Math.floor((new Date()).getTime() / 1000)}.backup`, JSON.stringify({
-        version: DATABASE_VERISON,
-        data: compress(data.filter((item) => item.discovered))
-    }), 'utf-8');
+    await saveToFile(`db_backup_${Math.floor((new Date()).getTime() / 1000)}.backup`);
     data = structuredClone(baseData) as RecipeRow[];
     await save();
-    console.log('resetted and saved');
     setDatabaseOrder();
 }
 
@@ -238,10 +237,7 @@ export async function exportDatabase(): Promise<boolean> {
         return false;
     }
     try {
-        await fs.writeFile(fileDialog.filePath, JSON.stringify({
-            version: DATABASE_VERISON,
-            data: compress(data.filter((item) => item.discovered))
-        }), 'utf-8');
+        saveToFile(fileDialog.filePath, true);
         return true;
     } catch (e) {
         throw new Error('Failed to save database file');

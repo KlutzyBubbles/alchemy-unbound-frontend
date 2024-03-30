@@ -31,7 +31,6 @@ export const ContentContainer: FC = () => {
 
     useEffect(() => {
         (async () => {
-            //console.log('Settings updated to', settings);
             setParticleReady(false);
             setCurrentParticles(options[settings.background](settings.theme, settings.fps));
             await initParticlesEngine(async (engine) => {
@@ -77,7 +76,7 @@ export const ContentContainer: FC = () => {
                             id="backgroundParticles"
                             options={currentParticles}
                         /> : <Fragment/>}
-                        <DropContainer hideSourceOnDrag={false} openModal={openModal}/>
+                        <DropContainer openModal={openModal}/>
                     </Row>
                     <SettingsModal show={currentModal === 'settings'} handleHide={handleModalClose} />
                     <InfoModal show={currentModal === 'info'} handleHide={handleModalClose} />

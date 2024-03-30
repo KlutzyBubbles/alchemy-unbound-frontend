@@ -9,8 +9,6 @@ import { LoadingProvider } from './providers/LoadingProvider';
 import { SoundProvider } from './providers/SoundProvider';
 import log from 'electron-log/renderer';
 import { UpdateProvider } from './providers/UpdateProvider';
-// import { StatsProvider } from './providers/StatsProvider';
-// import { ElementsProvider } from './providers/ElementProvider';
 import { InfoProvider } from './providers/InfoProvider';
 
 export type ModalOption = 'settings' | 'info' | 'none'
