@@ -81,7 +81,11 @@ export enum ErrorCode {
     AB_NOT_KNOWN = 4,
     STEAM_TICKET_INVALID = 5,
     TOKEN_EXPIRED = 6,
-    STEAM_SERVERS_DOWN = 7
+    STEAM_SERVERS_DOWN = 7,
+    AB_NUMBER = 8,
+    MAX_DEPTH = 9,
+    STEAM_ERROR = 10,
+    ITEM_UNKNOWN = 11
 }
 
 export type SoundFile = 'new-discovery' | 'first-discovery' | 'pickup' | 'side-drop' | 'drop'

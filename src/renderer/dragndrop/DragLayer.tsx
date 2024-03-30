@@ -49,24 +49,6 @@ export const CustomDragLayer: FC<Record<string, never>> = () => {
         }
     }
 
-    //const [tickThrottle, setTickThrottle] = useState(false);
-    //setInterval(() => {
-    //    setTickThrottle(!tickThrottle);
-    //}, 700);
-
-    ////Throttling with useMemo hook
-    //const throttledDataVisdsualizator = useMemo(
-    //    () => <div style={layerStyles} className='h-100 w-100 z-dragLayer'>
-    //        {renderItem()}
-    //    </div>,
-    //    [tickThrottle]
-    //);
-    //return (
-    //    <>
-    //        {throttledDataVisdsualizator}
-    //    </>
-    //);
-
     return (
         <div style={layerStyles} className='h-100 w-100 z-dragLayer'>
             {renderItem()}

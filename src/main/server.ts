@@ -35,8 +35,8 @@ async function refreshToken(): Promise<TokenHolder> {
         if (token.expiryDate < (new Date()).getTime() + 600000) {
             let response: Response | undefined = undefined;
             try {
-                console.log('token request url', `${endpoint}/session?${token.token}`);
-                response = await fetch(`${endpoint}/session?${token.token}`, {
+                console.log('token request url', `${endpoint}/session?token=${token.token}`);
+                response = await fetch(`${endpoint}/session?token=${token.token}`, {
                     method: 'GET',
                 });
             } catch(e) {
@@ -60,13 +60,15 @@ async function refreshToken(): Promise<TokenHolder> {
             } else {
                 const json = (await response.json()) as RequestErrorResult;
                 if (json.code === ErrorCode.QUERY_INVALID || json.code === ErrorCode.QUERY_UNDEFINED || json.code === ErrorCode.QUERY_MISSING) {
-                    throw(`Unknown issue with input token: ${json.code}`);
+                    throw(`Unknown issue with input token or language: ${json.code}`);
                 } else if (json.code === ErrorCode.STEAM_TICKET_INVALID) {
                     throw('Issue with steam ticket');
                 } else if (json.code === ErrorCode.STEAM_SERVERS_DOWN) {
                     throw('Steam servers are down');
+                } else if (json.code === ErrorCode.STEAM_ERROR) {
+                    throw('Issue validating ticket');
                 }
-                throw('Unknown error');
+                throw(`Unknown error: ${json.code}`);
             }
         } else {
             return token;
