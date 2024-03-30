@@ -60,7 +60,7 @@ async function refreshToken(): Promise<TokenHolder> {
             } else {
                 const json = (await response.json()) as RequestErrorResult;
                 if (json.code === ErrorCode.QUERY_INVALID || json.code === ErrorCode.QUERY_UNDEFINED || json.code === ErrorCode.QUERY_MISSING) {
-                    throw(`Unknown issue with input token or language: ${json.code}`);
+                    throw(`Issue with input token or language: ${json.code}`);
                 } else if (json.code === ErrorCode.STEAM_TICKET_INVALID) {
                     throw('Issue with steam ticket');
                 } else if (json.code === ErrorCode.STEAM_SERVERS_DOWN) {
