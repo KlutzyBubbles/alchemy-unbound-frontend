@@ -62,10 +62,8 @@ export const DropContainer: FC<ContainerProps> = ({
     }, []);
 
     useEffect(() => {
-        console.log('LSHOULC PDAUTE', shouldUpdate);
         (async () => {
             if (shouldUpdate) {
-                console.log('LSHOULC PDAUTE');
                 await refreshRecipes();
                 setBoxes(() => { return {}; });
                 setShouldUpdate(false);
@@ -145,12 +143,12 @@ export const DropContainer: FC<ContainerProps> = ({
         recipe: Recipe,
         recipes: Recipe[]
     }> => {
-        console.log(`backendCombine(${aName}, ${bName})`);
+        logger.debug(`backendCombine(${aName}, ${bName})`);
         const combined: CombineOuput | undefined = await window.RecipeAPI.combine(aName, bName);
         if (combined === undefined) {
             throw Error('Unknown error occurred while combining');
         } else {
-            console.log('Found recipe', combined);
+            logger.debug('Found recipe', combined);
             if (combined.recipe.result === '69') {
                 window.SteamAPI.activateAchievement('nice');
             }
@@ -180,17 +178,17 @@ export const DropContainer: FC<ContainerProps> = ({
                 }
             }
             const elementList = elements.filter((value) => value.name === combined.recipe.result);
-            console.log('found elements', elementList);
+            logger.debug('found elements', elementList);
             let recipes: Recipe[] = [];
             if (elementList.length === 0) {
-                //console.log('No existing element found');
+                logger.debug('No existing element found');
                 recipes.push(combined.recipe);
             } else {
                 if (elementList.length > 1) {
-                    console.warn('Elements list is more than 1, it should only be 1');
+                    logger.warn('Elements list is more than 1, it should only be 1');
                 }
                 const element = elementList[0];
-                console.log('time to check', element.recipes);
+                logger.debug('time to check', element.recipes);
                 recipes = element.recipes;
                 let recipeExists = false;
                 let newResultCount = 0;
@@ -202,7 +200,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 }
                 for (const r of element.recipes) {
                     if (((r.a.name === combined.recipe.a.name && r.b.name === combined.recipe.b.name) || (r.a.name === combined.recipe.b.name && r.b.name === combined.recipe.a.name))) {
-                        console.log('recipeExists', r, combined.recipe);
+                        logger.debug('recipeExists', r, combined.recipe);
                         if (combined.newDiscovery && newResultCount <= 1) {
                             newResult = true;
                         }
@@ -220,7 +218,6 @@ export const DropContainer: FC<ContainerProps> = ({
                         stats.aiResultsFound += 1;
                     }
                 }
-                console.log('recipessss', recipes);
             }
             stats.itemsCombined += 1;
             unlockCheck(stats);
@@ -241,13 +238,12 @@ export const DropContainer: FC<ContainerProps> = ({
         } = {};
         await new Promise<void>((resolve) => {
             setBoxes((boxes) => {
-                console.log(`combineInternal(${a}, ${name})`, boxes);
+                logger.debug(`rawCombine(${a}, ${bName})`, boxes);
                 workingBoxes = boxes;
                 resolve();
                 return boxes;
             });
         });
-        //console.log(`rawCombine(${a}, ${bName})`, boxes);
         if (hasProp(workingBoxes, a)) {
             try {
                 mergeState(a, undefined, 'loading', true);
@@ -285,7 +281,6 @@ export const DropContainer: FC<ContainerProps> = ({
     };
 
     const stopState = async (key: string, state: keyof Box) => {
-        //console.log(`stopState(${key}, ${state})`, boxes);
         if (hasProp(boxes, key)) {
             try {
                 mergeState(key, undefined, state, false);
@@ -301,28 +296,27 @@ export const DropContainer: FC<ContainerProps> = ({
         } = {};
         await new Promise<void>((resolve) => {
             setBoxes((boxes) => {
-                console.log(`combineInternal(${a}, ${b})`, boxes);
+                logger.debug(`combineInternal(${a}, ${b})`, boxes);
                 workingBoxes = boxes;
                 resolve();
                 return boxes;
             });
         });
-        console.log(`combine(${a}, ${b})`, workingBoxes);
-        console.log(hasProp(workingBoxes, a), hasProp(workingBoxes, b));
+        logger.debug(`combine(${a}, ${b})`, workingBoxes);
         if (hasProp(workingBoxes, a) && hasProp(workingBoxes, b)) {
             try {
                 mergeState(a, b, 'loading', true);
                 const { recipe, recipes, newDiscovery, firstDiscovery } = await backendCombine(workingBoxes[a].element.name, workingBoxes[b].element.name);
                 mergeState(a, b, 'loading', false);
                 playSound('drop', 0.5);
-                console.log('updatingboxes', {
+                logger.debug('updatingboxes', {
                     name: recipe.result,
                     display: recipe.display,
                     emoji: recipe.emoji,
                     recipes: recipes
                 });
                 const updatedRecipes = await window.RecipeAPI.getRecipesFor(recipe.result);
-                console.log('Resulintg updaterd recipes', recipe.result, updatedRecipes);
+                logger.debug('Resulintg updaterd recipes', recipe.result, updatedRecipes);
                 setBoxes((boxes) => {
                     const temp = update(boxes, {
                         [a]: {
@@ -356,8 +350,6 @@ export const DropContainer: FC<ContainerProps> = ({
     const removeBox = useCallback((id: string) => {
         setBoxes((boxes) => {
             if (hasProp(boxes, id)) {
-                console.log('setting boxes', boxes);
-                //console.log('Setting for remove');
                 const temp = {...boxes};
                 if (hasProp(boxes, id)) {
                     delete temp[id];
@@ -370,9 +362,7 @@ export const DropContainer: FC<ContainerProps> = ({
 
     const moveBox = useCallback((id: string, left: number, top: number): Promise<void> => {
         return new Promise((resolve) => {
-            //console.log(`moving ${id}`);
             setBoxes((boxes) => {
-                //console.log('MErging for move');
                 if (hasProp(boxes, id)) {
                     resolve();
                     return update(boxes, {
@@ -408,7 +398,6 @@ export const DropContainer: FC<ContainerProps> = ({
                 };
             });
             const wait: () => void = () => {
-                //console.log('waiting');
                 setBoxes((value) => {
                     if (hasProp(value, newId)) {
                         resolve(newId);
@@ -448,7 +437,6 @@ export const DropContainer: FC<ContainerProps> = ({
                     return;
                 }
                 let { x, y } = getXY(item, monitor);
-                console.log('dropped', item);
                 if (item.type === ItemTypes.SIDE_ELEMENT) {
                     // Create a new and place it
                     if (item.offset !== undefined) {
@@ -548,9 +536,9 @@ export const DropContainer: FC<ContainerProps> = ({
         (async () => {
             try {
                 const token = await window.RecipeAPI.getToken();
-                console.warn('Found token', token);
+                logger.warn('Found token', token);
             } catch (e) { 
-                console.error('Failed getting token', e);
+                logger.error('Failed getting token', e);
             }
         })();
     };
