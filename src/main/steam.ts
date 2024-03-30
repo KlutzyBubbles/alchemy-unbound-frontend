@@ -54,11 +54,11 @@ export function getFolder() {
     // windows
     if (process.env.APPDATA)
         return `${process.env.APPDATA}\\..\\LocalLow\\KlutzyBubbles\\${APP_ID}\\${steamId}\\`;
-  
+
     // macOS
     if (process.platform == 'darwin')
         return `${process.env.HOME}/Library/Application Support/KlutzyBubbles/${APP_ID}/${steamId}/`;
-  
+
     // linux / all others
     return `~/KlutzyBubbles/${APP_ID}/${steamId}/`;
 }

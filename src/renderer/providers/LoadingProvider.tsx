@@ -5,6 +5,7 @@ import logger from 'electron-log/renderer';
 import { unlockCheck } from '../utils/achievements';
 import { InfoContext } from './InfoProvider';
 import { SUPPORTER_DLC } from '../../common/types';
+import { DEFAULT_SETTINGS } from '../../common/settings';
 
 export const LoadingContext = createContext<{
     loading: boolean
@@ -34,8 +35,10 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
                 } catch (e) {
                     logger.error('Failed to load production check', e);
                 }
+                let hasSupporterTheme = false;
                 try {
-                    setHasSupporterTheme(await window.SteamAPI.isDlcInstalled(SUPPORTER_DLC));
+                    hasSupporterTheme = await window.SteamAPI.isDlcInstalled(SUPPORTER_DLC);
+                    setHasSupporterTheme(hasSupporterTheme);
                 } catch (e) {
                     logger.error('Failed to load production check', e);
                 }
@@ -44,7 +47,10 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
                     if (settings === undefined || settings === null) {
                         throw new Error('getSettings returned undefined');
                     }
-                    logger.info('Setting settings from load', settings);
+                    logger.info('Setting settings from load', settings, hasSupporterTheme);
+                    if (settings.theme === 'supporter' && !hasSupporterTheme) {
+                        settings.theme = DEFAULT_SETTINGS.theme;
+                    }
                     setSettings(settings);
                 } catch (e) {
                     logger.error('Failed to load settings in loader (oops)', e);

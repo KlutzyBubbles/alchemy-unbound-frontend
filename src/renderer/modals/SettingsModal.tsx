@@ -8,6 +8,7 @@ import { IoVolumeHighOutline, IoVolumeLowOutline, IoVolumeMediumOutline, IoVolum
 import { ConfirmModal } from './ConfirmDialog';
 import logger from 'electron-log/renderer';
 import { UpdateContext } from '../providers/UpdateProvider';
+import { InfoContext } from '../providers/InfoProvider';
 
 export interface SettingsModalProps {
   show: boolean
@@ -35,6 +36,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     const [errorText, setErrorText] = useState<string>('');
     const [successText, setSuccessText] = useState<string>('');
     const { setShouldUpdate } = useContext(UpdateContext);
+    const { hasSupporterTheme } = useContext(InfoContext);
 
     useEffect(() => {
         (async() => {
@@ -290,7 +292,13 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                             <div className='col-6 col-md- col-lg-9'>
                                 <div className="btn-group" role="group">
                                     {
-                                        ThemeTypeList.map((type) => {
+                                        ThemeTypeList.filter((item) => {
+                                            if (item === 'supporter') {
+                                                return hasSupporterTheme;
+                                            } else {
+                                                return true;
+                                            }
+                                        }).map((type) => {
                                             return (
                                                 <Fragment 
                                                     key={`${type}Theme`}>
