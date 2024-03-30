@@ -3,7 +3,7 @@ import { CombineOuput, ErrorCode, Recipe, TokenHolder } from '../common/types';
 import { getPlaceholderOrder, getRecipe, insertRecipeRow, save, setDiscovered, traverseAndFill } from './database';
 import { isPackaged } from './generic';
 import { getSettings } from './settings';
-import { getWebAuthTicket } from './steam';
+import { getSteamGameLanguage, getWebAuthTicket } from './steam';
 import fetch, { Response } from 'electron-fetch';
 
 export type RequestErrorResult = {
@@ -60,7 +60,7 @@ async function refreshToken(): Promise<TokenHolder> {
             } else {
                 const json = (await response.json()) as RequestErrorResult;
                 if (json.code === ErrorCode.QUERY_INVALID || json.code === ErrorCode.QUERY_UNDEFINED || json.code === ErrorCode.QUERY_MISSING) {
-                    throw('Unknown issue with input token');
+                    throw(`Unknown issue with input token: ${json.code}`);
                 } else if (json.code === ErrorCode.STEAM_TICKET_INVALID) {
                     throw('Issue with steam ticket');
                 } else if (json.code === ErrorCode.STEAM_SERVERS_DOWN) {
@@ -80,7 +80,7 @@ async function createToken(): Promise<TokenHolder> {
     console.log(`${endpoint}/session?steamToken=${ticket.getBytes().toString('hex')}`);
     let response: Response | undefined = undefined;
     try {
-        response = await fetch(`${endpoint}/session?steamToken=${ticket.getBytes().toString('hex')}`, {
+        response = await fetch(`${endpoint}/session?steamToken=${ticket.getBytes().toString('hex')}&steamLanguage=${getSteamGameLanguage()}`, {
             method: 'POST',
         });
     } catch(e) {

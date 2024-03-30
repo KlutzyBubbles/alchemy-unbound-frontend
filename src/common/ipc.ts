@@ -9,7 +9,8 @@ export enum RecipeChannel {
     RESET = 'recipe:reset',
     IMPORT = 'recipe:import',
     EXPORT = 'recipe:export',
-    BASE_HINT = 'recipe:baseHint'
+    BASE_HINT = 'recipe:baseHint',
+    GET_TOKEN = 'recipe:getToken'
 }
 
 export enum SettingsChannel {

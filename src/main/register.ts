@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import { Recipe } from '../common/types';
 import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, importFile, exportDatabase, getRecipesFor, getBaseHint } from './database';
-import { combine } from './server';
+import { combine, getToken } from './server';
 import { DisplayChannel, GenericChannel, RecipeChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
 import { Settings } from '../common/settings';
 import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './settings';
@@ -46,6 +46,9 @@ export function register() {
     });
     ipcMain.handle(RecipeChannel.BASE_HINT, async () => {
         return getBaseHint();
+    });
+    ipcMain.handle(RecipeChannel.GET_TOKEN, async () => {
+        return getToken();
     });
 
     // Settings handlers

@@ -8,7 +8,7 @@ import { CombineOuput, Recipe, RecipeElement } from '../../common/types';
 import { CustomDragLayer } from './DragLayer';
 import Split from 'react-split';
 import { SideContainer } from './SideContainer';
-import { IoCloudOfflineOutline, IoHelpOutline, IoInformationCircleOutline, IoSettingsOutline } from 'react-icons/io5';
+import { IoBandageOutline, IoCloudOfflineOutline, IoHelpOutline, IoInformationCircleOutline, IoSettingsOutline } from 'react-icons/io5';
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../Main';
 import { Box, DragItem, ItemTypes } from '../types';
@@ -549,6 +549,17 @@ export const DropContainer: FC<ContainerProps> = ({
             mainElement.current.focus();
         }
     };
+
+    const devClick = () => {
+        (async () => {
+            try {
+                const token = await window.RecipeAPI.getToken();
+                console.warn('Found token', token);
+            } catch (e) { 
+                console.error('Failed getting token', e);
+            }
+        })();
+    };
   
     const hintShow = () => {
         setHintOpen(true);
@@ -620,6 +631,9 @@ export const DropContainer: FC<ContainerProps> = ({
                                 <IoSettingsOutline/>
                             </motion.div>
                             <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('info')}><IoInformationCircleOutline /></div>
+                            {isProduction ? (<Fragment/>) : (
+                                <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={devClick}><IoBandageOutline /></div>
+                            )}
                             {isProduction ? (<Fragment/>) : (
                                 <div className="hint-drop dropstart float-end mb-2 fs-2">
                                     <button className="btn btn-secondary btn btn-info fs-2 p-2 d-flex" type="button" data-bs-toggle="dropdown" aria-expanded="false" onClick={() => hintShow()} onBlur={() => setHintOpen(false)}>
