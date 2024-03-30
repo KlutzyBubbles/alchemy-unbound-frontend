@@ -103,6 +103,25 @@ async function loadData(): Promise<RecipeRow[]> {
 
 export async function createDatabase(): Promise<void> {
     try {
+        // PRERELEASE -------------------------- REMOVE ON RELEASE
+        if (!(await dirExists(getFolder()))) {
+            await fs.mkdir(getFolder(), { recursive: true });
+        }
+        try {
+            JSON.parse(await fs.readFile(getFolder() + 'prerelease.json', 'utf-8'));
+        } catch (e) {
+            if (e.code === 'ENOENT') {
+                logger.info('No prerelease file found, creating');
+                await fs.writeFile(getFolder() + 'prerelease.json', JSON.stringify({
+                    data: 'DO NOT REMOVE ME',
+                    version: 1
+                }), 'utf-8');
+            } else {
+                logger.error(`Failed to read prerlease file with error ${e.code}`);
+                throw e;
+            }
+        }
+        // PRERELEASE -------------------------- REMOVE ON RELEASE
         data = await loadData();
     } catch(e) {
         logger.error(`Failed to load database '${e.message}'`);

@@ -1,7 +1,7 @@
 import { useState, type FC, useEffect, useContext, Fragment, ChangeEventHandler } from 'react';
 import { Alert, Button, Collapse, Form, Modal } from 'react-bootstrap';
 import { SettingsContext } from '../providers/SettingsProvider';
-import { BackgroundType, BackgroundTypeList, DEFAULT_SETTINGS, Language, languageDisplay, languages } from '../../common/settings';
+import { BackgroundType, BackgroundTypeList, ThemeType, ThemeTypeList, DEFAULT_SETTINGS, Language, languageDisplay, languages } from '../../common/settings';
 import { getFromStore } from '../language';
 import { LoadingContext } from '../providers/LoadingProvider';
 import { IoVolumeHighOutline, IoVolumeLowOutline, IoVolumeMediumOutline, IoVolumeMuteOutline } from 'react-icons/io5';
@@ -23,7 +23,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     const [displays, setDisplays] = useState<Electron.Display[]>([]);
     const [currentDisplay, setCurrentDisplay] = useState<Electron.Display>(undefined);
     const [fullscreen, setFullscreen] = useState<boolean>(settings?.fullscreen ?? DEFAULT_SETTINGS.fullscreen);
-    const [darkMode, setDarkMode] = useState<boolean>(settings?.dark ?? DEFAULT_SETTINGS.dark);
+    const [theme, setTheme] = useState<ThemeType>(settings?.theme ?? DEFAULT_SETTINGS.theme);
     const [offline, setOffline] = useState<boolean>(settings?.offline ?? DEFAULT_SETTINGS.offline);
     const [background, setBackground] = useState<BackgroundType>(settings?.background ?? DEFAULT_SETTINGS.background);
     const [language, setLanguage] = useState<Language>(settings?.language ?? DEFAULT_SETTINGS.language);
@@ -55,7 +55,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                 if (display !== undefined && settings.fullscreen) {
                     setCurrentDisplay(display);
                 }
-                setDarkMode(settings.dark);
+                setTheme(settings.theme);
                 setBackground(settings.background);
                 setLanguage(settings.language);
             }
@@ -79,18 +79,18 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     useEffect(() => {
         (async() => {
             try {
-                if (!darkMode) {
+                if (theme === 'light') {
                     window.SteamAPI.activateAchievement('flashbang');
                 }
                 setSettings({
                     ...settings,
-                    dark: darkMode
+                    theme: theme
                 });
             } catch (e) {
                 logger.error('Failed to change darkMode', e);
             }
         })();
-    }, [darkMode]);
+    }, [theme]);
 
     useEffect(() => {
         (async() => {
@@ -177,6 +177,10 @@ export const SettingsModal: FC<SettingsModalProps> = ({
         setBackground(e.currentTarget.value as BackgroundType);
     };
 
+    const onThemeChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+        setTheme(e.currentTarget.value as ThemeType);
+    };
+
     const handleHideInside = () => {
         setSettings({
             ...settings,
@@ -246,8 +250,8 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                 <h5>{getFromStore('resetTitle', settings.language)}</h5>
                 <p>{getFromStore('resetText', settings.language)}</p>
             </ConfirmModal>
-            <Modal show={show} onHide={handleHideInside} centered size="xl" data-bs-theme={darkMode ? 'dark' : 'light'}>
-                <Modal.Header closeButton data-bs-theme={darkMode ? 'dark' : 'light'}>
+            <Modal show={show} onHide={handleHideInside} centered size="xl" data-bs-theme={theme}>
+                <Modal.Header closeButton data-bs-theme={theme}>
                     <Modal.Title>{getFromStore('settings', settings.language)}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -274,16 +278,36 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                         <div className='row'>
                             <div className='col-12'>
                                 <div className="form-check form-switch form-switch-lg">
-                                    <input className="form-check-input" type="checkbox" role="switch" id="setDarkMode" onChange={() => setDarkMode(!darkMode)} checked={darkMode}/>
-                                    <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setDarkMode">{getFromStore('darkMode', settings.language)}</label>
+                                    <input className="form-check-input" type="checkbox" role="switch" id="setOffline" onChange={() => setOffline(!offline)} checked={offline}/>
+                                    <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setOffline">{getFromStore('offline', settings.language)}</label>
                                 </div>
                             </div>
                         </div>
-                        <div className='row'>
-                            <div className='col-12'>
-                                <div className="form-check form-switch form-switch-lg">
-                                    <input className="form-check-input" type="checkbox" role="switch" id="setOffline" onChange={() => setOffline(!offline)} checked={offline}/>
-                                    <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setOffline">{getFromStore('offline', settings.language)}</label>
+                        <div className='row mb-4'>
+                            <div className='col-6 col-md-5 col-lg-3 pt-1'>
+                                <h5 className='text-end'>{getFromStore('theme', settings.language)}</h5>
+                            </div>
+                            <div className='col-6 col-md- col-lg-9'>
+                                <div className="btn-group" role="group">
+                                    {
+                                        ThemeTypeList.map((type) => {
+                                            return (
+                                                <Fragment 
+                                                    key={`${type}Theme`}>
+                                                    <input
+                                                        type="radio"
+                                                        className="btn-check"
+                                                        key={`${type}Theme`}
+                                                        name={`${type}Theme`}
+                                                        id={`${type}Theme`}
+                                                        value={type}
+                                                        onChange={onThemeChange}
+                                                        checked={theme === type}/>
+                                                    <label className="btn btn-outline-primary" htmlFor={`${type}Theme`}>{getFromStore(`${type}Theme`, settings.language)}</label>
+                                                </Fragment>
+                                            );
+                                        })
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -292,7 +316,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                 <h5 className='text-end'>{getFromStore('background', settings.language)}</h5>
                             </div>
                             <div className='col-6 col-md- col-lg-9'>
-                                <div className="btn-group" role="group" aria-label="Basic outlined example">
+                                <div className="btn-group" role="group">
                                     {
                                         BackgroundTypeList.map((type) => {
                                             return (

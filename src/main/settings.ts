@@ -4,7 +4,7 @@ import { dirExists } from './utils';
 import { DEFAULT_SETTINGS, RawSettings, Settings } from '../common/settings';
 import logger from 'electron-log/main';
 
-const SETTINGS_VERISON = 1;
+const SETTINGS_VERISON = 2;
 
 let settings: Settings = DEFAULT_SETTINGS;
 let loaded = false;
@@ -24,7 +24,35 @@ export async function saveSettings(): Promise<void> {
 }
 
 function loadV1(loaded: RawSettings) {
-    settings = loaded;
+    settings = {
+        theme: loaded.theme ?? ((loaded.dark ?? true) ? 'dark' : 'light'),
+        fullscreen: loaded.fullscreen,
+        offline: loaded.offline,
+        currentDisplay: loaded.currentDisplay,
+        background: loaded.background,
+        sidebar: loaded.sidebar,
+        language: loaded.language,
+        languageSet: loaded.languageSet,
+        volume: loaded.volume,
+        muted: loaded.muted,
+        fps: loaded.fps
+    };
+}
+
+function loadV2(loaded: RawSettings) {
+    settings = {
+        theme: loaded.theme ?? ((loaded.dark ?? true) ? 'dark' : 'light'),
+        fullscreen: loaded.fullscreen,
+        offline: loaded.offline,
+        currentDisplay: loaded.currentDisplay,
+        background: loaded.background,
+        sidebar: loaded.sidebar,
+        language: loaded.language,
+        languageSet: loaded.languageSet,
+        volume: loaded.volume,
+        muted: loaded.muted,
+        fps: loaded.fps
+    };
 }
 
 export async function loadSettings(): Promise<void> {
@@ -33,6 +61,10 @@ export async function loadSettings(): Promise<void> {
         if (raw.version === 1) {
             logger.info('Found settings V1', raw.settings);
             loadV1(raw.settings);
+            loaded = true;
+        } else if (raw.version === 2) {
+            logger.info('Found settings V2', raw.settings);
+            loadV2(raw.settings);
             loaded = true;
         } else {
             logger.error(`Failed to load settings because of unknown version '${raw.version}', has this been altered?`);

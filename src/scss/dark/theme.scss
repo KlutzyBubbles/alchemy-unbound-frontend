@@ -1,0 +1,179 @@
+[data-bs-theme="dark"] {
+    @import "../../../node_modules/bootstrap/scss/functions";
+    @import "./variables.scss";
+    @import "../../../node_modules/bootstrap/scss/variables";
+
+    @import "../../../node_modules/bootstrap/scss/bootstrap";
+
+    @import "../common.scss";
+    
+    * {
+        // scss-docs-start modal-css-vars
+        --#{$prefix}modal-zindex: #{$zindex-modal};
+        --#{$prefix}modal-width: #{$modal-md};
+        --#{$prefix}modal-padding: #{$modal-inner-padding};
+        --#{$prefix}modal-margin: #{$modal-dialog-margin};
+        --#{$prefix}modal-color: #{$modal-content-color};
+        --#{$prefix}modal-bg: #{$modal-content-bg};
+        --#{$prefix}modal-border-color: #{$modal-content-border-color};
+        --#{$prefix}modal-border-width: #{$modal-content-border-width};
+        --#{$prefix}modal-border-radius: #{$modal-content-border-radius};
+        --#{$prefix}modal-box-shadow: #{$modal-content-box-shadow-xs};
+        --#{$prefix}modal-inner-border-radius: #{$modal-content-inner-border-radius};
+        --#{$prefix}modal-header-padding-x: #{$modal-header-padding-x};
+        --#{$prefix}modal-header-padding-y: #{$modal-header-padding-y};
+        --#{$prefix}modal-header-padding: #{$modal-header-padding}; // Todo in v6: Split this padding into x and y
+        --#{$prefix}modal-header-border-color: #{$modal-header-border-color};
+        --#{$prefix}modal-header-border-width: #{$modal-header-border-width};
+        --#{$prefix}modal-title-line-height: #{$modal-title-line-height};
+        --#{$prefix}modal-footer-gap: #{$modal-footer-margin-between};
+        --#{$prefix}modal-footer-bg: #{$modal-footer-bg};
+        --#{$prefix}modal-footer-border-color: #{$modal-footer-border-color};
+        --#{$prefix}modal-footer-border-width: #{$modal-footer-border-width};
+        // scss-docs-end modal-css-vars
+
+        // TABLES
+        --#{$prefix}table-color-type: initial;
+        --#{$prefix}table-bg-type: initial;
+        --#{$prefix}table-color-state: initial;
+        --#{$prefix}table-bg-state: initial;
+        // End of reset
+        --#{$prefix}table-color: #{$table-color};
+        --#{$prefix}table-bg: #{$table-bg};
+        --#{$prefix}table-border-color: #{$table-border-color};
+        --#{$prefix}table-accent-bg: #{$table-accent-bg};
+        --#{$prefix}table-striped-color: #{$table-striped-color};
+        --#{$prefix}table-striped-bg: #{$table-striped-bg};
+        --#{$prefix}table-active-color: #{$table-active-color};
+        --#{$prefix}table-active-bg: #{$table-active-bg};
+        --#{$prefix}table-hover-color: #{$table-hover-color};
+        --#{$prefix}table-hover-bg: #{$table-hover-bg};
+    }
+
+    // ---------------------------------
+    // COPIED FROM BOOTSTRAP DO NOT EDIT
+    @each $color, $value in $colors {
+        --#{$prefix}#{$color}: #{$value};
+    }
+
+    @each $color, $value in $grays {
+        --#{$prefix}gray-#{$color}: #{$value};
+    }
+
+    @each $color, $value in $theme-colors {
+        --#{$prefix}#{$color}: #{$value};
+    }
+
+    @each $color, $value in $theme-colors-rgb {
+        --#{$prefix}#{$color}-rgb: #{$value};
+    }
+
+    @each $color, $value in $theme-colors-text {
+        --#{$prefix}#{$color}-text-emphasis: #{$value};
+    }
+
+    @each $color, $value in $theme-colors-bg-subtle {
+        --#{$prefix}#{$color}-bg-subtle: #{$value};
+    }
+
+    @each $color, $value in $theme-colors-border-subtle {
+        --#{$prefix}#{$color}-border-subtle: #{$value};
+    }
+
+    --#{$prefix}white-rgb: #{to-rgb($white)};
+    --#{$prefix}black-rgb: #{to-rgb($black)};
+
+    // Fonts
+
+    // Note: Use `inspect` for lists so that quoted items keep the quotes.
+    // See https://github.com/sass/sass/issues/2383#issuecomment-336349172
+    --#{$prefix}font-sans-serif: #{inspect($font-family-sans-serif)};
+    --#{$prefix}font-monospace: #{inspect($font-family-monospace)};
+    --#{$prefix}gradient: #{$gradient};
+
+    // Root and body
+    // scss-docs-start root-body-variables
+    @if $font-size-root !=null {
+        --#{$prefix}root-font-size: #{$font-size-root};
+    }
+
+    --#{$prefix}body-font-family: #{inspect($font-family-base)};
+    @include rfs($font-size-base, --#{$prefix}body-font-size);
+    --#{$prefix}body-font-weight: #{$font-weight-base};
+    --#{$prefix}body-line-height: #{$line-height-base};
+
+    @if $body-text-align !=null {
+        --#{$prefix}body-text-align: #{$body-text-align};
+    }
+
+    --#{$prefix}body-color: #{$body-color};
+    --#{$prefix}body-color-rgb: #{to-rgb($body-color)};
+    --#{$prefix}body-bg: #{$body-bg};
+    --#{$prefix}body-bg-rgb: #{to-rgb($body-bg)};
+
+    --#{$prefix}emphasis-color: #{$body-emphasis-color};
+    --#{$prefix}emphasis-color-rgb: #{to-rgb($body-emphasis-color)};
+
+    --#{$prefix}secondary-color: #{$body-secondary-color};
+    --#{$prefix}secondary-color-rgb: #{to-rgb($body-secondary-color)};
+    --#{$prefix}secondary-bg: #{$body-secondary-bg};
+    --#{$prefix}secondary-bg-rgb: #{to-rgb($body-secondary-bg)};
+
+    --#{$prefix}tertiary-color: #{$body-tertiary-color};
+    --#{$prefix}tertiary-color-rgb: #{to-rgb($body-tertiary-color)};
+    --#{$prefix}tertiary-bg: #{$body-tertiary-bg};
+    --#{$prefix}tertiary-bg-rgb: #{to-rgb($body-tertiary-bg)};
+    // scss-docs-end root-body-variables
+
+    --#{$prefix}heading-color: #{$headings-color};
+
+    --#{$prefix}link-color: #{$link-color};
+    --#{$prefix}link-color-rgb: #{to-rgb($link-color)};
+    --#{$prefix}link-decoration: #{$link-decoration};
+
+    --#{$prefix}link-hover-color: #{$link-hover-color};
+    --#{$prefix}link-hover-color-rgb: #{to-rgb($link-hover-color)};
+
+    @if $link-hover-decoration !=null {
+        --#{$prefix}link-hover-decoration: #{$link-hover-decoration};
+    }
+
+    --#{$prefix}code-color: #{$code-color};
+    --#{$prefix}highlight-color: #{$mark-color};
+    --#{$prefix}highlight-bg: #{$mark-bg};
+
+    // scss-docs-start root-border-var
+    --#{$prefix}border-width: #{$border-width};
+    --#{$prefix}border-style: #{$border-style};
+    --#{$prefix}border-color: #{$border-color};
+    --#{$prefix}border-color-translucent: #{$border-color-translucent};
+
+    --#{$prefix}border-radius: #{$border-radius};
+    --#{$prefix}border-radius-sm: #{$border-radius-sm};
+    --#{$prefix}border-radius-lg: #{$border-radius-lg};
+    --#{$prefix}border-radius-xl: #{$border-radius-xl};
+    --#{$prefix}border-radius-xxl: #{$border-radius-xxl};
+    --#{$prefix}border-radius-2xl: var(--#{$prefix}border-radius-xxl); // Deprecated in v5.3.0 for consistency
+    --#{$prefix}border-radius-pill: #{$border-radius-pill};
+    // scss-docs-end root-border-var
+
+    --#{$prefix}box-shadow: #{$box-shadow};
+    --#{$prefix}box-shadow-sm: #{$box-shadow-sm};
+    --#{$prefix}box-shadow-lg: #{$box-shadow-lg};
+    --#{$prefix}box-shadow-inset: #{$box-shadow-inset};
+
+    // Focus styles
+    // scss-docs-start root-focus-variables
+    --#{$prefix}focus-ring-width: #{$focus-ring-width};
+    --#{$prefix}focus-ring-opacity: #{$focus-ring-opacity};
+    --#{$prefix}focus-ring-color: #{$focus-ring-color};
+    // scss-docs-end root-focus-variables
+
+    // scss-docs-start root-form-validation-variables
+    --#{$prefix}form-valid-color: #{$form-valid-color};
+    --#{$prefix}form-valid-border-color: #{$form-valid-border-color};
+    --#{$prefix}form-invalid-color: #{$form-invalid-color};
+    --#{$prefix}form-invalid-border-color: #{$form-invalid-border-color};
+    // COPIED FROM BOOTSTRAP DO NOT EDIT
+    // ---------------------------------
+}

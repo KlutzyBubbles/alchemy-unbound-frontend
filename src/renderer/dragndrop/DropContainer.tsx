@@ -570,7 +570,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 gutterSize={2}
                 snapOffset={0}
             >
-                <div ref={mainElement} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} tabIndex={0} onBlur={handleBlur}>
+                <div className='main-container' ref={mainElement} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} tabIndex={0} onBlur={handleBlur}>
                     <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
                         <AnimatePresence>
                             {boxes === undefined ? (<Fragment/>) : Object.keys(boxes).filter((v) => v !== undefined).map((key) => {
@@ -621,7 +621,7 @@ export const DropContainer: FC<ContainerProps> = ({
                             </motion.div>
                             <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('info')}><IoInformationCircleOutline /></div>
                             {isProduction ? (<Fragment/>) : (
-                                <div className="dropstart float-end mb-2 fs-2">
+                                <div className="hint-drop dropstart float-end mb-2 fs-2">
                                     <button className="btn btn-secondary btn btn-info fs-2 p-2 d-flex" type="button" data-bs-toggle="dropdown" aria-expanded="false" onClick={() => hintShow()} onBlur={() => setHintOpen(false)}>
                                         <IoHelpOutline />
                                     </button>

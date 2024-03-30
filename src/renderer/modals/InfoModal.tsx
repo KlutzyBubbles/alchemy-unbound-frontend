@@ -48,7 +48,7 @@ export const InfoModal: FC<InfoModalProps> = ({
     }, [show]);
 
     return (
-        <Modal show={show} onHide={handleHide} centered size="xl" data-bs-theme={settings.dark ? 'dark' : 'light'}>
+        <Modal show={show} onHide={handleHide} centered size="xl" data-bs-theme={settings.theme}>
             <Modal.Header closeButton>
                 <Modal.Title>Alchemy Unbound</Modal.Title>
             </Modal.Header>

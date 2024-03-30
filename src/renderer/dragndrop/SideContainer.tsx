@@ -194,7 +194,7 @@ export const SideContainer: FC<ContainerProps> = ({
 
     return (
         <div className='side-container vh-100 d-flex flex-column position-sticky z-side'>
-            <div ref={drop} className={`${isOver ? 'is-over' : ''} overflow-y-scroll overflow-x-hidden h-100 pb-2`}>
+            <div ref={drop} className={`${isOver ? 'is-over' : ''} overflow-y-scroll overflow-x-hidden h-100 pb-2 pe-2`}>
                 {filteredElements.filter((item) => {
                     let discovered = false;
                     for (const recipe of item.recipes) {

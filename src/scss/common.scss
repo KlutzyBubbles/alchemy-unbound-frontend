@@ -1,0 +1,521 @@
+@use "sass:map";
+
+.split {
+    display: flex;
+    flex-direction: row;
+}
+
+.gutter {
+    background-color: $side-color;
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+    // background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+    cursor: col-resize;
+    // z-index: map.get($zindex-levels, 'side') // This broke for some reason
+    z-index: 15;
+}
+
+.btn-element {
+    @include button-variant($side-bg, $side-color, color-contrast($side-bg), $side-bg, $side-bg, $side-color, $side-bg);
+    border-radius: $btn-border-radius
+}
+
+.side-container {
+    background-color: $side-bg;
+
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: $side-bg;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: $side-color;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: $side-color;
+    }
+
+    .btn-element {
+        @include button-variant($side-element-bg, // Background
+            $side-element-color, // Border
+            $side-element-color, // Color
+            $side-element-bg-hover, // Hover Background
+            $side-element-color-hover, // Hover Border
+            $side-element-color-hover, // Hover Color
+            $side-element-bg); // Active Background
+        border-radius: $btn-border-radius;
+
+        .btn-holder {
+            background-color: $side-element-bg;
+        }
+
+        :hover > .btn-holder:first-child {
+            background-color: $side-element-color;
+        }
+    }
+
+    .is-over {
+        background-color: mix($side-bg, $danger, 20%);
+    }
+
+    .footer {
+        border-top-color: $side-color;
+        border-top-style: solid;
+        border-top-width: 2px;
+
+        .btn-left-hover {
+            background: $side-button-bg;
+            color: $side-button-color;
+            background-size: 210% 100%;
+            background-position: right bottom;
+            transition: all 0.3s ease-out;
+        }
+
+        .btn-left-hover:hover,
+        .btn-left-hover:active {
+            color: $side-button-color-hover;
+            background: linear-gradient(to right, $side-button-bg-hover 50%, $side-button-bg 50%);
+            background-size: 210% 100%;
+            background-position: left bottom;
+        }
+
+        .btn-right-hover {
+            background: $side-bg;
+            color: $side-button-color;
+            background-size: 210% 100%;
+            background-position: left bottom;
+            transition: all 0.3s ease-out;
+        }
+
+        .btn-right-hover:hover,
+        .btn-right-hover:active {
+            color: $side-button-color-hover;
+            background: linear-gradient(to left, $side-button-bg-hover 50%, $side-button-bg 50%);
+            background-size: 210% 100%;
+            background-position: right bottom;
+        }
+    }
+}
+
+.main-container {
+    background-color: $main-bg;
+
+    .btn-element {
+        @include button-variant(
+            $main-element-bg, // Background
+            $main-element-color, // Border
+            $main-element-color, // Color
+            $main-element-bg-hover, // Hover Background
+            $main-element-color-hover, // Hover Border
+            $main-element-color-hover, // Hover Color
+            $main-element-bg // Active Background
+        );
+        border-radius: $btn-border-radius;
+
+        .btn-holder {
+            background-color: $main-element-bg;
+        }
+
+        :hover > .btn-holder:first-child {
+            background-color: $main-element-color;
+        }
+    }
+
+    .btn-no-outline {
+        @include button-variant(
+            $main-button-bg, // Background
+            $main-button-bg, // Border
+            $main-button-color, // Color
+            $main-button-bg-hover, // Hover Background
+            $main-button-bg-hover, // Hover Border
+            $main-button-color-hover, // Hover Color
+            $main-button-bg-hover, // Active Background
+            $main-button-bg-hover, // Active Border
+            $main-button-color-hover // Active Color
+        );
+    }
+
+    .btn-info {
+        @include button-variant(
+            $main-button-bg, // Background
+            $main-button-bg, // Border
+            $main-button-color, // Color
+            $main-button-bg-hover, // Hover Background
+            $main-button-bg-hover, // Hover Border
+            $primary, // Hover Color
+            $main-button-bg-hover, // Active Background
+            $main-button-bg-hover, // Active Border
+            $primary // Active Color
+        );
+    }
+
+    .btn-offline {
+        @include button-variant(
+            $main-button-bg, // Background
+            $main-button-bg, // Border
+            $danger, // Color
+            $main-button-bg-hover, // Hover Background
+            $main-button-bg-hover, // Hover Border
+            $danger, // Hover Color
+            $main-button-bg-hover, // Active Background
+            $main-button-bg-hover, // Active Border
+            $danger // Active Color
+        );
+    }
+
+    .dropdown-menu {
+        .dropdown-item:hover {
+            background-color: $dropdown-bg
+        }
+    }
+}
+
+.full-size {
+    height: 100vh;
+    width: 100vw;
+}
+
+.btn-element.holo {
+    --#{$prefix}btn-hover-bg: #{$dark};
+    --#{$prefix}btn-hover-color: #{$dark};
+    --#{$prefix}btn-active-color: #{$dark};
+}
+
+.btn-element.holo:hover {
+    background-color: var(--#{$prefix}-btn-hover-bg);
+}
+
+.btn-element.holo .btn-holder {
+    background-color: transparent;
+}
+
+.btn-element:hover>.btn-holder:first-child {
+    background-color: $side-color;
+}
+
+.btn-element .btn-holder,
+.btn-element .glare,
+.btn-element .shine,
+.btn-element .holder {
+    border-radius: $btn-border-radius
+}
+
+select option {
+    background-color: $body-bg;
+    color: $body-color;
+}
+
+.btn-advanced {
+    @include button-variant(
+        $main-button-bg, // Background
+        $main-button-bg, // Border
+        $main-button-color, // Color
+        $main-button-bg-hover, // Hover Background
+        $main-button-bg-hover, // Hover Border
+        $warning, // Hover Color
+        $main-button-bg-hover, // Active Background
+        $main-button-bg-hover, // Active Border
+        $warning // Active Color
+    );
+}
+
+.btn-discord {
+    @include button-variant(#5865F2, #5865F2, color-contrast($dark), #5865F2, #5865F2, color-contrast($dark));
+}
+
+.btn-github {
+    @include button-variant(#010409, #010409, color-contrast($dark), #010409, #010409, color-contrast($dark));
+}
+
+.btn.btn-no-radius {
+    border-radius: 0
+}
+
+.dropdown-menu {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+@keyframes spin {
+    from {
+        transform: translate(-50%, -50%) rotate(0);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+// .element.generated > .btn-holder:first-child > .glare:first-child > .shine:first-child > .holder:first-child::after {
+//     content: "";
+//     position: absolute;
+// 
+//     //display: block;
+//     //width: 50px;
+//     //height: 10px;
+//     //padding: 0;
+//     //background-color: $success;
+//     //transform: rotate(45deg);
+//     //top: 0px;
+//     //right: -20px;
+// 
+//     height: 100%;
+//     width: 15px;
+//     top: 0px;
+//     right: 0px;
+//     background-image: radial-gradient(circle at center, $success 4px, transparent 5px);
+//     background-size: 15px 15px;
+//     background-position: top center, bottom center;
+//     background-repeat: no-repeat;
+// }
+
+.highlight {
+    border-radius: $btn-border-radius;
+
+    &::before {
+        content: '';
+        display: block;
+        background: #00000000 url("../images/new_light.png") no-repeat;
+        background-size: 100%;
+        width: 100%;
+        padding-bottom: 100%;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        z-index: -2;
+        animation: spin 5s linear infinite;
+    }
+
+    &-reverse::before {
+        animation-direction: reverse;
+    }
+}
+
+@mixin switch($res: 'sm') {
+    $index: 1rem;
+    $mainVal: 1rem;
+
+    @if $res =='md' {
+        $index: 2rem;
+        $mainVal: 1.5rem;
+    }
+
+    @else if $res =='lg' {
+        $index: 3rem;
+        $mainVal: 2rem;
+    }
+
+    @else if $res =='xl' {
+        $index: 4rem;
+        $mainVal: 2.5rem;
+    }
+
+    margin-bottom: calc($index / 2);
+    /* JUST FOR STYLING PURPOSE */
+
+    .form-check-input {
+        height: $mainVal;
+        width: calc(#{$index} + 0.75rem);
+        border-radius: calc($mainVal * 2);
+    }
+}
+
+.form-check-input {
+    clear: left;
+}
+
+// YOU CAN PUT ALL RESOLUTION HERE
+// sm - DEFAULT, md, lg, xl
+
+.form-switch.form-switch-sm {
+    @include switch();
+}
+
+.form-switch.form-switch-md {
+    @include switch('md');
+}
+
+.form-switch.form-switch-lg {
+    @include switch('lg');
+}
+
+.form-switch.form-switch-xl {
+    @include switch('xl');
+}
+
+// @mixin customZ($zindex-levels) {
+//     @each $class, $value in $zindex-levels {
+//         .z-#{$class} {
+//             z-index: $value
+//         }
+//     }
+// }
+
+// @include customZ($zindex-levels);
+
+.element.holo>.btn-holder:first-child {
+    background-image: url('../images/holo.avif');
+    //-webkit-background-clip: text;
+    //-webkit-text-fill-color: transparent;
+    color: $dark;
+    animation-duration: 15s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-timing-function: ease-in-out;
+    animation-name: different;
+    background-size: 300%;
+    // border-color: #fff8b9;
+    background-color: #ff00ffff;
+    background-blend-mode: hard-light;
+}
+
+.element.holo .holder.not-holo {
+    background-color: #00000000
+}
+
+.element.holo .holder {
+    background-color: #FFFA
+}
+
+.element {
+    --grain: url("../images/grain.webp");
+    --glitter: url("../images/glitter.png");
+    --glittersize: 25%;
+
+    --space: 5%;
+    --angle: 133deg;
+    --imgsize: cover;
+
+    --red: #f80e35;
+    --yellow: #eedf10;
+    --green: #21e985;
+    --blue: #0dbde9;
+    --violet: #c929f1;
+
+    --clip: inset(9.85% 8% 52.85% 8%);
+    --clip-invert: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0 47.15%, 91.5% 47.15%, 91.5% 9.85%, 8% 9.85%, 8% 47.15%, 0 50%);
+
+    --clip-stage: polygon(91.5% 9.85%, 57% 9.85%, 54% 12%, 17% 12%, 16% 14%, 12% 16%, 8% 16%, 8% 47.15%, 92% 47.15%);
+    --clip-stage-invert: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0 47.15%, 91.5% 47.15%, 91.5% 9.85%, 57% 9.85%, 54% 12%, 17% 12%, 16% 14%, 12% 16%, 8% 16%, 8% 47.15%, 0 50%);
+
+    --clip-trainer: inset(14.5% 8.5% 48.2% 8.5%);
+    --clip-borders: inset(2.8% 4% round 2.55% / 1.5%);
+}
+
+.overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    top: 40%;
+    left: 0px;
+    // opacity: 0.5;
+    // filter: alpha(opacity=50);
+}
+
+.spinner-lg {
+    width: 100px;
+    height: 100px;
+}
+
+.shine,
+.shine {
+    will-change: transform, opacity, background-image, background-size,
+        background-position, background-blend-mode, filter;
+}
+
+.element.rainbow .shine {
+    filter: brightness(calc((var(--pointer-from-center)*0.05) + .8)) contrast(1.75) saturate(1.2);
+}
+
+.element.rainbow .shine:after {
+    filter: brightness(calc((var(--pointer-from-center)*.4) + .85)) contrast(2) saturate(.5);
+}
+
+.element.rainbow .shine:before {
+    background-image:
+        radial-gradient(farthest-corner circle at var(--pointer-x) var(--pointer-y),
+            hsl(0, 0%, 100%) 0%,
+            hsla(0, 0%, 0%, 0) 80%);
+
+    mix-blend-mode: screen;
+    opacity: 0.5;
+}
+
+/*
+  
+    GLARE LAYERS
+  
+  */
+
+.element.rainbow .glare {
+    opacity: calc(var(--card-opacity) * .75);
+    mix-blend-mode: multiply;
+    filter: brightness(1.5) contrast(1.4) saturate(1);
+    background-size: 170% 170%;
+}
+
+/*
+  
+    NO MASK
+  
+  */
+
+.element:not(.masked).rainbow .shine,
+.element:not(.masked).rainbow .shine:after {
+    --mask: none;
+    // --foil: url("/img/trainerbg.png"); 
+    --imgsize: 20%;
+
+    background-blend-mode: color-burn, hue, hard-light;
+    filter: brightness(calc((var(--pointer-from-center)*0.05) + .6)) contrast(1.5) saturate(1.2);
+}
+
+
+@keyframes updown {
+    from {
+        background-position: top;
+    }
+
+    to {
+        background-position: bottom;
+    }
+}
+
+@keyframes different {
+    0% {
+        background-position-x: left;
+        background-position: bottom;
+        //background-color: #ff00ffff;
+    }
+
+    100% {
+        background-position-x: right;
+        background-position: top;
+        //background-color: #ff00ffff;
+    }
+}
+
+
+@keyframes roll {
+    100% {
+        transform: rotateZ(-2turn);
+    }
+}
+
+@keyframes flip {
+    25% {
+        background-position: rotateX(0.5turn) translate(0, -8em);
+    }
+
+    75% {
+        background-position: rotateX(0turn);
+    }
+}

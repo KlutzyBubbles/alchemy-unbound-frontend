@@ -20,10 +20,10 @@ export const ConfirmModal: FC<ConfirmModalProps> = ({
 }) => {
     const { settings } = useContext(SettingsContext);
     return (
-        <Modal show={show} onHide={onCancel} centered size="xl" data-bs-theme={settings.dark ? 'dark' : 'light'} style={{
+        <Modal show={show} onHide={onCancel} centered size="xl" data-bs-theme={settings.theme} style={{
             background: '#000000dd'
         }}>
-            <Modal.Header closeButton data-bs-theme={settings.dark ? 'dark' : 'light'}>
+            <Modal.Header closeButton data-bs-theme={settings.theme}>
                 <Modal.Title>{getFromStore('confirm', settings.language)}</Modal.Title>
             </Modal.Header>
             <Modal.Body>

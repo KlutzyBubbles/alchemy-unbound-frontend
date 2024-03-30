@@ -5,6 +5,15 @@ export const BackgroundTypeList: BackgroundType[] = [
     'line'
 ];
 
+export type ThemeType = 'dark' | 'light' | 'supporter' //| 'purple' // | 'github' | 'steam' | 'discord'
+
+export const ThemeTypeList: ThemeType[] = [
+    'dark',
+    'light',
+    'supporter',
+    // 'purple'
+];
+
 export type LeftRight = 'left' | 'right'
 
 export type Language = 
@@ -111,7 +120,7 @@ export const languageDisplay: {
 };
 
 export type Settings = {
-    dark: boolean
+    theme: ThemeType
     fullscreen: boolean
     offline: boolean
     currentDisplay: number
@@ -126,7 +135,8 @@ export type Settings = {
 
 // This is here for future settings changes
 export type RawSettings = {
-    dark: boolean
+    dark?: boolean
+    theme?: ThemeType
     fullscreen: boolean
     offline: boolean
     currentDisplay: number
@@ -140,7 +150,7 @@ export type RawSettings = {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-    dark: true,
+    theme: 'dark',
     fullscreen: true,
     offline: false,
     currentDisplay: 1,

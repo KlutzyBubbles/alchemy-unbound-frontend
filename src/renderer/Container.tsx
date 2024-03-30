@@ -17,7 +17,7 @@ export const ContentContainer: FC = () => {
     const { settings } = useContext(SettingsContext);
     const { loading } = useContext(LoadingContext);
     const [currentModal, setCurrentModal] = useState<ModalOption>('none');
-    const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.dark, settings.fps));
+    const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.theme, settings.fps));
     const [particleReady, setParticleReady] = useState<boolean>(false);
 
     useEffect(() => {
@@ -33,7 +33,7 @@ export const ContentContainer: FC = () => {
         (async () => {
             //console.log('Settings updated to', settings);
             setParticleReady(false);
-            setCurrentParticles(options[settings.background](settings.dark, settings.fps));
+            setCurrentParticles(options[settings.background](settings.theme, settings.fps));
             await initParticlesEngine(async (engine) => {
                 await loadFull(engine);
             });
@@ -57,8 +57,8 @@ export const ContentContainer: FC = () => {
 
     if (loading) {
         return (
-            <div data-bs-theme={settings.dark ? 'dark' : 'light'}>
-                <Container fluid={true} className='p-0 bg-theme full-size overflow-hidden' data-bs-theme={settings.dark ? 'dark' : 'light'}>
+            <div data-bs-theme={settings.theme}>
+                <Container fluid={true} className='p-0 bg-theme full-size overflow-hidden' data-bs-theme={settings.theme}>
                     <div className='overlay'>
                         <div className={`${loading ? 'd-flex' : 'd-none'} justify-content-center`}>
                             <div className="spinner-border spinner-lg" role="loading"/>
@@ -69,8 +69,8 @@ export const ContentContainer: FC = () => {
         );
     } else {
         return (
-            <div data-bs-theme={settings.dark ? 'dark' : 'light'}>
-                <Container fluid={true} className='h-100 p-0 bg-theme overflow-hidden' data-bs-theme={settings.dark ? 'dark' : 'light'}>
+            <div data-bs-theme={settings.theme}>
+                <Container fluid={true} className='h-100 p-0 bg-theme overflow-hidden' data-bs-theme={settings.theme}>
                     <Row className='h-100 p-0 m-0'>
                         {particleReady ? <Particles
                             className='z-particles'

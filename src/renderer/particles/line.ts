@@ -1,12 +1,13 @@
 import { IOptions, RecursivePartial } from '@tsparticles/engine';
 import { getColor } from '../utils/theme';
+import { ThemeType } from '../../common/settings';
 
-export const lineOptions: (dark: boolean, fps: number) => RecursivePartial<IOptions> = (dark: boolean, fps: number) => {
+export const lineOptions: (theme: ThemeType, fps: number) => RecursivePartial<IOptions> = (theme: ThemeType, fps: number) => {
     return {
         fpsLimit: fps,
         background: {
             color: {
-                value: getColor('background', dark),
+                value: getColor('background', theme),
             },
         },
         particles: {
@@ -19,7 +20,7 @@ export const lineOptions: (dark: boolean, fps: number) => RecursivePartial<IOpti
                 }
             },
             color: {
-                value: getColor('foreground', dark)
+                value: getColor('foreground', theme)
             },
             shape: {
                 type: 'circle',
@@ -42,7 +43,7 @@ export const lineOptions: (dark: boolean, fps: number) => RecursivePartial<IOpti
                 }
             },
             links: {
-                color:getColor('foreground', dark),
+                color: getColor('foreground', theme),
                 distance: 150,
                 enable: true,
                 opacity: 0.5,
