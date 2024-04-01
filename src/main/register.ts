@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron';
 import { Recipe } from '../common/types';
-import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, importFile, exportDatabase, getRecipesFor, getBaseHint } from './database';
+import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, importFile, exportDatabase, getRecipesFor } from './database';
 import { combine, getToken } from './server';
-import { DisplayChannel, GenericChannel, RecipeChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
+import { DisplayChannel, GenericChannel, HintChannel, RecipeChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
 import { Settings } from '../common/settings';
 import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './settings';
 import { getAppVersions, isPackaged, getSystemInformation, quit } from './generic';
@@ -10,6 +10,7 @@ import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from './
 import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated, isDlcInstalled } from './steam';
 import { getStats, loadStats, saveStats, setStat, setStats } from './stats';
 import { Stats } from '../common/stats';
+import { addHintPoint, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint, setMaxHints } from './hints';
 
 
 export function register() {
@@ -43,9 +44,6 @@ export function register() {
     });
     ipcMain.handle(RecipeChannel.EXPORT, async () => {
         return exportDatabase();
-    });
-    ipcMain.handle(RecipeChannel.BASE_HINT, async () => {
-        return getBaseHint();
     });
     ipcMain.handle(RecipeChannel.GET_TOKEN, async () => {
         return getToken();
@@ -128,5 +126,34 @@ export function register() {
     });
     ipcMain.handle(SteamChannel.GET_LANGUAGE, async () => {
         return getSteamGameLanguage();
+    });
+    
+    // Hint handlers
+    ipcMain.handle(HintChannel.SAVE, async () => {
+        return saveHint();
+    });
+    ipcMain.handle(HintChannel.LOAD, async () => {
+        return loadHint();
+    });
+    ipcMain.handle(HintChannel.ADD_POINT, async (_, hintPoints: number) => {
+        return addHintPoint(hintPoints);
+    });
+    ipcMain.handle(HintChannel.GET, async (_, generate: boolean) => {
+        return getHint(generate);
+    });
+    ipcMain.handle(HintChannel.GET_LEFT, async () => {
+        return getHintsLeft();
+    });
+    ipcMain.handle(HintChannel.GET_MAX, async () => {
+        return getMaxHints();
+    });
+    ipcMain.handle(HintChannel.RESET, async () => {
+        return resetHint();
+    });
+    ipcMain.handle(HintChannel.SET_MAX, async (_, maxHints: number) => {
+        return setMaxHints(maxHints);
+    });
+    ipcMain.handle(HintChannel.COMPLETE, async () => {
+        return hintComplete();
     });
 }

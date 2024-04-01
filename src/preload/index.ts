@@ -4,3 +4,4 @@ import './generic';
 import './display';
 import './steam';
 import './stats';
+import './hints';

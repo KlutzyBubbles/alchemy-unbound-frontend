@@ -126,12 +126,13 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
     let newDiscovery = false;
     let firstDiscovery = false;
     if (exists !== undefined) {
-        setDiscovered(exists.a.name, exists.b.name, true);
+        const hintAdded = await setDiscovered(exists.a.name, exists.b.name, true);
         if (!exists.discovered)
             newDiscovery = true;
         exists.discovered = 1;
         await save();
         return {
+            hintAdded,
             newDiscovery,
             firstDiscovery,
             recipe: exists
@@ -171,6 +172,7 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
                         });
                         await save();
                         return {
+                            hintAdded: false,
                             newDiscovery,
                             firstDiscovery,
                             recipe: traverseAndFill(recipeRow)
@@ -178,6 +180,7 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
                     } catch(e) {
                         logger.error('Failed to insert recipe', e);
                         return {
+                            hintAdded: false,
                             newDiscovery,
                             firstDiscovery,
                             recipe: traverseAndFill({

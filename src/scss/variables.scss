@@ -15,6 +15,32 @@ $zindex-levels: (
   draggingElement: 35
 );
 
+$font-size-base:              1rem;
+
+$h1-font-size:                $font-size-base * 2.5;
+$h2-font-size:                $font-size-base * 2;
+$h3-font-size:                $font-size-base * 1.75;
+$h4-font-size:                $font-size-base * 1.5;
+$h5-font-size:                $font-size-base * 1.25;
+$h6-font-size:                $font-size-base;
+$h7-font-size:                $font-size-base * 0.75;
+$h8-font-size:                $font-size-base * 0.5;
+$h9-font-size:                $font-size-base * 0.25;
+// scss-docs-end font-variables
+
+// scss-docs-start font-sizes
+$font-sizes: (
+  1: $h1-font-size,
+  2: $h2-font-size,
+  3: $h3-font-size,
+  4: $h4-font-size,
+  5: $h5-font-size,
+  6: $h6-font-size,
+  7: $h7-font-size,
+  8: $h8-font-size,
+  9: $h9-font-size
+);
+
 $input-border-radius: 2px;
 $input-border-radius-sm: 2px;
 $input-border-radius-lg: 2px;

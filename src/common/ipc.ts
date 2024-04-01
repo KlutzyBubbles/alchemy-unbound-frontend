@@ -9,7 +9,6 @@ export enum RecipeChannel {
     RESET = 'recipe:reset',
     IMPORT = 'recipe:import',
     EXPORT = 'recipe:export',
-    BASE_HINT = 'recipe:baseHint',
     GET_TOKEN = 'recipe:getToken'
 }
 
@@ -19,6 +18,18 @@ export enum SettingsChannel {
     SET_VALUE = 'settings:setSetting',
     GET = 'settings:get',
     SAVE = 'settings:save'
+}
+
+export enum HintChannel {
+    LOAD = 'hint:load',
+    SAVE = 'hint:save',
+    ADD_POINT = 'hint:addPoint',
+    SET_MAX = 'hint:setMax',
+    GET = 'hint:get',
+    GET_MAX = 'hint:getMax',
+    GET_LEFT = 'hint:getLeft',
+    RESET = 'hint:reset',
+    COMPLETE = 'hint:complete',
 }
 
 export enum StatsChannel {

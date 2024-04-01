@@ -1,4 +1,5 @@
 import { promises as fs } from 'fs';
+import { getFolder } from './steam';
 
 export async function dirExists(path: string): Promise<boolean> {
     try
@@ -19,5 +20,11 @@ export async function fileExists(path: string): Promise<boolean> {
     catch (err)
     {
         return false;
+    }
+}
+
+export async function verifyFolder(): Promise<void> {
+    if (!(await dirExists(getFolder()))) {
+        await fs.mkdir(getFolder(), { recursive: true });
     }
 }

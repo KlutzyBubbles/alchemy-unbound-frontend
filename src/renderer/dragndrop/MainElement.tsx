@@ -196,8 +196,9 @@ export const MainElement: FC<BoxProps> = ({
                     controls.start('hide');
                 } else {
                     await controls.start('show');
-                    if (loading)
+                    if (loading && mounted.current) {
                         controls.start('flash');
+                    }
                 }
             }
         })();

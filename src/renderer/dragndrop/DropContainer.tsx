@@ -8,21 +8,17 @@ import { CombineOuput, Recipe, RecipeElement } from '../../common/types';
 import { CustomDragLayer } from './DragLayer';
 import Split from 'react-split';
 import { SideContainer } from './SideContainer';
-import { IoBandageOutline, IoCloudOfflineOutline, IoHelpOutline, IoInformationCircleOutline, IoSettingsOutline } from 'react-icons/io5';
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../Main';
 import { Box, DragItem, ItemTypes } from '../types';
-import { getAllRecipes, getXY, makeId, mockElement } from '../utils';
-import { SettingsContext } from '../providers/SettingsProvider';
+import { getAllRecipes, getXY, makeId } from '../utils';
 import { SoundContext } from '../providers/SoundProvider';
 import logger from 'electron-log/renderer';
 import { UpdateContext } from '../providers/UpdateProvider';
 import { hasProp } from '../../common/utils';
 import { LoadingContext } from '../providers/LoadingProvider';
 import { unlockCheck } from '../utils/achievements';
-import { ItemRenderer } from '../ItemRenderer';
-import { getPlaceholderLanguage } from '../language';
-import { InfoContext } from '../providers/InfoProvider';
+import { MainButtons } from './MainButtons';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
@@ -39,14 +35,11 @@ export const DropContainer: FC<ContainerProps> = ({
     const [shift, setShift] = useState<boolean>(false);
     const [alt, setAlt] = useState<boolean>(false);
     const [control, setControl] = useState<boolean>(false);
-    const { settings } = useContext(SettingsContext);
     const { setLoading } = useContext(LoadingContext);
     const { playSound } = useContext(SoundContext);
     const mainElement = useRef<HTMLDivElement>();
     const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
-    const [hintOpen, setHintOpen] = useState<boolean>(false);
-    const [currentHint, setCurrentHint] = useState<Recipe>(undefined);
-    const { isProduction } = useContext(InfoContext);
+    const [refreshHint, setRefreshHint] = useState<number>(0);
     const [boxes, setBoxes] = useState<{
         [key: string]: Box
     }>({});
@@ -152,8 +145,14 @@ export const DropContainer: FC<ContainerProps> = ({
             if (combined.recipe.result === '69') {
                 window.SteamAPI.activateAchievement('nice');
             }
+            const currentHint = await window.HintAPI.getHint(false);
             if (currentHint !== undefined && combined.recipe.result === currentHint.result) {
-                setCurrentHint(undefined);
+                await window.HintAPI.hintComplete();
+            }
+            if (combined.hintAdded || (currentHint !== undefined && combined.recipe.result === currentHint.result)) {
+                setRefreshHint((value) => {
+                    return value + 1;
+                });
             }
             const stats = await window.StatsAPI.getStats();
             if (combined.newDiscovery) {
@@ -456,36 +455,6 @@ export const DropContainer: FC<ContainerProps> = ({
         [moveBox, alt],
     );
 
-    const onSettingsMouseEnter = () => {
-        settingsControls.start('start');
-    };
-
-    const onSettingsMouseLeave = () => {
-        settingsControls.start('reset');
-    };
-
-    const settingsVariants = {
-        start: () => ({
-            rotate: [0, 90],
-            transition: {
-                duration: 0.2,
-                repeat: 0,
-                ease: 'easeInOut',
-                repeatDelay: 0.5
-            }
-        }),
-        reset: {
-            rotate: [90, 0],
-            transition: {
-                duration: 0.2,
-                repeat: 0,
-                ease: 'easeInOut'
-            }
-        }
-    };
-  
-    const settingsControls = useAnimation();
-
     const elementVariants = {
         error: () => ({
             rotate: [0, -20, 20, -20, 20, 0],
@@ -530,27 +499,6 @@ export const DropContainer: FC<ContainerProps> = ({
         if (e.relatedTarget === undefined || e.relatedTarget === null || (e.relatedTarget.id !== 'element-search' && e.relatedTarget.id !== 'hint-dropdown')) {
             mainElement.current.focus();
         }
-    };
-
-    const devClick = () => {
-        (async () => {
-            try {
-                const token = await window.RecipeAPI.getToken();
-                logger.warn('Found token', token);
-            } catch (e) { 
-                logger.error('Failed getting token', e);
-            }
-        })();
-    };
-  
-    const hintShow = () => {
-        setHintOpen(true);
-        (async () => {
-            if (currentHint === undefined) {
-                const recipe = await window.RecipeAPI.getBaseHint();
-                setCurrentHint(recipe);
-            }
-        })();
     };
 
     const elementControls = useAnimation();
@@ -601,90 +549,7 @@ export const DropContainer: FC<ContainerProps> = ({
                             })}
                         </AnimatePresence>
                         <CustomDragLayer/>
-                        <div className='footer mt-auto z-mainButtons'>
-                            <motion.div
-                                className='btn btn-no-outline float-end mb-2 me-2 fs-2 d-flex p-2'
-                                onMouseEnter={onSettingsMouseEnter}
-                                onMouseLeave={onSettingsMouseLeave}
-                                variants={settingsVariants}
-                                animate={settingsControls}
-                                onClick={() => openModal('settings')}>
-                                <IoSettingsOutline/>
-                            </motion.div>
-                            <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('info')}><IoInformationCircleOutline /></div>
-                            {isProduction ? (<Fragment/>) : (
-                                <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={devClick}><IoBandageOutline /></div>
-                            )}
-                            {isProduction ? (<Fragment/>) : (
-                                <div className="hint-drop dropstart float-end mb-2 fs-2">
-                                    <button className="btn btn-secondary btn btn-info fs-2 p-2 d-flex" type="button" data-bs-toggle="dropdown" aria-expanded="false" onClick={() => hintShow()} onBlur={() => setHintOpen(false)}>
-                                        <IoHelpOutline />
-                                    </button>
-                                    <div className={`dropdown-menu ${ hintOpen ? 'show' : '' }`}>
-                                        {currentHint === undefined ? (
-                                            <div className='dropdown-item'>
-                                                <ItemRenderer
-                                                    element={mockElement({
-                                                        name: '?',
-                                                        display: getPlaceholderLanguage('?'),
-                                                        emoji: '?',
-                                                        depth: 0,
-                                                        first: 0,
-                                                        who_discovered: '',
-                                                        base: 1
-                                                    })}
-                                                    type={ItemTypes.RECIPE_ELEMENT}
-                                                    dragging={false}/>
-                                                    +
-                                                <ItemRenderer
-                                                    element={mockElement({
-                                                        name: '?',
-                                                        display: getPlaceholderLanguage('?'),
-                                                        emoji: '?',
-                                                        depth: 0,
-                                                        first: 0,
-                                                        who_discovered: '',
-                                                        base: 1
-                                                    })}
-                                                    type={ItemTypes.RECIPE_ELEMENT}
-                                                    dragging={false}/>
-                                                    =
-                                                <ItemRenderer
-                                                    element={mockElement({
-                                                        name: '?',
-                                                        display: getPlaceholderLanguage('?'),
-                                                        emoji: '?',
-                                                        depth: 0,
-                                                        first: 0,
-                                                        who_discovered: '',
-                                                        base: 1
-                                                    })}
-                                                    type={ItemTypes.RECIPE_ELEMENT}
-                                                    dragging={false}/>
-                                            </div>
-                                        ) : (
-                                            <div className='dropdown-item'>
-                                                <ItemRenderer
-                                                    element={mockElement(currentHint.a)}
-                                                    type={ItemTypes.RECIPE_ELEMENT}
-                                                    dragging={false}/>
-                                                <span className='fs-3'>+</span>
-                                                <ItemRenderer
-                                                    element={mockElement(currentHint.b)}
-                                                    type={ItemTypes.RECIPE_ELEMENT}
-                                                    dragging={false}/>
-                                                <span className='fs-3'>=</span>
-                                                <ItemRenderer
-                                                    element={mockElement(currentHint)}
-                                                    type={ItemTypes.RECIPE_ELEMENT}
-                                                    dragging={false}/>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                            {settings.offline ? (<div className='btn btn-offline float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('settings')}><IoCloudOfflineOutline /></div>) : (<Fragment/>)}
-                        </div>
+                        <MainButtons openModal={openModal} refreshHint={refreshHint}/>
                     </div>
                 </div>
                 <SideContainer

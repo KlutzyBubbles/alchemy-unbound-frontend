@@ -69,6 +69,7 @@ export type TokenHolder = {
 }
 
 export type CombineOuput = {
+    hintAdded: boolean,
     newDiscovery: boolean,
     firstDiscovery: boolean,
     recipe: Recipe

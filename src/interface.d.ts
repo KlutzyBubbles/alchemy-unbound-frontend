@@ -5,6 +5,7 @@ import { DisplayAPIName, IDisplayAPI } from './preload/display';
 import { ISteamAPI, SteamAPIName } from './preload/steam';
 import 'react';
 import { IStatsAPI, StatsAPIName } from './preload/stats';
+import { HintAPIName, IHintAPI } from './preload/hints';
 
 declare module 'react' {
     interface CSSProperties {
@@ -20,6 +21,7 @@ declare global {
         [DisplayAPIName]: IDisplayAPI
         [SteamAPIName]: ISteamAPI
         [StatsAPIName]: IStatsAPI
+        [HintAPIName]: IHintAPI
     }
 }
 declare module 'vanta/dist/vanta.birds.min';

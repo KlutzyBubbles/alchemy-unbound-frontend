@@ -903,5 +903,22 @@ export const LanguageStore: {
         portuguese: '',
         tchinese: '',
         koreana: ''
+    },
+    hintTooltip: {
+        english: 'Click to use a hint point',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
     }
 };

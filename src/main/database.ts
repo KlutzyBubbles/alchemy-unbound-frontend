@@ -2,13 +2,14 @@ import { BasicElement, Languages, Recipe, RecipeRow } from '../common/types';
 import { promises as fs } from 'fs';
 import { Compressed, compress, decompress } from 'compress-json';
 import { getFolder } from './steam';
-import { dirExists } from './utils';
+import { verifyFolder } from './utils';
 import { languages } from '../common/settings';
 import baseData from '../base.json';
 // import baseData from '../allDiscovered.json';
 import logger from 'electron-log/main';
 import { dialog } from 'electron';
 import { hasProp } from '../common/utils';
+import { addHintPoint } from './hints';
 
 const DATABASE_VERISON = 2;
 
@@ -29,9 +30,7 @@ async function saveToFile(filename: string, fullpath = false) {
 }
 
 export async function save(): Promise<void> {
-    if (!(await dirExists(getFolder()))) {
-        await fs.mkdir(getFolder(), { recursive: true });
-    }
+    await verifyFolder();
     await saveToFile('db.json');
     //let existing: RecipeRow[] = [];
     //try {
@@ -108,9 +107,7 @@ async function loadData(): Promise<RecipeRow[]> {
 export async function createDatabase(): Promise<void> {
     try {
         // PRERELEASE -------------------------- REMOVE ON RELEASE
-        if (!(await dirExists(getFolder()))) {
-            await fs.mkdir(getFolder(), { recursive: true });
-        }
+        await verifyFolder();
         try {
             JSON.parse(await fs.readFile(getFolder() + 'prerelease.json', 'utf-8'));
         } catch (e) {
@@ -138,9 +135,7 @@ export async function createDatabase(): Promise<void> {
 }
 
 export async function resetAndBackup(): Promise<void> {
-    if (!(await dirExists(getFolder()))) {
-        await fs.mkdir(getFolder(), { recursive: true });
-    }
+    await verifyFolder();
     await saveToFile(`db_backup_${Math.floor((new Date()).getTime() / 1000)}.backup`);
     data = structuredClone(baseData) as RecipeRow[];
     await save();
@@ -281,7 +276,7 @@ function getDiscoveredOrder(result: string): number | undefined {
     return undefined;
 }
 
-export function setDiscovered(a: string, b: string, discovered: boolean) {
+export async function setDiscovered(a: string, b: string, discovered: boolean): Promise<boolean> {
     for (const recipe of data) {
         if ((recipe.a === a && recipe.b === b) || (recipe.a === b && recipe.b === a)) {
             const existingOrder = getDiscoveredOrder(recipe.result);
@@ -292,6 +287,11 @@ export function setDiscovered(a: string, b: string, discovered: boolean) {
             break;
         }
     }
+    if (data.filter((recipe) => recipe.discovered).length % 10 === 0) {
+        await addHintPoint(1);
+        return true;
+    }
+    return false;
 }
 
 export async function deleteRecipe(a: string, b: string): Promise<void> {
@@ -321,12 +321,15 @@ export async function getRecipesFor(result: string): Promise<Recipe[]> {
     return formatted;
 }
 
-export async function getBaseHint(): Promise<Recipe> {
+export async function getBaseHint(): Promise<Recipe | undefined> {
     const alreadyFound = [...new Set(data.filter((value) => value.discovered).map((item) => item.result))];
     let undiscovered = data.filter((value) => !alreadyFound.includes(value.result));
     undiscovered = undiscovered.filter((item) => alreadyFound.includes(item.a) && alreadyFound.includes(item.b));
     undiscovered = undiscovered.sort((a, b) => a.depth - b.depth);
-    return traverseAndFill(undiscovered[0]);
+    if (undiscovered.length > 0) {
+        return traverseAndFill(undiscovered[0]);
+    }
+    return undefined;
 }
 
 export async function getAllRecipes(): Promise<Recipe[]> {
