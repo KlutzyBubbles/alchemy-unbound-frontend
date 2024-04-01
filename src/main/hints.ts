@@ -69,8 +69,10 @@ export async function loadHint(): Promise<void> {
 
 async function generateHint(): Promise<Recipe | undefined> {
     if (hint.hintsLeft > 0) {
-        hint.hintsLeft -= 1;
-        return getBaseHint();
+        const tempHint = await getBaseHint();
+        if (tempHint !== undefined)
+            hint.hintsLeft -= 1;
+        return tempHint;
     }
     return undefined;
 }
