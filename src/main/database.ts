@@ -329,6 +329,12 @@ export async function getBaseHint(): Promise<Recipe | undefined> {
     if (undiscovered.length > 0) {
         return traverseAndFill(undiscovered[0]);
     }
+    const alreadyFoundRecipes = [...new Set(data.filter((value) => value.discovered).map((item) => `${item.a}:${item.b}`))];
+    let undiscoveredRecipes = data.filter((value) => !alreadyFoundRecipes.includes(`${value.a}:${value.b}`));
+    undiscoveredRecipes = undiscoveredRecipes.sort((a, b) => a.depth - b.depth);
+    if (undiscoveredRecipes.length > 0) {
+        return traverseAndFill(undiscoveredRecipes[0]);
+    }
     return undefined;
 }
 
