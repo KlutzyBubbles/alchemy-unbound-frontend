@@ -78,9 +78,7 @@ export const MainButtons: FC<MainButtonProps> = ({
             {isProduction ? (<Fragment/>) : (
                 <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={devClick}><IoBandageOutline /></div>
             )}
-            {isProduction ? (<Fragment/>) : (
-                <HintButton refreshProp={refreshHint} />
-            )}
+            <HintButton refreshProp={refreshHint} />
             {settings.offline ? (<div className='btn btn-offline float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('settings')}><IoCloudOfflineOutline /></div>) : (<Fragment/>)}
         </div>
     );
