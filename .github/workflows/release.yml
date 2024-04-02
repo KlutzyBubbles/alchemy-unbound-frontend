@@ -51,6 +51,12 @@ jobs:
       #   run: npm run make -- --platform linux
       # - name: Build for win32
       #   run: npm run make -- --platform win32
+      - name: Debug out dir
+        run: ls out
+      - name: Debug linux dir
+        run: ls out/alchemy-unbound-linux-x64
+      - name: Debug win32 dir
+        run: ls out/alchemy-unbound-win32-x64
         
       - name: Release
         uses: softprops/action-gh-release@v1
