@@ -1,6 +1,6 @@
 import { app } from 'electron';
-import * as appInfo from '../../package.json';
-import { SystemVersion, AppVersions } from '../common/types';
+import * as appInfo from '../../../package.json';
+import { SystemVersion, AppVersions } from '../../common/types';
 
 export function getAppVersions(): AppVersions {
     return {

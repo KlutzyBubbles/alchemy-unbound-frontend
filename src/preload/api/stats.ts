@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { StatsChannel } from '../common/ipc';
-import { getStats, setStats, saveStats, loadStats, setStat } from '../main/stats';
-import { Stats } from '../common/stats';
+import { StatsChannel } from '../../common/ipc';
+import { getStats, setStats, saveStats, loadStats, setStat } from '../../main/libs/stats';
+import { Stats } from '../../common/stats';
 
 export const StatsAPIName = 'StatsAPI';
 

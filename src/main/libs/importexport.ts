@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import logger from 'electron-log/main';
 import { dialog } from 'electron';
-import { hasProp } from '../common/utils';
+import { hasProp } from '../../common/utils';
 import { getHintSaveFormat, loadHintV1, setHintRaw } from './hints';
 import { getDatabaseSaveFormat, loadDatabaseV1, loadDatabaseV2, setDataRaw } from './database';
 

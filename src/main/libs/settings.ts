@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import { getFolder, getSteamGameLanguage } from './steam';
-import { dirExists } from './utils';
-import { DEFAULT_SETTINGS, RawSettings, Settings } from '../common/settings';
+import { dirExists } from '../utils';
+import { DEFAULT_SETTINGS, RawSettings, Settings } from '../../common/settings';
 import logger from 'electron-log/main';
 
 const SETTINGS_VERISON = 2;

@@ -1,5 +1,5 @@
 import logger from 'electron-log/main';
-import { CombineOuput, ErrorCode, Recipe, TokenHolder } from '../common/types';
+import { CombineOuput, ErrorCode, Recipe, TokenHolder } from '../../common/types';
 import { getPlaceholderOrder, getRecipe, insertRecipeRow, save, setDiscovered, traverseAndFill } from './database';
 import { isPackaged } from './generic';
 import { getSettings } from './settings';

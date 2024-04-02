@@ -1,5 +1,5 @@
 import { promises as fs } from 'fs';
-import { getFolder } from './steam';
+import { getFolder } from './libs/steam';
 
 export async function dirExists(path: string): Promise<boolean> {
     try

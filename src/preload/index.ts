@@ -1,7 +1,8 @@
-import './settings';
-import './recipe';
-import './generic';
-import './display';
-import './steam';
-import './stats';
-import './hints';
+import './api/settings';
+import './api/recipe';
+import './api/generic';
+import './api/display';
+import './api/steam';
+import './api/stats';
+import './api/hints';
+import './api/importexport';

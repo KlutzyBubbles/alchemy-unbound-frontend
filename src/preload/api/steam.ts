@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { SteamChannel } from '../common/ipc';
-import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated, isDlcInstalled } from '../main/steam';
+import { SteamChannel } from '../../common/ipc';
+import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated, isDlcInstalled } from '../../main/libs/steam';
 
 export const SteamAPIName = 'SteamAPI';
 

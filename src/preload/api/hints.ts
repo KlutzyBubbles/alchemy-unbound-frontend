@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { HintChannel } from '../common/ipc';
-import { addHintPoint, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint } from '../main/hints';
+import { HintChannel } from '../../common/ipc';
+import { addHintPoint, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint } from '../../main/libs/hints';
 
 export const HintAPIName = 'HintAPI';
 

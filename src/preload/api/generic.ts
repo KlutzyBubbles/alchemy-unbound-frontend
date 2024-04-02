@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { GenericChannel } from '../common/ipc';
-import { getAppVersions, isPackaged, getSystemInformation, quit } from '../main/generic';
+import { GenericChannel } from '../../common/ipc';
+import { getAppVersions, isPackaged, getSystemInformation, quit } from '../../main/libs/generic';
 
 export const GenericAPIName = 'GenericAPI';
 

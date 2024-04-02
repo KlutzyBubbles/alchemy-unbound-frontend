@@ -1,17 +1,17 @@
-import { BasicElement, Languages, Recipe, RecipeRow } from '../common/types';
+import { BasicElement, Languages, Recipe, RecipeRow } from '../../common/types';
 import { promises as fs } from 'fs';
 import { Compressed, compress, decompress } from 'compress-json';
 import { getFolder } from './steam';
-import { verifyFolder } from './utils';
-import { languages } from '../common/settings';
-import baseData from '../base.json';
+import { verifyFolder } from '../utils';
+import { languages } from '../../common/settings';
+import baseData from '../../base.json';
 // import baseData from '../allDiscovered.json';
 import logger from 'electron-log/main';
 import { addHintPoint, resetHint } from './hints';
 
 const DATABASE_VERISON = 2;
 
-let data: RecipeRow[] = [];
+export let data: RecipeRow[] = [];
 let databaseOrder = 0;
 
 export function getPlaceholderOrder(): number {
@@ -229,23 +229,6 @@ export async function getRecipesFor(result: string): Promise<Recipe[]> {
         formatted.push(traverseAndFill(recipe));
     }
     return formatted;
-}
-
-export async function getBaseHint(): Promise<Recipe | undefined> {
-    const alreadyFound = [...new Set(data.filter((value) => value.discovered).map((item) => item.result))];
-    let undiscovered = data.filter((value) => !alreadyFound.includes(value.result));
-    undiscovered = undiscovered.filter((item) => alreadyFound.includes(item.a) && alreadyFound.includes(item.b));
-    undiscovered = undiscovered.sort((a, b) => a.depth - b.depth);
-    if (undiscovered.length > 0) {
-        return traverseAndFill(undiscovered[0]);
-    }
-    const alreadyFoundRecipes = [...new Set(data.filter((value) => value.discovered).map((item) => `${item.a}:${item.b}`))];
-    let undiscoveredRecipes = data.filter((value) => !alreadyFoundRecipes.includes(`${value.a}:${value.b}`));
-    undiscoveredRecipes = undiscoveredRecipes.sort((a, b) => a.depth - b.depth);
-    if (undiscoveredRecipes.length > 0) {
-        return traverseAndFill(undiscoveredRecipes[0]);
-    }
-    return undefined;
 }
 
 export async function getAllRecipes(): Promise<Recipe[]> {

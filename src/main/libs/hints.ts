@@ -1,17 +1,34 @@
 import { promises as fs } from 'fs';
 import { getFolder, isDlcInstalled } from './steam';
-import { verifyFolder } from './utils';
+import { verifyFolder } from '../utils';
 import logger from 'electron-log/main';
-import { DEFAULT_HINT, DEFAULT_MAX_HINTS, Hint } from '../common/hints';
+import { DEFAULT_HINT, DEFAULT_MAX_HINTS, Hint } from '../../common/hints';
 import { Compressed, compress, decompress } from 'compress-json';
-import { HINT_DLC, Recipe } from '../common/types';
-import { getBaseHint } from './database';
+import { HINT_DLC, Recipe } from '../../common/types';
+import { data, traverseAndFill } from './database';
 
 const HINT_VERISON = 1;
 
 let maxHints = DEFAULT_MAX_HINTS;
 let hint: Hint = DEFAULT_HINT;
 let loaded = false;
+
+async function getBaseHint(): Promise<Recipe | undefined> {
+    const alreadyFound = [...new Set(data.filter((value) => value.discovered).map((item) => item.result))];
+    let undiscovered = data.filter((value) => !alreadyFound.includes(value.result));
+    undiscovered = undiscovered.filter((item) => alreadyFound.includes(item.a) && alreadyFound.includes(item.b));
+    undiscovered = undiscovered.sort((a, b) => a.depth - b.depth);
+    if (undiscovered.length > 0) {
+        return traverseAndFill(undiscovered[0]);
+    }
+    const alreadyFoundRecipes = [...new Set(data.filter((value) => value.discovered).map((item) => `${item.a}:${item.b}`))];
+    let undiscoveredRecipes = data.filter((value) => !alreadyFoundRecipes.includes(`${value.a}:${value.b}`));
+    undiscoveredRecipes = undiscoveredRecipes.sort((a, b) => a.depth - b.depth);
+    if (undiscoveredRecipes.length > 0) {
+        return traverseAndFill(undiscoveredRecipes[0]);
+    }
+    return undefined;
+}
 
 async function saveHintToFile(filename: string, fullpath = false) {
     logger.debug('saveHintToFile()');

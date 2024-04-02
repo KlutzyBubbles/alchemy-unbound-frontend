@@ -196,7 +196,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     const onResetConfirm = async () => {
         setShowResetConfirm(false);
         try {
-            await window.RecipeAPI.reset();
+            await window.ImportExportAPI.reset();
             setShouldUpdate(true);
         } catch (e) {
             logger.error('Failed resetting data', e);
@@ -211,7 +211,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
         try {
             setErrorText('');
             setSuccessText('');
-            const result = await window.RecipeAPI.export();
+            const result = await window.ImportExportAPI.export();
             if (!result) {
                 setErrorText(getFromStore('userCancelled', settings.language));
             } else {
@@ -227,7 +227,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
         try {
             setErrorText('');
             setSuccessText('');
-            const result = await window.RecipeAPI.import();
+            const result = await window.ImportExportAPI.import();
             if (!result) {
                 setErrorText(getFromStore('userCancelled', settings.language));
             } else {

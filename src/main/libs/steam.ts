@@ -1,4 +1,4 @@
-import { Language, languages } from '../common/settings';
+import { Language, languages } from '../../common/settings';
 import steamworks from '@ai-zen/steamworks.js';
 import { PlayerSteamId, auth } from '@ai-zen/steamworks.js/client';
 import logger from 'electron-log/main';

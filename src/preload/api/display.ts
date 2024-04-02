@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { DisplayChannel } from '../common/ipc';
-import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from '../main/display';
+import { DisplayChannel } from '../../common/ipc';
+import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from '../../main/libs/display';
 
 export const DisplayAPIName = 'DisplayAPI';
 

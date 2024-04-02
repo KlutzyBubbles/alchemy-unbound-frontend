@@ -1,11 +1,12 @@
-import { RecipeAPIName, IRecipeAPI } from './preload/recipe';
-import { ISettingsAPI, SettingsAPIName } from './preload/settings';
-import { IGenericAPI, GenericAPIName } from './preload/generic';
-import { DisplayAPIName, IDisplayAPI } from './preload/display';
-import { ISteamAPI, SteamAPIName } from './preload/steam';
+import { RecipeAPIName, IRecipeAPI } from './preload/api/recipe';
+import { ISettingsAPI, SettingsAPIName } from './preload/api/settings';
+import { IGenericAPI, GenericAPIName } from './preload/api/generic';
+import { DisplayAPIName, IDisplayAPI } from './preload/api/display';
+import { ISteamAPI, SteamAPIName } from './preload/api/steam';
 import 'react';
-import { IStatsAPI, StatsAPIName } from './preload/stats';
-import { HintAPIName, IHintAPI } from './preload/hints';
+import { IStatsAPI, StatsAPIName } from './preload/api/stats';
+import { HintAPIName, IHintAPI } from './preload/api/hints';
+import { IImportExportAPI, ImportExportAPIName } from './preload/api/importexport';
 
 declare module 'react' {
     interface CSSProperties {
@@ -22,6 +23,7 @@ declare global {
         [SteamAPIName]: ISteamAPI
         [StatsAPIName]: IStatsAPI
         [HintAPIName]: IHintAPI
+        [ImportExportAPIName]: IImportExportAPI
     }
 }
 declare module 'vanta/dist/vanta.birds.min';

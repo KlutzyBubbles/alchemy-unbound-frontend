@@ -1,17 +1,17 @@
 import { ipcMain } from 'electron';
 import { Recipe } from '../common/types';
-import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor } from './database';
-import { combine, getToken } from './server';
-import { DisplayChannel, GenericChannel, HintChannel, RecipeChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
+import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor } from './libs/database';
+import { combine, getToken } from './libs/server';
+import { DisplayChannel, GenericChannel, HintChannel, ImportExportChannel, RecipeChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
 import { Settings } from '../common/settings';
-import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './settings';
-import { getAppVersions, isPackaged, getSystemInformation, quit } from './generic';
-import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from './display';
-import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated, isDlcInstalled } from './steam';
-import { getStats, loadStats, saveStats, setStat, setStats } from './stats';
+import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './libs/settings';
+import { getAppVersions, isPackaged, getSystemInformation, quit } from './libs/generic';
+import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from './libs/display';
+import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated, isDlcInstalled } from './libs/steam';
+import { getStats, loadStats, saveStats, setStat, setStats } from './libs/stats';
 import { Stats } from '../common/stats';
-import { addHintPoint, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint } from './hints';
-import { exportDatabase, importFile } from './importexport';
+import { addHintPoint, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint } from './libs/hints';
+import { exportDatabase, importFile } from './libs/importexport';
 
 
 export function register() {
@@ -36,15 +36,6 @@ export function register() {
     });
     ipcMain.handle(RecipeChannel.SAVE, async () => {
         return save();
-    });
-    ipcMain.handle(RecipeChannel.RESET, async () => {
-        return resetAndBackup();
-    });
-    ipcMain.handle(RecipeChannel.IMPORT, async () => {
-        return importFile();
-    });
-    ipcMain.handle(RecipeChannel.EXPORT, async () => {
-        return exportDatabase();
     });
     ipcMain.handle(RecipeChannel.GET_TOKEN, async () => {
         return getToken();
@@ -153,5 +144,16 @@ export function register() {
     });
     ipcMain.handle(HintChannel.COMPLETE, async () => {
         return hintComplete();
+    });
+
+    // Import Export Handlers
+    ipcMain.handle(ImportExportChannel.RESET, async () => {
+        return resetAndBackup();
+    });
+    ipcMain.handle(ImportExportChannel.IMPORT, async () => {
+        return importFile();
+    });
+    ipcMain.handle(ImportExportChannel.EXPORT, async () => {
+        return exportDatabase();
     });
 }

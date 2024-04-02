@@ -6,10 +6,13 @@ export enum RecipeChannel {
     GET_ALL = 'recipe:getAll',
     GET_FOR = 'recipe:getFor',
     SAVE = 'recipe:save',
-    RESET = 'recipe:reset',
-    IMPORT = 'recipe:import',
-    EXPORT = 'recipe:export',
     GET_TOKEN = 'recipe:getToken'
+}
+
+export enum ImportExportChannel {
+    RESET = 'io:reset',
+    IMPORT = 'io:import',
+    EXPORT = 'io:export'
 }
 
 export enum SettingsChannel {

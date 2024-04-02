@@ -1,9 +1,9 @@
 import { promises as fs } from 'fs';
 import { getFolder } from './steam';
-import { dirExists } from './utils';
+import { dirExists } from '../utils';
 import logger from 'electron-log/main';
-import { DEFAULT_STATS, Stats } from '../common/stats';
-import { hasProp } from '../common/utils';
+import { DEFAULT_STATS, Stats } from '../../common/stats';
+import { hasProp } from '../../common/utils';
 
 let stats: Stats = DEFAULT_STATS;
 let loaded = false;

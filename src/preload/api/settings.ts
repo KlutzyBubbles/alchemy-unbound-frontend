@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { Settings } from '../common/settings';
-import { getSettings, setSettings, saveSettings, loadSettings, setSetting } from '../main/settings';
-import { SettingsChannel } from '../common/ipc';
+import { Settings } from '../../common/settings';
+import { getSettings, setSettings, saveSettings, loadSettings, setSetting } from '../../main/libs/settings';
+import { SettingsChannel } from '../../common/ipc';
 
 export const SettingsAPIName = 'SettingsAPI';
 

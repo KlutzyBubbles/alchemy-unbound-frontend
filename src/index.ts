@@ -1,15 +1,15 @@
 import { app, BrowserWindow, crashReporter, Menu, net, protocol, shell } from 'electron';
-import { createDatabase } from './main/database';
+import { createDatabase } from './main/libs/database';
 import debug from 'electron-debug';
 import steamworks from '@ai-zen/steamworks.js';
 import { register } from './main/register';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-assembler';
-import { getFolder } from './main/steam';
+import { getFolder } from './main/libs/steam';
 import path from 'path';
 import log from 'electron-log/main';
 import util from 'util';
-import { saveStats } from './main/stats';
-import { saveSettings } from './main/settings';
+import { saveStats } from './main/libs/stats';
+import { saveSettings } from './main/libs/settings';
 import { timeoutPromise } from './common/utils';
 
 log.transports.file.resolvePathFn = (variables) => {
