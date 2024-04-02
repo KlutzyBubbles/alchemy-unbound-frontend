@@ -226,6 +226,10 @@ select option {
     );
 }
 
+.btn-status {
+    @include button-variant(#4CBB17, #4CBB17, color-contrast($dark), #4CBB17, #4CBB17, color-contrast($dark));
+}
+
 .btn-discord {
     @include button-variant(#5865F2, #5865F2, color-contrast($dark), #5865F2, #5865F2, color-contrast($dark));
 }

@@ -8,6 +8,7 @@ import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
 import { getFromStore } from '../language';
 import { DEFAULT_STATS, Stats } from '../../common/stats';
 import { ErrorItem } from './ErrorItem';
+import { IoPulseOutline } from 'react-icons/io5';
 
 
 export interface InfoModalProps {
@@ -169,6 +170,13 @@ export const InfoModal: FC<InfoModalProps> = ({
                     onClick={() => setAdvanced(!advanced)}>
                     <h2 className='mx-2'><HiOutlineWrenchScrewdriver /><span className='fs-3 ms-3'>v{appVersions.app}</span></h2>
                 </div>
+                <a
+                    href="https://status.alchemyunbound.net"
+                    target="_blank"
+                    className='btn btn-sm btn-status float-end mb-2 fs-2 d-flex p-2'
+                    rel="noreferrer">
+                    <h2 className='mx-2'><IoPulseOutline /></h2>
+                </a>
                 <a
                     href="https://github.com/KlutzyBubbles/alchemy-unbound"
                     target="_blank"
