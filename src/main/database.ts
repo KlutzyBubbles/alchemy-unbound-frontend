@@ -7,9 +7,7 @@ import { languages } from '../common/settings';
 import baseData from '../base.json';
 // import baseData from '../allDiscovered.json';
 import logger from 'electron-log/main';
-import { dialog } from 'electron';
-import { hasProp } from '../common/utils';
-import { addHintPoint } from './hints';
+import { addHintPoint, resetHint } from './hints';
 
 const DATABASE_VERISON = 2;
 
@@ -22,16 +20,20 @@ export function getPlaceholderOrder(): number {
     return temp;
 }
 
-async function saveToFile(filename: string, fullpath = false) {
-    await fs.writeFile(fullpath ? filename : getFolder() + filename, JSON.stringify({
+async function saveDatabaseToFile(filename: string, fullpath = false) {
+    await fs.writeFile(fullpath ? filename : getFolder() + filename, JSON.stringify(getDatabaseSaveFormat()), 'utf-8');
+}
+
+export function getDatabaseSaveFormat() {
+    return {
         version: DATABASE_VERISON,
         data: compress(data.filter((item) => item.discovered))
-    }), 'utf-8');
+    };
 }
 
 export async function save(): Promise<void> {
     await verifyFolder();
-    await saveToFile('db.json');
+    await saveDatabaseToFile('db.json');
     //let existing: RecipeRow[] = [];
     //try {
     //    if (fileExists(getFolder() + 'db.json')) {
@@ -59,11 +61,15 @@ export async function save(): Promise<void> {
     //}), 'utf-8');
 }
 
-function loadV1(loaded: Record<string, unknown>[]): RecipeRow[] {
+export function setDataRaw(newData: RecipeRow[]) {
+    data = newData;
+}
+
+export function loadDatabaseV1(loaded: Record<string, unknown>[]): RecipeRow[] {
     return loaded as RecipeRow[];
 }
 
-function loadV2(loaded: Compressed): RecipeRow[] {
+export function loadDatabaseV2(loaded: Compressed): RecipeRow[] {
     const tempData = decompress(loaded) as RecipeRow[];
     for (const baseItem of structuredClone(baseData)) {
         let hasDiscovered = false;
@@ -84,9 +90,9 @@ async function loadData(): Promise<RecipeRow[]> {
     try {
         const raw = JSON.parse(await fs.readFile(getFolder() + 'db.json', 'utf-8'));
         if (raw.version === 1) {
-            return loadV1(raw.data);
+            return loadDatabaseV1(raw.data);
         } else if (raw.version === 2) {
-            return loadV2(raw.data);
+            return loadDatabaseV2(raw.data);
         } else {
             logger.error(`Failed to load database because of unknown version '${raw.version}', has this been altered?`);
             throw(Error(`Failed to load database because of unknown version '${raw.version}', has this been altered?`));
@@ -136,107 +142,11 @@ export async function createDatabase(): Promise<void> {
 
 export async function resetAndBackup(): Promise<void> {
     await verifyFolder();
-    await saveToFile(`db_backup_${Math.floor((new Date()).getTime() / 1000)}.backup`);
+    await saveDatabaseToFile(`db_backup_${Math.floor((new Date()).getTime() / 1000)}.backup`);
     data = structuredClone(baseData) as RecipeRow[];
     await save();
     setDatabaseOrder();
-}
-
-export async function importFile(): Promise<boolean> {
-    const fileDialog = await dialog.showOpenDialog({
-        filters: [{
-            name: 'JSON Database',
-            extensions: ['json']
-        }],
-        properties: [
-            'openFile'
-        ],
-    });
-    if (fileDialog.canceled) {
-        return false;
-    }
-    if (fileDialog.filePaths.length === 0) {
-        return false;
-    } else {
-        const filePath = fileDialog.filePaths[0];
-        let text: string = undefined;
-        try {
-            text = await fs.readFile(filePath, 'utf-8');
-        } catch (e) {
-            if (e.code === 'ENOENT') {
-                return false;
-            } else {
-                logger.error(`Failed to read imported database file with error ${e.code}`);
-                throw new Error('Failed to read database file');
-            }
-        }
-        if (text === undefined || text === null) {
-            return false;
-        }
-        let raw = undefined;
-        try {
-            raw = JSON.parse(text);
-        } catch (e) {
-            logger.error('Failed to translate imported database to JSON');
-            throw new Error('Imported a malformed JSON');
-        }
-        if (raw === undefined || raw === null) {
-            return false;
-        }
-        if (!hasProp(raw, 'version') || !hasProp(raw, 'data') || !Array.isArray(raw.data)) {
-            throw new Error('Malformed database file selected');
-        }
-        let version = -1;
-        try {
-            version = parseInt(raw.version);
-        } catch (e) {
-            logger.error('Failed to translate imported database to JSON');
-            throw new Error('Imported database version isnt supported');
-        }
-        if (version < 1) {
-            throw new Error('Database version isnt supported');
-        }
-        if (raw.version === 1) {
-            try {
-                data = loadV1(raw.data);
-                return true;
-            } catch (e) {
-                throw new Error('Failed loading the database from version');
-            }
-        } else if (raw.version === 2) {
-            try {
-                data = loadV2(raw.data);
-                return true;
-            } catch (e) {
-                throw new Error('Failed loading the database from version');
-            }
-        } else {
-            logger.error(`Unknown imported version '${raw.version}'`);
-            throw new Error(`Unknown imported version '${raw.version}'`);
-        }
-    }
-}
-
-export async function exportDatabase(): Promise<boolean> {
-    const fileDialog = await dialog.showSaveDialog({
-        filters: [{
-            name: 'JSON Database',
-            extensions: ['json']
-        }],
-        properties: [
-            'createDirectory',
-            'showOverwriteConfirmation'
-        ],
-    });
-    if (fileDialog.canceled || fileDialog.filePath === undefined || fileDialog.filePath === null) {
-        return false;
-    }
-    try {
-        saveToFile(fileDialog.filePath, true);
-        return true;
-    } catch (e) {
-        throw new Error('Failed to save database file');
-    }
+    await resetHint();
 }
 
 function setDatabaseOrder() {

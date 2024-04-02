@@ -24,7 +24,6 @@ export enum HintChannel {
     LOAD = 'hint:load',
     SAVE = 'hint:save',
     ADD_POINT = 'hint:addPoint',
-    SET_MAX = 'hint:setMax',
     GET = 'hint:get',
     GET_MAX = 'hint:getMax',
     GET_LEFT = 'hint:getLeft',

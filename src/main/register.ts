@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import { Recipe } from '../common/types';
-import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, importFile, exportDatabase, getRecipesFor } from './database';
+import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor } from './database';
 import { combine, getToken } from './server';
 import { DisplayChannel, GenericChannel, HintChannel, RecipeChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
 import { Settings } from '../common/settings';
@@ -10,7 +10,8 @@ import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from './
 import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated, isDlcInstalled } from './steam';
 import { getStats, loadStats, saveStats, setStat, setStats } from './stats';
 import { Stats } from '../common/stats';
-import { addHintPoint, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint, setMaxHints } from './hints';
+import { addHintPoint, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint } from './hints';
+import { exportDatabase, importFile } from './importexport';
 
 
 export function register() {
@@ -149,9 +150,6 @@ export function register() {
     });
     ipcMain.handle(HintChannel.RESET, async () => {
         return resetHint();
-    });
-    ipcMain.handle(HintChannel.SET_MAX, async (_, maxHints: number) => {
-        return setMaxHints(maxHints);
     });
     ipcMain.handle(HintChannel.COMPLETE, async () => {
         return hintComplete();

@@ -156,25 +156,25 @@
         );
     }
 
-    .btn-offline {
-        @include button-variant(
-            $main-button-bg, // Background
-            $main-button-bg, // Border
-            $danger, // Color
-            $main-button-bg-hover, // Hover Background
-            $main-button-bg-hover, // Hover Border
-            $danger, // Hover Color
-            $main-button-bg-hover, // Active Background
-            $main-button-bg-hover, // Active Border
-            $danger // Active Color
-        );
-    }
-
     .dropdown-menu {
         .dropdown-item:hover {
             background-color: $dropdown-bg
         }
     }
+}
+
+.btn-offline {
+    @include button-variant(
+        $main-button-bg, // Background
+        $main-button-bg, // Border
+        $danger, // Color
+        $main-button-bg-hover, // Hover Background
+        $main-button-bg-hover, // Hover Border
+        $danger, // Hover Color
+        $main-button-bg-hover, // Active Background
+        $main-button-bg-hover, // Active Border
+        $danger // Active Color
+    );
 }
 
 .full-size {

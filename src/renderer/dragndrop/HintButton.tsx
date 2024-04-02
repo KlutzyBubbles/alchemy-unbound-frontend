@@ -8,7 +8,7 @@ import { ItemTypes } from '../types';
 import { mockElement } from '../utils';
 import { ItemRenderer } from '../ItemRenderer';
 import { getFromStore, getPlaceholderLanguage } from '../language';
-import { DEFAULT_HINT } from '../../common/hints';
+import { DEFAULT_HINT, DEFAULT_MAX_HINTS } from '../../common/hints';
 import logger from 'electron-log/renderer';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { Overlay } from 'react-bootstrap';
@@ -21,7 +21,7 @@ export const HintButton: FC<HintButtonProps> = ({
     refreshProp
 }) => {
     const [hintOpen, setHintOpen] = useState<boolean>(false);
-    const [maxHints, setMaxHints] = useState<number>(DEFAULT_HINT.maxHints);
+    const [maxHints, setMaxHints] = useState<number>(DEFAULT_MAX_HINTS);
     const [hintPoints, setHintPoints] = useState<number>(DEFAULT_HINT.hintsLeft);
     const [currentHint, setCurrentHint] = useState<Recipe>(DEFAULT_HINT.hint);
     const [hovered, setHovered] = useState<boolean>(false);
@@ -30,20 +30,25 @@ export const HintButton: FC<HintButtonProps> = ({
     const tooltipRef = useRef(undefined);
 
     const refresh = async () => {
+        logger.debug('Refresh');
         try {
             const newHint = await window.HintAPI.getHint(false);
             setShowTooltip(newHint === undefined);
             setCurrentHint(newHint);
-            setMaxHints(await window.HintAPI.getMaxHints());
-            setHintPoints(await window.HintAPI.getHintsLeft());
+            const maxHintsTemp = await window.HintAPI.getMaxHints();
+            setMaxHints(maxHintsTemp);
+            const hintsLeft = await window.HintAPI.getHintsLeft();
+            setHintPoints(hintsLeft);
+            logger.debug('vAlues', newHint, maxHintsTemp, hintsLeft);
         } catch (error) {
             logger.error('Failed getting hint data from main', error);
         }
     };
 
     useEffect(() => {
+        logger.debug('blank useEffect');
         refresh();
-        if (tooltipRef.current !== undefined) {
+        if (tooltipRef.current !== undefined && tooltipRef.current !== null) {
             tooltipRef.current.addEventListener('hide.bs.dropdown', () => {
                 setHintOpen(false);
             });
@@ -52,7 +57,7 @@ export const HintButton: FC<HintButtonProps> = ({
             });
         }
         return () => {
-            if (tooltipRef.current !== undefined) {
+            if (tooltipRef.current !== undefined && tooltipRef.current !== null) {
                 tooltipRef.current.removeEventListener('hide.bs.dropdown');
                 tooltipRef.current.removeEventListener('show.bs.dropdown');
             }
@@ -60,6 +65,7 @@ export const HintButton: FC<HintButtonProps> = ({
     }, []);
 
     useEffect(() => {
+        logger.debug('refreshProp useEffect');
         refresh();
     }, [refreshProp]);
 

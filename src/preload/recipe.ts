@@ -1,8 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { Recipe } from '../common/types';
-import { deleteRecipe, exportDatabase, getAllRecipes, getRecipe, getRecipesFor, importFile, insertRecipe, resetAndBackup, save } from '../main/database';
+import { deleteRecipe, getAllRecipes, getRecipe, getRecipesFor, insertRecipe, resetAndBackup, save } from '../main/database';
 import { combine, getToken } from '../main/server';
 import { RecipeChannel } from '../common/ipc';
+import { exportDatabase, importFile } from '../main/importexport';
 
 export const RecipeAPIName = 'RecipeAPI';
 

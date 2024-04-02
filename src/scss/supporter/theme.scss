@@ -7,6 +7,13 @@
 
     @import "../common.scss";
     
+    .alert-success {
+        --#{$prefix}alert-bg: #{$green-400};
+        --#{$prefix}alert-color: #{$green-900};
+        --#{$prefix}alert-border-color: #{$green-900};
+        --#{$prefix}alert-border: #{$alert-border-width} solid var(--#{$prefix}alert-border-color);
+    }
+
     * {
         // scss-docs-start modal-css-vars
         --#{$prefix}modal-zindex: #{$zindex-modal};
