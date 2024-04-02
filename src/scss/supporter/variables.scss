@@ -189,6 +189,8 @@ $form-switch-focus-bg-image:      url("data:image/svg+xml,<svg xmlns='http://www
 $form-switch-checked-color:       $component-active-color;
 $form-switch-checked-bg-image:    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$form-switch-checked-color}'/></svg>");
 
+$form-select-indicator-color:       $theme-fg;
+$form-select-indicator:             url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='#{$form-select-indicator-color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/></svg>");
 
 $form-range-track-bg:             rgba($black, .2) !default;
 
@@ -283,7 +285,7 @@ $breadcrumb-active-color:           $white !default;
 
 // Close
 
-$btn-close-color:            $white !default;
+$btn-close-color:            $white;
 
 // Modal
 
