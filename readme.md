@@ -25,15 +25,3 @@ $InputFile = Get-Content $InputPath -Encoding byte
 $Base64Output = [System.Convert]::ToBase64String($InputFile)
 $Base64Output | Out-File $OutputPath
 ```
-
-
-
-
-
-
-
-
-
-
-
-./steamcmd.exe +login alchemyunbound "$NzKz*rVrXK4X7xtVyxT" +quit
