@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron';
-import { Recipe } from '../common/types';
-import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor } from './libs/database';
+import { ErrorEntryAdd, Recipe } from '../common/types';
+import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor, hasAllRecipes } from './libs/database';
 import { combine, getToken } from './libs/server';
-import { DisplayChannel, GenericChannel, HintChannel, ImportExportChannel, RecipeChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
+import { DisplayChannel, ErrorChannel, GenericChannel, HintChannel, ImportExportChannel, RecipeChannel, ServerChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
 import { Settings } from '../common/settings';
 import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './libs/settings';
 import { getAppVersions, isPackaged, getSystemInformation, quit } from './libs/generic';
@@ -12,6 +12,7 @@ import { getStats, loadStats, saveStats, setStat, setStats } from './libs/stats'
 import { Stats } from '../common/stats';
 import { addHintPoint, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint } from './libs/hints';
 import { exportDatabase, importFile } from './libs/importexport';
+import { getErrors, registerError } from './libs/error';
 
 
 export function register() {
@@ -25,9 +26,6 @@ export function register() {
     ipcMain.handle(RecipeChannel.GET, async (_, a: string, b: string) => {
         return getRecipe(a, b);
     });
-    ipcMain.handle(RecipeChannel.COMBINE, async (_, a: string, b: string) => {
-        return combine(a, b);
-    });
     ipcMain.handle(RecipeChannel.GET_ALL, async () => {
         return getAllRecipes();
     });
@@ -37,8 +35,24 @@ export function register() {
     ipcMain.handle(RecipeChannel.SAVE, async () => {
         return save();
     });
-    ipcMain.handle(RecipeChannel.GET_TOKEN, async () => {
+    ipcMain.handle(RecipeChannel.HAS_ALL, async (_, result: string) => {
+        return hasAllRecipes(result);
+    });
+
+    // Server handlers
+    ipcMain.handle(ServerChannel.COMBINE, async (_, a: string, b: string) => {
+        return combine(a, b);
+    });
+    ipcMain.handle(ServerChannel.GET_TOKEN, async () => {
         return getToken();
+    });
+
+    // Error handlers
+    ipcMain.handle(ErrorChannel.REGISTER, async (_, error: ErrorEntryAdd) => {
+        return registerError(error);
+    });
+    ipcMain.handle(ErrorChannel.GET_ALL, async () => {
+        return getErrors();
     });
 
     // Settings handlers

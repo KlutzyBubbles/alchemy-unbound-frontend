@@ -279,3 +279,18 @@ export function traverseAndFill(recipe?: RecipeRow): Recipe | undefined {
         b: getBasicDetails(b)
     };
 }
+
+export function hasAllRecipes(result: string): boolean {
+    const recipes = data.filter((value) => (value.result === result && value.base));
+    if (recipes.length === 0) {
+        return false;
+    }
+    let hasAll = true;
+    for (const recipe of recipes) {
+        if (!recipe.discovered) {
+            hasAll = false;
+            break;
+        }
+    }
+    return hasAll;
+}

@@ -68,14 +68,26 @@ export type TokenHolder = {
     expiryDate: number
 }
 
-export type CombineOuput = {
+export type CombineOutput = {
+    type: 'success',
+    result: CombineSuccess
+} | {
+    type: 'error',
+    result: CombineError
+}
+
+export type CombineSuccess = {
     hintAdded: boolean,
     newDiscovery: boolean,
     firstDiscovery: boolean,
     recipe: Recipe
 }
 
-export enum ErrorCode {
+export type CombineError = {
+    code: ServerErrorCode
+}
+
+export enum ServerErrorCode {
     QUERY_MISSING = 1,
     QUERY_INVALID = 2,
     QUERY_UNDEFINED = 3,
@@ -88,6 +100,42 @@ export enum ErrorCode {
     STEAM_ERROR = 10,
     ITEM_UNKNOWN = 11
 }
+
+export enum LocalErrorCode {
+    UNKNOWN = 1001
+}
+
+export type ErrorCode = ServerErrorCode | LocalErrorCode;
+
+export const ErrorCodeToString: {
+    [key in ErrorCode]: string
+} = {
+    1: 'queryMissing',
+    2: 'queryInvalid',
+    3: 'queryUndefined',
+    4: 'abNotKnown',
+    5: 'steamTicketInvalid',
+    6: 'tokenExpired',
+    7: 'steamServersDown',
+    8: 'abNumber',
+    9: 'maxDepth',
+    10: 'steamError',
+    11: 'itemUnknown',
+    1001: 'unknownError'
+};
+
+export type ErrorType = 'combine' | 'token';
+
+export type ErrorEntry = {
+    a?: string,
+    b?: string,
+    message?: string,
+    type: ErrorType,
+    code: ErrorCode,
+    date: Date,
+}
+
+export type ErrorEntryAdd = Omit<ErrorEntry, 'date'>
 
 export type SoundFile = 'new-discovery' | 'first-discovery' | 'pickup' | 'side-drop' | 'drop'
 

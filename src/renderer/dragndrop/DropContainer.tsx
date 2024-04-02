@@ -4,7 +4,7 @@ import { Fragment, useCallback, useContext, useEffect, useRef, useState } from '
 import { useDrop } from 'react-dnd';
 
 import { MainElement } from './MainElement';
-import { CombineOuput, Recipe, RecipeElement } from '../../common/types';
+import { CombineOutput, LocalErrorCode, Recipe, RecipeElement, ServerErrorCode } from '../../common/types';
 import { CustomDragLayer } from './DragLayer';
 import Split from 'react-split';
 import { SideContainer } from './SideContainer';
@@ -17,7 +17,7 @@ import logger from 'electron-log/renderer';
 import { UpdateContext } from '../providers/UpdateProvider';
 import { hasProp } from '../../common/utils';
 import { LoadingContext } from '../providers/LoadingProvider';
-import { unlockCheck } from '../utils/achievements';
+import { itemRecipeCheck, unlockCheck } from '../utils/achievements';
 import { MainButtons } from './MainButtons';
 
 export interface ContainerProps {
@@ -137,97 +137,151 @@ export const DropContainer: FC<ContainerProps> = ({
         recipes: Recipe[]
     }> => {
         logger.debug(`backendCombine(${aName}, ${bName})`);
-        const combined: CombineOuput | undefined = await window.RecipeAPI.combine(aName, bName);
-        if (combined === undefined) {
-            throw Error('Unknown error occurred while combining');
+        let combinedResult: CombineOutput | undefined = undefined;
+        try {
+            combinedResult = await window.ServerAPI.combine(aName, bName);
+        } catch (error) {
+            logger.error('Failed combining from main', error);
+            await window.ErrorAPI.registerError({
+                a: aName,
+                b: bName,
+                message: error.toString(),
+                type: 'combine',
+                code: LocalErrorCode.UNKNOWN
+            });
+        }
+        if (combinedResult === undefined) {
+            logger.debug('Combine failed in offline mode');
         } else {
-            logger.debug('Found recipe', combined);
-            if (combined.recipe.result === '69') {
-                window.SteamAPI.activateAchievement('nice');
-            }
-            const currentHint = await window.HintAPI.getHint(false);
-            if (currentHint !== undefined && combined.recipe.result === currentHint.result) {
-                await window.HintAPI.hintComplete();
-            }
-            if (combined.hintAdded || (currentHint !== undefined && combined.recipe.result === currentHint.result)) {
-                setRefreshHint((value) => {
-                    return value + 1;
-                });
-            }
-            const stats = await window.StatsAPI.getStats();
-            if (combined.newDiscovery) {
-                playSound('new-discovery');
-                if (combined.recipe.base) {
-                    stats.baseRecipesFound += 1;
+            if (combinedResult.type === 'error') {
+                /*
+                STEAM_TICKET_INVALID = 5,
+                TOKEN_EXPIRED = 6,
+                STEAM_SERVERS_DOWN = 7,
+                AB_NUMBER = 8,
+                MAX_DEPTH = 9,
+                STEAM_ERROR = 10,
+                ITEM_UNKNOWN = 11
+                */
+                const errorCode = combinedResult.result.code;
+                if (errorCode <= 7 || errorCode === ServerErrorCode.STEAM_ERROR) {
+                    // Soft / Unknown error that shouldn't ever make it here.
+                    logger.error(`Found error code ${errorCode} where it shouln't be. Please report this if you see it`);
                 } else {
-                    stats.aiRecipesFound += 1;
-                }
-            }
-            if (combined.firstDiscovery) {
-                playSound('first-discovery');
-                stats.firstDiscoveries += 1;
-            }
-            if (combined.recipe.base) {
-                if (combined.recipe.depth > stats.baseHighestDepth) {
-                    stats.baseHighestDepth = combined.recipe.depth;
-                }
-            } else {
-                if (combined.recipe.depth > stats.aiHighestDepth) {
-                    stats.aiHighestDepth = combined.recipe.depth;
-                }
-            }
-            const elementList = elements.filter((value) => value.name === combined.recipe.result);
-            logger.debug('found elements', elementList);
-            let recipes: Recipe[] = [];
-            if (elementList.length === 0) {
-                logger.debug('No existing element found');
-                recipes.push(combined.recipe);
-            } else {
-                if (elementList.length > 1) {
-                    logger.warn('Elements list is more than 1, it should only be 1');
-                }
-                const element = elementList[0];
-                logger.debug('time to check', element.recipes);
-                recipes = element.recipes;
-                let recipeExists = false;
-                let newResultCount = 0;
-                let newResult = false;
-                for (const r of element.recipes) {
-                    if (r.discovered) {
-                        newResultCount += 1;
-                    }
-                }
-                for (const r of element.recipes) {
-                    if (((r.a.name === combined.recipe.a.name && r.b.name === combined.recipe.b.name) || (r.a.name === combined.recipe.b.name && r.b.name === combined.recipe.a.name))) {
-                        logger.debug('recipeExists', r, combined.recipe);
-                        if (combined.newDiscovery && newResultCount <= 1) {
-                            newResult = true;
-                        }
-                        recipeExists = true;
-                        break;
-                    }
-                }
-                if (!recipeExists) {
-                    recipes.push(combined.recipe);
-                }
-                if (newResult) {
-                    if (combined.recipe.base) {
-                        stats.baseResultsFound += 1;
+                    if (errorCode === ServerErrorCode.AB_NUMBER) {
+                        logger.error(`Combine a/b is number '${aName}', '${bName}'`);
+                    } else if (errorCode === ServerErrorCode.MAX_DEPTH) {
+                        window.SteamAPI.activateAchievement('baited');
+                        logger.error(`Combine a/b is max depth '${aName}', '${bName}'`);
+                    } else if (errorCode === ServerErrorCode.ITEM_UNKNOWN) {
+                        logger.error(`Combine a/b is unknown (this is usually because of modified save files / updates) '${aName}', '${bName}'`);
                     } else {
-                        stats.aiResultsFound += 1;
+                        logger.error(`Combine a/b unknown error '${aName}', '${bName}'`);
                     }
+                    await window.ErrorAPI.registerError({
+                        a: aName,
+                        b: bName,
+                        type: 'combine',
+                        code: errorCode
+                    });
+                }
+            } else {
+                const combined = combinedResult.result;
+                if (combinedResult === undefined) {
+                    logger.debug('Combine failed in offline mode (two)');
+                } else {
+                    logger.debug('Found recipe', combined);
+                    if (combined.recipe.result === '69') {
+                        window.SteamAPI.activateAchievement('nice');
+                    }
+                    if (['egg', 'idea'].includes(combined.recipe.result)) {
+                        await itemRecipeCheck(combined.recipe.result);
+                    }
+                    const currentHint = await window.HintAPI.getHint(false);
+                    if (currentHint !== undefined && combined.recipe.result === currentHint.result) {
+                        await window.HintAPI.hintComplete();
+                    }
+                    if (combined.hintAdded || (currentHint !== undefined && combined.recipe.result === currentHint.result)) {
+                        setRefreshHint((value) => {
+                            return value + 1;
+                        });
+                    }
+                    const stats = await window.StatsAPI.getStats();
+                    if (combined.newDiscovery) {
+                        playSound('new-discovery');
+                        if (combined.recipe.base) {
+                            stats.baseRecipesFound += 1;
+                        } else {
+                            stats.aiRecipesFound += 1;
+                        }
+                    }
+                    if (combined.firstDiscovery) {
+                        playSound('first-discovery');
+                        stats.firstDiscoveries += 1;
+                    }
+                    if (combined.recipe.base) {
+                        if (combined.recipe.depth > stats.baseHighestDepth) {
+                            stats.baseHighestDepth = combined.recipe.depth;
+                        }
+                    } else {
+                        if (combined.recipe.depth > stats.aiHighestDepth) {
+                            stats.aiHighestDepth = combined.recipe.depth;
+                        }
+                    }
+                    const elementList = elements.filter((value) => value.name === combined.recipe.result);
+                    logger.debug('found elements', elementList);
+                    let recipes: Recipe[] = [];
+                    if (elementList.length === 0) {
+                        logger.debug('No existing element found');
+                        recipes.push(combined.recipe);
+                    } else {
+                        if (elementList.length > 1) {
+                            logger.warn('Elements list is more than 1, it should only be 1');
+                        }
+                        const element = elementList[0];
+                        logger.debug('time to check', element.recipes);
+                        recipes = element.recipes;
+                        let recipeExists = false;
+                        let newResultCount = 0;
+                        let newResult = false;
+                        for (const r of element.recipes) {
+                            if (r.discovered) {
+                                newResultCount += 1;
+                            }
+                        }
+                        for (const r of element.recipes) {
+                            if (((r.a.name === combined.recipe.a.name && r.b.name === combined.recipe.b.name) || (r.a.name === combined.recipe.b.name && r.b.name === combined.recipe.a.name))) {
+                                logger.debug('recipeExists', r, combined.recipe);
+                                if (combined.newDiscovery && newResultCount <= 1) {
+                                    newResult = true;
+                                }
+                                recipeExists = true;
+                                break;
+                            }
+                        }
+                        if (!recipeExists) {
+                            recipes.push(combined.recipe);
+                        }
+                        if (newResult) {
+                            if (combined.recipe.base) {
+                                stats.baseResultsFound += 1;
+                            } else {
+                                stats.aiResultsFound += 1;
+                            }
+                        }
+                    }
+                    stats.itemsCombined += 1;
+                    unlockCheck(stats);
+                    await window.StatsAPI.setStats(stats);
+                    // setStats(stats);
+                    return {
+                        newDiscovery: combined.newDiscovery,
+                        firstDiscovery: combined.firstDiscovery,
+                        recipe: combined.recipe,
+                        recipes
+                    };
                 }
             }
-            stats.itemsCombined += 1;
-            unlockCheck(stats);
-            await window.StatsAPI.setStats(stats);
-            // setStats(stats);
-            return {
-                newDiscovery: combined.newDiscovery,
-                firstDiscovery: combined.firstDiscovery,
-                recipe: combined.recipe,
-                recipes
-            };
         }
     };
 

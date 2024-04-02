@@ -2,11 +2,20 @@ export enum RecipeChannel {
     INSERT = 'recipe:insert',
     DELETE = 'recipe:delete',
     GET = 'recipe:get',
-    COMBINE = 'recipe:combine',
     GET_ALL = 'recipe:getAll',
     GET_FOR = 'recipe:getFor',
     SAVE = 'recipe:save',
-    GET_TOKEN = 'recipe:getToken'
+    HAS_ALL = 'recipe:hasAll',
+}
+
+export enum ServerChannel {
+    COMBINE = 'server:combine',
+    GET_TOKEN = 'server:getToken'
+}
+
+export enum ErrorChannel {
+    REGISTER = 'error:register',
+    GET_ALL = 'error:getAll'
 }
 
 export enum ImportExportChannel {

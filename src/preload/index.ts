@@ -6,3 +6,5 @@ import './api/steam';
 import './api/stats';
 import './api/hints';
 import './api/importexport';
+import './api/server';
+import './api/error';

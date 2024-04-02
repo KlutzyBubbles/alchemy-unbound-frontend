@@ -7,6 +7,14 @@ export function unlockCheck(stats: Stats): void {
     aiResultCheck(stats.aiResultsFound);
     firstDiscoveryCheck(stats.firstDiscoveries);
     depthCheck(stats.baseHighestDepth, stats.aiHighestDepth);
+    itemRecipeCheck('egg');
+    itemRecipeCheck('idea');
+}
+
+export async function itemRecipeCheck(result: string, achievementName?: string) {
+    if (await window.RecipeAPI.hasAllRecipes(result)) {
+        window.SteamAPI.activateAchievement(achievementName ?? result);
+    }
 }
 
 export function baseRecipeCheck(baseRecipesFound: number) {

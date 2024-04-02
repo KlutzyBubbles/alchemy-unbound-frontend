@@ -1,5 +1,5 @@
 import logger from 'electron-log/main';
-import { CombineOuput, ErrorCode, Recipe, TokenHolder } from '../../common/types';
+import { CombineOutput, ServerErrorCode, Recipe, TokenHolder } from '../../common/types';
 import { getPlaceholderOrder, getRecipe, insertRecipeRow, save, setDiscovered, traverseAndFill } from './database';
 import { isPackaged } from './generic';
 import { getSettings } from './settings';
@@ -59,13 +59,13 @@ async function refreshToken(): Promise<TokenHolder> {
                 }
             } else {
                 const json = (await response.json()) as RequestErrorResult;
-                if (json.code === ErrorCode.QUERY_INVALID || json.code === ErrorCode.QUERY_UNDEFINED || json.code === ErrorCode.QUERY_MISSING) {
+                if (json.code === ServerErrorCode.QUERY_INVALID || json.code === ServerErrorCode.QUERY_UNDEFINED || json.code === ServerErrorCode.QUERY_MISSING) {
                     throw(`Issue with input token or language: ${json.code}`);
-                } else if (json.code === ErrorCode.STEAM_TICKET_INVALID) {
+                } else if (json.code === ServerErrorCode.STEAM_TICKET_INVALID) {
                     throw('Issue with steam ticket');
-                } else if (json.code === ErrorCode.STEAM_SERVERS_DOWN) {
+                } else if (json.code === ServerErrorCode.STEAM_SERVERS_DOWN) {
                     throw('Steam servers are down');
-                } else if (json.code === ErrorCode.STEAM_ERROR) {
+                } else if (json.code === ServerErrorCode.STEAM_ERROR) {
                     throw('Issue validating ticket');
                 }
                 throw(`Unknown error: ${json.code}`);
@@ -104,18 +104,19 @@ async function createToken(): Promise<TokenHolder> {
         }
     } else {
         const json = (await response.json()) as RequestErrorResult;
-        if (json.code === ErrorCode.QUERY_INVALID || json.code === ErrorCode.QUERY_UNDEFINED || json.code === ErrorCode.QUERY_MISSING) {
+        if (json.code === ServerErrorCode.QUERY_INVALID || json.code === ServerErrorCode.QUERY_UNDEFINED || json.code === ServerErrorCode.QUERY_MISSING) {
             throw('Unknown issue with input token');
-        } else if (json.code === ErrorCode.STEAM_TICKET_INVALID) {
+        } else if (json.code === ServerErrorCode.STEAM_TICKET_INVALID) {
             throw('Issue with steam ticket');
-        } else if (json.code === ErrorCode.STEAM_SERVERS_DOWN) {
+        } else if (json.code === ServerErrorCode.STEAM_SERVERS_DOWN) {
             throw('Steam servers are down');
         }
         throw('Unknown error');
     }
 }
 
-export async function combine(a: string, b: string): Promise<CombineOuput | undefined> {
+// Returns undefined if in offline mode.
+export async function combine(a: string, b: string): Promise<CombineOutput | undefined> {
     let exists: Recipe | undefined = undefined;
     try {
         exists = await getRecipe(a, b);
@@ -132,10 +133,13 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
         exists.discovered = 1;
         await save();
         return {
-            hintAdded,
-            newDiscovery,
-            firstDiscovery,
-            recipe: exists
+            type: 'success',
+            result: {
+                hintAdded,
+                newDiscovery,
+                firstDiscovery,
+                recipe: exists
+            }
         };
     } else {
         if (!(await getSettings(false)).offline) {
@@ -149,10 +153,10 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
             if (tokenResponse !== undefined) {
                 url += `&token=${tokenResponse.token}`;
             }
-            logger.debug('combine url: ', url);
-            const response = await fetch(url);
-            if (response.ok) {
-                try {
+            try {
+                logger.debug('combine url: ', url);
+                const response = await fetch(url);
+                if (response.ok) {
                     const body: Recipe = (await response.json()) as Recipe;
                     logger.debug('combine response body', body);
                     newDiscovery = true;
@@ -172,44 +176,59 @@ export async function combine(a: string, b: string): Promise<CombineOuput | unde
                         });
                         await save();
                         return {
-                            hintAdded: false,
-                            newDiscovery,
-                            firstDiscovery,
-                            recipe: traverseAndFill(recipeRow)
+                            type: 'success',
+                            result: {
+                                hintAdded: false,
+                                newDiscovery,
+                                firstDiscovery,
+                                recipe: traverseAndFill(recipeRow)
+                            }
                         };
                     } catch(e) {
                         logger.error('Failed to insert recipe', e);
                         return {
-                            hintAdded: false,
-                            newDiscovery,
-                            firstDiscovery,
-                            recipe: traverseAndFill({
-                                order: getPlaceholderOrder(),
-                                a: a,
-                                b: b,
-                                result: body.result,
-                                discovered: 1,
-                                display: body.display,
-                                emoji: body.emoji,
-                                depth: body.depth,
-                                first: body.first ? 1 : 0,
-                                who_discovered: body.who_discovered,
-                                base: body.base ? 1 : 0
-                            })
+                            type: 'success',
+                            result: {
+                                hintAdded: false,
+                                newDiscovery,
+                                firstDiscovery,
+                                recipe: traverseAndFill({
+                                    order: getPlaceholderOrder(),
+                                    a: a,
+                                    b: b,
+                                    result: body.result,
+                                    discovered: 1,
+                                    display: body.display,
+                                    emoji: body.emoji,
+                                    depth: body.depth,
+                                    first: body.first ? 1 : 0,
+                                    who_discovered: body.who_discovered,
+                                    base: body.base ? 1 : 0
+                                })
+                            }
                         };
                     }
-                } catch(e) {
-                    logger.error('Failed to make api request', e);
-                    throw(e);
+                } else {
+                    const json = (await response.json()) as RequestErrorResult;
+                    if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
+                        throw('Unknown issue with input a/b');
+                    } else if (json.code === ServerErrorCode.AB_NOT_KNOWN) {
+                        // TODO Need to add server method to rectify this
+                        throw('Items are not known, have these been synced with the server?');
+                    }
+                    if (json.code === undefined) {
+                        throw('Unknown error occurred');
+                    }
+                    return {
+                        type: 'error',
+                        result: {
+                            code: json.code
+                        }
+                    };
                 }
-            } else {
-                const json = (await response.json()) as RequestErrorResult;
-                if (json.code === ErrorCode.QUERY_INVALID || json.code === ErrorCode.QUERY_UNDEFINED) {
-                    throw('Unknown issue with input a/b');
-                } else if (json.code === ErrorCode.AB_NOT_KNOWN) {
-                    throw('Items are not known, have these been synced with the server?');
-                }
-                return undefined;
+            } catch(e) {
+                logger.error('Failed to make api request', e);
+                throw(e);
             }
         } else {
             return undefined;

@@ -7,6 +7,8 @@ import 'react';
 import { IStatsAPI, StatsAPIName } from './preload/api/stats';
 import { HintAPIName, IHintAPI } from './preload/api/hints';
 import { IImportExportAPI, ImportExportAPIName } from './preload/api/importexport';
+import { IServerAPI, ServerAPIName } from './preload/api/server';
+import { ErrorAPIName, IErrorAPI } from './preload/api/error';
 
 declare module 'react' {
     interface CSSProperties {
@@ -24,6 +26,8 @@ declare global {
         [StatsAPIName]: IStatsAPI
         [HintAPIName]: IHintAPI
         [ImportExportAPIName]: IImportExportAPI
+        [ServerAPIName]: IServerAPI
+        [ErrorAPIName]: IErrorAPI
     }
 }
 declare module 'vanta/dist/vanta.birds.min';

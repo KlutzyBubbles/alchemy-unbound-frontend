@@ -1,12 +1,13 @@
 import { useState, type FC, useEffect, useContext } from 'react';
 import { Collapse, Modal, Table } from 'react-bootstrap';
-import { AppVersions, SystemVersion } from '../../common/types';
+import { AppVersions, ErrorEntry, SystemVersion } from '../../common/types';
 import { SettingsContext } from '../providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { BsDiscord, BsGithub } from 'react-icons/bs';
 import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
 import { getFromStore } from '../language';
 import { DEFAULT_STATS, Stats } from '../../common/stats';
+import { ErrorItem } from './ErrorItem';
 
 
 export interface InfoModalProps {
@@ -23,6 +24,7 @@ export const InfoModal: FC<InfoModalProps> = ({
     const [systemInformation, setSystemInformation] = useState<SystemVersion>({ arch: '', platform: '', version: '' });
     const [advanced, setAdvanced] = useState<boolean>(false);
     const [stats, setStats] = useState<Stats>(DEFAULT_STATS);
+    const [errors, setErrors] = useState<ErrorEntry[]>([]);
 
     useEffect(() => {
         (async () => {
@@ -41,6 +43,11 @@ export const InfoModal: FC<InfoModalProps> = ({
                 setStats(await window.StatsAPI.getStats());
             } catch (e) {
                 logger.error('Failed to load stats', e);
+            }
+            try {
+                setErrors(await window.ErrorAPI.getErrors());
+            } catch (e) {
+                logger.error('Failed to load errors (ironic)', e);
             }
         })();
     }, [show]);
@@ -104,42 +111,55 @@ export const InfoModal: FC<InfoModalProps> = ({
                 </div>
                 <Collapse in={advanced}>
                     <div>
-                        <Table striped bordered hover size="sm">
-                            <tbody>
-                                <tr>
-                                    <td>Electron</td>
-                                    <td>{appVersions.electron}</td>
-                                </tr>
-                                <tr>
-                                    <td>Chrome</td>
-                                    <td>{appVersions.chrome}</td>
-                                </tr>
-                                <tr>
-                                    <td>Node</td>
-                                    <td>{appVersions.node}</td>
-                                </tr>
-                                <tr>
-                                    <td>App</td>
-                                    <td>{appVersions.app}</td>
-                                </tr>
-                            </tbody>
-                        </Table>
-                        <Table striped bordered hover size="sm">
-                            <tbody>
-                                <tr>
-                                    <td>Platform</td>
-                                    <td>{systemInformation.platform}</td>
-                                </tr>
-                                <tr>
-                                    <td>Arch</td>
-                                    <td>{systemInformation.arch}</td>
-                                </tr>
-                                <tr>
-                                    <td>Version</td>
-                                    <td>{systemInformation.version}</td>
-                                </tr>
-                            </tbody>
-                        </Table>
+                        <div className='row'>
+                            <div className='col-12 col-lg-6'>
+                                <Table striped bordered hover size="sm">
+                                    <tbody>
+                                        <tr>
+                                            <td>Electron</td>
+                                            <td>{appVersions.electron}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Chrome</td>
+                                            <td>{appVersions.chrome}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Node</td>
+                                            <td>{appVersions.node}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>App</td>
+                                            <td>{appVersions.app}</td>
+                                        </tr>
+                                    </tbody>
+                                </Table>
+                            </div>
+                            <div className='col-12 col-lg-6'>
+                                <Table striped bordered hover size="sm">
+                                    <tbody>
+                                        <tr>
+                                            <td>Platform</td>
+                                            <td>{systemInformation.platform}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Arch</td>
+                                            <td>{systemInformation.arch}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Version</td>
+                                            <td>{systemInformation.version}</td>
+                                        </tr>
+                                    </tbody>
+                                </Table>
+                            </div>
+                        </div>
+                        <h5>{getFromStore('apiErrorsTitle', settings.language)}</h5>
+                        <ul className="list-group">
+                            {errors.length === 0 ? getFromStore('noErrors', settings.language) : ''}
+                            {errors.map((error) => (
+                                <ErrorItem key={error.date.getMilliseconds()} error={error}/>
+                            ))}
+                        </ul>
                     </div>
                 </Collapse>
             </Modal.Body>
