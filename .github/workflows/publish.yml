@@ -104,10 +104,10 @@ jobs:
         tag: ${{ github.event.inputs.releaseTag }}         
         searchLimit: 20
     - name: Set prerelease branch
-      if: ${{ steps.release.output.prerelease }}
+      if: ${{ steps.release.outputs.prerelease }}
       run: echo 'RELEASE_BRANCH=prerelease' >> "$GITHUB_ENV"
     - name: Set release branch
-      if: ${{ !steps.release.output.prerelease }}
+      if: ${{ !steps.release.outputs.prerelease }}
       run: echo 'RELEASE_BRANCH=release' >> "$GITHUB_ENV"
     #- uses: game-ci/steam-deploy@v3
     #  with:
