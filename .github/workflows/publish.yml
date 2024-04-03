@@ -74,13 +74,17 @@ jobs:
       run: |
         unzip -o ./out/alchemy-unbound-linux*.zip -d ./out/linux || true
         zip -FF ./out/alchemy-unbound-win32*.zip --out ./out/alchemy-unbound-win32-fixed.zip -fz || true
-        unzip -o ./out/alchemy-unbound-win32-fixed.zip -d ./out/win32 || true
+        unzip -o ./out/alchemy-unbound-win32-fixed.zip -d ./out/win32/alchemy-unbound-win32-x64 || true
     - name: Debug out dir
       run: ls out
     - name: Debug linux dir
       run: ls out/linux
     - name: Debug win32 dir
       run: ls out/win32
+    - name: Debug linux dir
+      run: ls out/linux/alchemy-unbound-linux-x64
+    - name: Debug win32 dir
+      run: ls out/win32/alchemy-unbound-win32-x64
     # - name: Set prerelease branch
     #   if: ${{ github.event.release.prerelease }}
     #   run: echo 'RELEASE_BRANCH=prerelease' >> "$GITHUB_ENV"
