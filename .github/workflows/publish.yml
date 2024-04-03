@@ -116,6 +116,6 @@ jobs:
         appId: 2858840
         buildDescription: ${{ github.event.inputs.releaseTag }}
         rootPath: out
-        depot2Path: alchemy-unbound-win32-x64
-        depot3Path: alchemy-unbound-linux-x64
+        depot2Path: win32/alchemy-unbound-win32-x64
+        depot3Path: linux/alchemy-unbound-linux-x64
         releaseBranch: ${{ env.RELEASE_BRANCH }}
