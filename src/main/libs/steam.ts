@@ -2,6 +2,7 @@ import { Language, languages } from '../../common/settings';
 import steamworks from '@ai-zen/steamworks.js';
 import { PlayerSteamId, auth } from '@ai-zen/steamworks.js/client';
 import logger from 'electron-log/main';
+import os from 'os';
 
 export const APP_ID = 2858840;
 
@@ -60,7 +61,7 @@ export function getFolder() {
         return `${process.env.HOME}/Library/Application Support/KlutzyBubbles/${APP_ID}/${steamId}/`;
 
     // linux / all others
-    return `~/KlutzyBubbles/${APP_ID}/${steamId}/`;
+    return `${os.homedir()}/KlutzyBubbles/${APP_ID}/${steamId}/`;
 }
 
 export async function getWebAuthTicket(): Promise<auth.Ticket> {
