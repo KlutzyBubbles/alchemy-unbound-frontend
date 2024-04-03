@@ -72,9 +72,9 @@ jobs:
           created: ${{ github.event.release.created_at }}
     - name: extract things
       run: |
-        unzip -o ./out/alchemy-unbound-linux*.zip -d ./out/linux
-        zip -FF ./out/alchemy-unbound-win32*.zip --out ./out/alchemy-unbound-win32-fixed.zip -fz
-        unzip -o ./out/alchemy-unbound-win32-fixed.zip -d ./out/win32
+        unzip -o ./out/alchemy-unbound-linux*.zip -d ./out/linux || true
+        zip -FF ./out/alchemy-unbound-win32*.zip --out ./out/alchemy-unbound-win32-fixed.zip -fz || true
+        unzip -o ./out/alchemy-unbound-win32-fixed.zip -d ./out/win32 || true
     - name: Debug out dir
       run: ls out
     - name: Debug linux dir
