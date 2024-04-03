@@ -22,6 +22,10 @@ jobs:
     name: Publish
     runs-on: ubuntu-latest
     steps:
+    - name: Create folders
+      run: |
+        mkdir -p ./out/win32/
+        mkdir -p ./out/linux/
     - name: Download linux zip
       uses: robinraju/release-downloader@v1.8
       with: 
