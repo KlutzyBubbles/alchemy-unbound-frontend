@@ -4,8 +4,8 @@ import { Compressed, compress, decompress } from 'compress-json';
 import { getFolder } from './steam';
 import { verifyFolder } from '../utils';
 import { languages } from '../../common/settings';
-// import baseData from '../../base.json';
-import baseData from '../../allDiscovered.json';
+import baseData from '../../base.json';
+// import baseData from '../../allDiscovered.json';
 import logger from 'electron-log/main';
 import { addHintPoint, resetHint } from './hints';
 
