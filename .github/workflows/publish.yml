@@ -109,13 +109,13 @@ jobs:
     - name: Set release branch
       if: ${{ !steps.release.outputs.prerelease }}
       run: echo 'RELEASE_BRANCH=release' >> "$GITHUB_ENV"
-    #- uses: game-ci/steam-deploy@v3
-    #  with:
-    #    username: ${{ secrets.STEAM_USERNAME }}          
-    #    configVdf: ${{ secrets.STEAM_CONFIG_VDF }}          
-    #    appId: 2858840
-    #    buildDescription: ${{ github.event.inputs.releaseTag }}
-    #    rootPath: out
-    #    depot2Path: alchemy-unbound-win32-x64
-    #    depot3Path: alchemy-unbound-linux-x64
-    #    releaseBranch: ${{ env.RELEASE_BRANCH }}
+    - uses: game-ci/steam-deploy@v3
+      with:
+        username: ${{ secrets.STEAM_USERNAME }}          
+        configVdf: ${{ secrets.STEAM_CONFIG_VDF }}          
+        appId: 2858840
+        buildDescription: ${{ github.event.inputs.releaseTag }}
+        rootPath: out
+        depot2Path: alchemy-unbound-win32-x64
+        depot3Path: alchemy-unbound-linux-x64
+        releaseBranch: ${{ env.RELEASE_BRANCH }}
