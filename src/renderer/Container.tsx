@@ -4,7 +4,7 @@ import { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { SettingsModal } from './modals/SettingsModal';
 import { InfoModal } from './modals/InfoModal';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
-import { loadFull } from 'tsparticles';
+import { loadSlim } from '@tsparticles/slim';
 import type { IOptions, RecursivePartial } from '@tsparticles/engine';
 import options from './particles';
 import { SettingsContext } from './providers/SettingsProvider';
@@ -23,7 +23,7 @@ export const ContentContainer: FC = () => {
     useEffect(() => {
         (async() => {
             await initParticlesEngine(async (engine) => {
-                await loadFull(engine);
+                await loadSlim(engine);
             });
             setParticleReady(true);
         })();
@@ -34,7 +34,7 @@ export const ContentContainer: FC = () => {
             setParticleReady(false);
             setCurrentParticles(options[settings.background](settings.theme, settings.fps));
             await initParticlesEngine(async (engine) => {
-                await loadFull(engine);
+                await loadSlim(engine);
             });
             setParticleReady(true);
         })();

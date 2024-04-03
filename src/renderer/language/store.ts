@@ -887,23 +887,6 @@ export const LanguageStore: {
         tchinese: '',
         koreana: ''
     },
-    bounceBackground: {
-        english: 'Bounce',
-        schinese: '',
-        russian: '',
-        spanish: '',
-        french: '',
-        japanese: '',
-        indonesian: '',
-        german: '',
-        latam: '',
-        italian: '',
-        dutch: '',
-        polish: '',
-        portuguese: '',
-        tchinese: '',
-        koreana: ''
-    },
     hintTooltip: {
         english: 'Click to use a hint point',
         schinese: '',

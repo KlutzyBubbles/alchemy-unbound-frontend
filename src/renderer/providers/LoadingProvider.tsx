@@ -4,7 +4,7 @@ import logger from 'electron-log/renderer';
 import { unlockCheck } from '../utils/achievements';
 import { InfoContext } from './InfoProvider';
 import { SUPPORTER_DLC } from '../../common/types';
-import { DEFAULT_SETTINGS } from '../../common/settings';
+import { BackgroundType, DEFAULT_SETTINGS } from '../../common/settings';
 
 export const LoadingContext = createContext<{
     loading: boolean
@@ -49,6 +49,9 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
                     logger.info('Setting settings from load', settings, hasSupporterTheme);
                     if (settings.theme === 'supporter' && !hasSupporterTheme) {
                         settings.theme = DEFAULT_SETTINGS.theme;
+                    }
+                    if (settings.background === 'bounce' as BackgroundType) {
+                        settings.background = DEFAULT_SETTINGS.background;
                     }
                     setSettings(settings);
                 } catch (e) {

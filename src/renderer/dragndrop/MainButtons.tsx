@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { Fragment, useContext } from 'react';
 
-import { IoBandageOutline, IoCloudOfflineOutline, IoInformationCircleOutline, IoSettingsOutline } from 'react-icons/io5';
+import { IoBandageOutline, IoCloudOfflineOutline, IoInformationCircleOutline, IoSettingsOutline } from '../icons/io5';
 import { motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../Main';
 import { SettingsContext } from '../providers/SettingsProvider';

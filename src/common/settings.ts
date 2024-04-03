@@ -1,10 +1,9 @@
-export type BackgroundType = 'blank' | 'line' | 'bubble' | 'bounce' // | 'particles' | 'rain'
+export type BackgroundType = 'blank' | 'line' | 'bubble' // | 'particles' | 'rain'
 
 export const BackgroundTypeList: BackgroundType[] = [
     'blank',
     'line',
-    'bubble',
-    'bounce'
+    'bubble'
 ];
 
 export type ThemeType = 'dark' | 'light' | 'supporter' //| 'purple' // | 'github' | 'steam' | 'discord'

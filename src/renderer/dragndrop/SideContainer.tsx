@@ -5,7 +5,7 @@ import { SideElement } from './SideElement';
 import { DragItem, ItemTypes } from '../types';
 import { getXY } from '../utils';
 import { SettingsContext } from '../providers/SettingsProvider';
-import { IoArrowDown, IoArrowUp, IoFilterOutline } from 'react-icons/io5';
+import { IoArrowDown, IoArrowUp, IoFilterOutline } from '../icons/io5';
 import { getFromStore } from '../language';
 import { SoundContext } from '../providers/SoundProvider';
 

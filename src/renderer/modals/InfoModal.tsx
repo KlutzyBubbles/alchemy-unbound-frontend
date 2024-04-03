@@ -3,12 +3,12 @@ import { Collapse, Modal, Table } from 'react-bootstrap';
 import { AppVersions, ErrorEntry, SystemVersion } from '../../common/types';
 import { SettingsContext } from '../providers/SettingsProvider';
 import logger from 'electron-log/renderer';
-import { BsDiscord, BsGithub } from 'react-icons/bs';
-import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
+import { BsDiscord, BsGithub } from '../icons/bs';
+import { HiOutlineWrenchScrewdriver } from '../icons/hi2';
 import { getFromStore } from '../language';
 import { DEFAULT_STATS, Stats } from '../../common/stats';
 import { ErrorItem } from './ErrorItem';
-import { IoPulseOutline } from 'react-icons/io5';
+import { IoPulseOutline } from '../icons/io5';
 
 
 export interface InfoModalProps {

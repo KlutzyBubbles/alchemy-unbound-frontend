@@ -3,7 +3,7 @@ import { ErrorCodeToString, ErrorEntry, ServerErrorCode } from '../../common/typ
 import { SettingsContext } from '../providers/SettingsProvider';
 import { getFromStore } from '../language';
 import { Collapse } from 'react-bootstrap';
-import { IoArrowDownOutline, IoArrowUpOutline } from 'react-icons/io5';
+import { IoArrowDownOutline, IoArrowUpOutline } from '../icons/io5';
 
 
 export interface ErrorItemProps {

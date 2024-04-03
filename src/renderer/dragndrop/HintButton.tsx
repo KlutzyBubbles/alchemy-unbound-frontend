@@ -3,7 +3,7 @@ import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { Tooltip } from 'react-bootstrap';
 
 import { Recipe } from '../../common/types';
-import { IoHelpOutline } from 'react-icons/io5';
+import { IoHelpOutline } from '../icons/io5';
 import { ItemTypes } from '../types';
 import { mockElement } from '../utils';
 import { ItemRenderer } from '../ItemRenderer';

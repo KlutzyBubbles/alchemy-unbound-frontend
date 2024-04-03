@@ -3,7 +3,7 @@ import { blankOptions } from './blank';
 import { lineOptions } from './line';
 import { bubbleOptions } from './bubble';
 import { BackgroundType, ThemeType } from '../../common/settings';
-import { bounceOptions } from './bounce';
+// import { bounceOptions } from './bounce';
 
 export const options: {
     [K in BackgroundType]: (theme: ThemeType, fps: number) => RecursivePartial<IOptions>
@@ -11,7 +11,7 @@ export const options: {
     blank: blankOptions,
     line: lineOptions,
     bubble: bubbleOptions,
-    bounce: bounceOptions
+    // bounce: bounceOptions
 };
 
 export default options;
