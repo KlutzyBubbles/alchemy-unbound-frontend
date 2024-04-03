@@ -37,7 +37,7 @@ jobs:
         with:
             node-version: 18.x
       - name: Install dependacnies
-        run: npm ci
+        run: npm ci --include=dev
       # - name: Install wine
       #   run: |
       #     sudo dpkg --add-architecture i386
