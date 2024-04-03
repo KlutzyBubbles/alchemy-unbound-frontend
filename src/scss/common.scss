@@ -23,6 +23,19 @@
     border-radius: $btn-border-radius
 }
 
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $side-color;
+    border-radius: $border-radius $border-radius $border-radius $border-radius;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: $side-color;
+}
+
 .side-container {
     background-color: $side-bg;
 
