@@ -643,34 +643,3 @@ export const DropContainer: FC<ContainerProps> = ({
         </Fragment>
     );
 };
-
-// <a href="https://ko-fi.com/klutzybubbles" target="_blank" className='btn btn-sm btn-heart float-end mb-2 fs-2 d-flex p-2' rel="noreferrer"><IoHeart /></a>
-/*
-
-                                        {recipes.filter((item) => item.discovered).map((recipe) => {
-                                            // console.log('element recipes', recipe);
-                                            if (recipe.a.name === '' || recipe.b.name === '') {
-                                                return (
-                                                    <Dropdown.Item key={`${recipe.result}`} href="#">
-                                                        <ItemRenderer
-                                                            element={mockElement(recipe)}
-                                                            type={ItemTypes.RECIPE_ELEMENT}
-                                                            dragging={false}/>
-                                                    </Dropdown.Item>);
-                                            }
-                                            return (
-                                                <Dropdown.Item key={`${recipe.a.name}${recipe.b.name}`} href="#">
-                                                    <ItemRenderer
-                                                        element={mockElement(recipe.a)}
-                                                        type={ItemTypes.RECIPE_ELEMENT}
-                                                        dragging={false}/>
-                                                        +
-                                                    <ItemRenderer
-                                                        element={mockElement(recipe.b)}
-                                                        type={ItemTypes.RECIPE_ELEMENT}
-                                                        dragging={false}/>
-                                                </Dropdown.Item>
-                                            );
-                                        })}
-*/
-

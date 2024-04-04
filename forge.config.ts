@@ -9,19 +9,38 @@ import { rendererConfig } from './webpack.renderer.config';
 
 const config: ForgeConfig = {
     packagerConfig: {
+        appCopyright: 'Copyright (C) 2024 KlutzyBubbles',
+        prune: true,
         asar: {
             unpack: '*.{node,dll,dylib,so,lib}',
         },
         icon: './icons/icon.ico',
-        ignore: ['node_modules/steamworks.js/dist', 'node_modules/@ai-zen/steamworks.js/dist'],
-        // extraResource: [
-        //     'src/sounds/*'
-        // ]
+        ignore: [
+            'node_modules',
+            'src',
+            '.github',
+            '.zip',
+            'pages',
+            'icons',
+            'webpack.main.config.ts',
+            'webpack.plugins.ts',
+            'webpack.renderer.config.ts',
+            'webpack.rules.ts',
+            'tsconfig.json',
+            'package.json',
+            'package-lock.json',
+            'readme.md',
+            'forge.config.ts',
+            '.gitignore',
+            '.gitattributes',
+            '.editorconfig',
+            '.eslintignore',
+            '.eslintrc.json',
+        ],
     },
     rebuildConfig: {},
     makers: [new MakerZIP({}, ['darwin', 'linux', 'win32'])],
     plugins: [
-    // new AutoUnpackNativesPlugin({}),
         new WebpackPlugin({
             mainConfig,
             devContentSecurityPolicy: '',
@@ -47,8 +66,8 @@ const config: ForgeConfig = {
             [FuseV1Options.EnableCookieEncryption]: true,
             [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
             [FuseV1Options.EnableNodeCliInspectArguments]: false,
-            [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
-            [FuseV1Options.OnlyLoadAppFromAsar]: true,
+            [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: false,
+            [FuseV1Options.OnlyLoadAppFromAsar]: false,
         }),
     ],
 };
