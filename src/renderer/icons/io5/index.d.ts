@@ -15,3 +15,5 @@ export declare const IoVolumeHighOutline: IconType;
 export declare const IoVolumeLowOutline: IconType;
 export declare const IoVolumeMediumOutline: IconType;
 export declare const IoVolumeMuteOutline: IconType;
+export declare const IoCloudDownloadOutline: IconType;
+export declare const IoSpeedometerOutline: IconType;

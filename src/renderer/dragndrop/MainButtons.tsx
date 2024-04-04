@@ -1,25 +1,36 @@
 import type { FC } from 'react';
-import { Fragment, useContext } from 'react';
+import { Fragment, useContext, useRef, useState } from 'react';
 
-import { IoBandageOutline, IoCloudOfflineOutline, IoInformationCircleOutline, IoSettingsOutline } from '../icons/io5';
+import { IoBandageOutline, IoCloudDownloadOutline, IoCloudOfflineOutline, IoInformationCircleOutline, IoSettingsOutline, IoSpeedometerOutline } from '../icons/io5';
 import { motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../Main';
 import { SettingsContext } from '../providers/SettingsProvider';
-import logger from 'electron-log/renderer';
 import { InfoContext } from '../providers/InfoProvider';
 import { HintButton } from './HintButton';
+import { Overlay, Tooltip } from 'react-bootstrap';
+import { getFromStore } from '../language';
 
 export interface MainButtonProps {
-  openModal: (option: ModalOption) => void
-  refreshHint: number
+    openModal: (option: ModalOption) => void
+    devButton: () => void
+    refreshHint: number,
+    deprecated: boolean,
+    rateLimited: boolean
 }
 
 export const MainButtons: FC<MainButtonProps> = ({
     openModal,
-    refreshHint
+    devButton,
+    refreshHint,
+    deprecated,
+    rateLimited
 }) => {
     const { settings } = useContext(SettingsContext);
     const { isProduction } = useContext(InfoContext);
+    const [showDeprecatedTooltip, setShowDeprecatedTooltip] = useState<boolean>(false);
+    const [showRateTooltip, setShowRateTooltip] = useState<boolean>(false);
+    const deprecatedRef = useRef(undefined);
+    const rateLimitedRef = useRef(undefined);
 
     const onSettingsMouseEnter = () => {
         settingsControls.start('start');
@@ -52,15 +63,7 @@ export const MainButtons: FC<MainButtonProps> = ({
     const settingsControls = useAnimation();
 
     const devClick = () => {
-        (async () => {
-            try {
-                // const token = await window.RecipeAPI.getToken();
-                // logger.warn('Found token', token);
-                await window.HintAPI.resetHint();
-            } catch (e) { 
-                logger.error('Failed dev', e);
-            }
-        })();
+        devButton();
     };
 
     return (
@@ -79,7 +82,38 @@ export const MainButtons: FC<MainButtonProps> = ({
                 <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={devClick}><IoBandageOutline /></div>
             )}
             <HintButton refreshProp={refreshHint} />
-            {settings.offline ? (<div className='btn btn-offline float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('settings')}><IoCloudOfflineOutline /></div>) : (<Fragment/>)}
+            {settings.offline ?
+                (<div className='btn btn-offline float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('settings')}><IoCloudOfflineOutline /></div>) :
+                deprecated ? (<Fragment>
+                    <div
+                        ref={deprecatedRef}
+                        className='btn btn-deprecated float-end mb-2 fs-2 d-flex p-2'
+                        onMouseEnter={() => setShowDeprecatedTooltip(true)}
+                        onMouseLeave={() => setShowDeprecatedTooltip(false)}
+                    ><IoCloudDownloadOutline /></div>
+                    <Overlay target={deprecatedRef.current} show={showDeprecatedTooltip} placement="left">
+                        {(props) => (
+                            <Tooltip id="overlay-example" {...props}>
+                                {getFromStore('apiDeprecated', settings.language)}
+                            </Tooltip>
+                        )}
+                    </Overlay>
+                </Fragment>) : (<Fragment/>)}
+            {rateLimited ? (<Fragment>
+                <div
+                    ref={rateLimitedRef}
+                    className='btn btn-deprecated float-end mb-2 fs-2 d-flex p-2'
+                    onMouseEnter={() => setShowRateTooltip(true)}
+                    onMouseLeave={() => setShowRateTooltip(false)}
+                ><IoSpeedometerOutline /></div>
+                <Overlay target={rateLimitedRef.current} show={showRateTooltip} placement="left">
+                    {(props) => (
+                        <Tooltip id="overlay-example" {...props}>
+                            {getFromStore('rateLimited', settings.language)}
+                        </Tooltip>
+                    )}
+                </Overlay>
+            </Fragment>) : (<Fragment/>)}
         </div>
     );
 };

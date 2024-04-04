@@ -1210,4 +1210,38 @@ export const LanguageStore: {
         tchinese: '',
         koreana: ''
     },
+    apiDeprecated: {
+        english: 'The server is ahead of your client version',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
+    },
+    rateLimited: {
+        english: 'You are crafting too fast',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
+    },
 };

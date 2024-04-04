@@ -68,6 +68,11 @@ export type TokenHolder = {
     expiryDate: number
 }
 
+export type TokenHolderResponse = {
+    tokenHolder: TokenHolder,
+    deprecated: boolean
+}
+
 export type CombineOutput = {
     type: 'success',
     result: CombineSuccess
@@ -77,6 +82,8 @@ export type CombineOutput = {
 }
 
 export type CombineSuccess = {
+    responseCode: number,
+    deprecated: boolean,
     hintAdded: boolean,
     newDiscovery: boolean,
     firstDiscovery: boolean,
@@ -84,6 +91,8 @@ export type CombineSuccess = {
 }
 
 export type CombineError = {
+    responseCode: number,
+    deprecated: boolean,
     code: ServerErrorCode
 }
 

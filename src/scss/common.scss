@@ -190,6 +190,20 @@
     );
 }
 
+.btn-deprecated {
+    @include button-variant(
+        $main-button-bg, // Background
+        $main-button-bg, // Border
+        $warning, // Color
+        $main-button-bg-hover, // Hover Background
+        $main-button-bg-hover, // Hover Border
+        $warning, // Hover Color
+        $main-button-bg-hover, // Active Background
+        $main-button-bg-hover, // Active Border
+        $warning // Active Color
+    );
+}
+
 .full-size {
     height: 100vh;
     width: 100vw;

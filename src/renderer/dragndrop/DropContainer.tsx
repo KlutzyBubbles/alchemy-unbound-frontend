@@ -34,12 +34,15 @@ export const DropContainer: FC<ContainerProps> = ({
     const [elements, setElements] = useState<RecipeElement[]>([]);
     const [shift, setShift] = useState<boolean>(false);
     const [alt, setAlt] = useState<boolean>(false);
+    const [rateLimited, setRateLimited] = useState<boolean>(false);
+    const [deprecated, setDeprecated] = useState<boolean>(false);
     const [control, setControl] = useState<boolean>(false);
     const { setLoading } = useContext(LoadingContext);
     const { playSound } = useContext(SoundContext);
     const mainElement = useRef<HTMLDivElement>();
     const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
     const [refreshHint, setRefreshHint] = useState<number>(0);
+    const speedTimerRef = useRef<NodeJS.Timeout>(undefined);
     const [boxes, setBoxes] = useState<{
         [key: string]: Box
     }>({});
@@ -52,7 +55,22 @@ export const DropContainer: FC<ContainerProps> = ({
     useEffect(() => {
         refreshRecipes();
         mainElement.current.focus();
+        return () => {
+            if (speedTimerRef.current !== undefined) {
+                clearTimeout(speedTimerRef.current);
+            }
+        };
     }, []);
+
+    useEffect(() => {
+        if (rateLimited) {
+            if (speedTimerRef.current !== undefined) {
+                clearTimeout(speedTimerRef.current);
+            }
+            const timer = setTimeout(() => setRateLimited(false), 6969);
+            speedTimerRef.current = timer;
+        }
+    }, [rateLimited]);
 
     useEffect(() => {
         (async () => {
@@ -130,6 +148,10 @@ export const DropContainer: FC<ContainerProps> = ({
         }
     };
 
+    const devButton = () => {
+        logger.warn('This is a dev button and shouldnt be visible');
+    };
+
     const backendCombine = async (aName: string, bName: string): Promise<{
         newDiscovery: boolean,
         firstDiscovery: boolean,
@@ -153,6 +175,12 @@ export const DropContainer: FC<ContainerProps> = ({
         if (combinedResult === undefined) {
             logger.debug('Combine failed in offline mode');
         } else {
+            if (combinedResult.result.deprecated) {
+                setDeprecated(true);
+            }
+            if (combinedResult.result.responseCode === 429) {
+                setRateLimited(true);
+            }
             if (combinedResult.type === 'error') {
                 /*
                 STEAM_TICKET_INVALID = 5,
@@ -603,7 +631,7 @@ export const DropContainer: FC<ContainerProps> = ({
                             })}
                         </AnimatePresence>
                         <CustomDragLayer/>
-                        <MainButtons openModal={openModal} refreshHint={refreshHint}/>
+                        <MainButtons openModal={openModal} refreshHint={refreshHint} deprecated={deprecated} rateLimited={rateLimited} devButton={devButton}/>
                     </div>
                 </div>
                 <SideContainer

@@ -1,5 +1,5 @@
 import logger from 'electron-log/main';
-import { CombineOutput, ServerErrorCode, Recipe, TokenHolder } from '../../common/types';
+import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse } from '../../common/types';
 import { getPlaceholderOrder, getRecipe, insertRecipeRow, save, setDiscovered, traverseAndFill } from './database';
 import { isPackaged } from './generic';
 import { getSettings } from './settings';
@@ -20,7 +20,7 @@ if (isPackaged()) {
 
 let token: TokenHolder | undefined = undefined;
 
-export async function getToken(): Promise<TokenHolder> {
+export async function getToken(): Promise<TokenHolderResponse> {
     if (token === undefined) {
         return await createToken();
     } else {
@@ -28,7 +28,7 @@ export async function getToken(): Promise<TokenHolder> {
     }
 }
 
-async function refreshToken(): Promise<TokenHolder> {
+async function refreshToken(): Promise<TokenHolderResponse> {
     if (token === undefined) {
         return await createToken();
     } else {
@@ -52,7 +52,10 @@ async function refreshToken(): Promise<TokenHolder> {
                     const body: TokenHolder = (await response.json()) as TokenHolder;
                     logger.debug('token response body', body);
                     token = body;
-                    return body;
+                    return {
+                        tokenHolder: body,
+                        deprecated: response.headers.has('Api-Deprecated')
+                    };
                 } catch(e) {
                     logger.error('Failed to format token response data', e);
                     throw(e);
@@ -71,12 +74,15 @@ async function refreshToken(): Promise<TokenHolder> {
                 throw(`Unknown error: ${json.code}`);
             }
         } else {
-            return token;
+            return {
+                tokenHolder: token,
+                deprecated: false
+            };
         }
     }
 }
 
-async function createToken(): Promise<TokenHolder> {
+async function createToken(): Promise<TokenHolderResponse> {
     const ticket = await getWebAuthTicket();
     logger.debug('trying to get token', `${endpoint}/session?steamToken=${ticket.getBytes().toString('hex')}`);
     let response: Response | undefined = undefined;
@@ -97,7 +103,10 @@ async function createToken(): Promise<TokenHolder> {
             const body: TokenHolder = (await response.json()) as TokenHolder;
             logger.debug('token response body', body);
             token = body;
-            return body;
+            return {
+                tokenHolder: body,
+                deprecated: response.headers.has('Api-Deprecated')
+            };
         } catch(e) {
             logger.error('Failed to format steam token response data', e);
             throw(e);
@@ -135,6 +144,8 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
         return {
             type: 'success',
             result: {
+                responseCode: 200,
+                deprecated: false,
                 hintAdded,
                 newDiscovery,
                 firstDiscovery,
@@ -143,15 +154,19 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
         };
     } else {
         if (!(await getSettings(false)).offline) {
-            let tokenResponse: TokenHolder | undefined = undefined;
+            let tokenResponse: TokenHolderResponse | undefined = undefined;
             try {
                 tokenResponse = await getToken();
             } catch (e) {
                 logger.error('Failed to get token response', e);
             }
             let url = `${endpoint}/api?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
+            let hasDeprecated = false;
             if (tokenResponse !== undefined) {
-                url += `&token=${tokenResponse.token}`;
+                hasDeprecated = tokenResponse.deprecated;
+                if (tokenResponse.tokenHolder !== undefined) {
+                    url += `&token=${tokenResponse.tokenHolder.token}`;
+                }
             }
             try {
                 logger.debug('combine url: ', url);
@@ -178,6 +193,8 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                         return {
                             type: 'success',
                             result: {
+                                responseCode: response.status,
+                                deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
                                 hintAdded: false,
                                 newDiscovery,
                                 firstDiscovery,
@@ -189,6 +206,8 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                         return {
                             type: 'success',
                             result: {
+                                responseCode: response.status,
+                                deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
                                 hintAdded: false,
                                 newDiscovery,
                                 firstDiscovery,
@@ -222,6 +241,8 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                     return {
                         type: 'error',
                         result: {
+                            responseCode: response.status,
+                            deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
                             code: json.code
                         }
                     };
