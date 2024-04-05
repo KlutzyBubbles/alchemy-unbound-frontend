@@ -146,9 +146,9 @@ export type ErrorEntry = {
 
 export type ErrorEntryAdd = Omit<ErrorEntry, 'date'>
 
-export type SoundFile = 'new-discovery' | 'first-discovery' | 'pickup' | 'side-drop' | 'drop'
+export type SoundFile = 'new-discovery' | 'first-discovery' | 'pickup' | 'side-drop' | 'drop' | 'reset'
 
-export const SoundFiles: SoundFile[] = ['first-discovery', 'new-discovery', 'pickup', 'side-drop', 'drop'];
+export const SoundFiles: SoundFile[] = ['first-discovery', 'new-discovery', 'pickup', 'side-drop', 'drop', 'reset'];
 
 export const SUPPORTER_DLC = 2911170;
 export const HINT_DLC = 2920230;

@@ -24,10 +24,11 @@ export const SoundProvider: FC<SoundProviderProps> = ({
         'pickup': undefined,
         'side-drop': undefined,
         'drop': undefined,
+        'reset': undefined,
     });
     const playSound = (sound: SoundFile, multiplier?: number) => {
         const foundAudio = audio[sound];
-        if (foundAudio !== undefined) {
+        if (foundAudio !== undefined && !settings.muted) {
             foundAudio.volume(clamp(settings.volume * (multiplier ?? 1), 0, 1));
             foundAudio.play();
         }
@@ -40,6 +41,7 @@ export const SoundProvider: FC<SoundProviderProps> = ({
             'pickup': undefined,
             'side-drop': undefined,
             'drop': undefined,
+            'reset': undefined,
         };
         for (const sound of SoundFiles) {
             const newAudio = new Howl({
