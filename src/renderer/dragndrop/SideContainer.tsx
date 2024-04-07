@@ -5,7 +5,7 @@ import { SideElement } from './SideElement';
 import { DragItem, ItemTypes } from '../types';
 import { getXY } from '../utils';
 import { SettingsContext } from '../providers/SettingsProvider';
-import { IoArrowDown, IoArrowUp, IoFilterOutline } from '../icons/io5';
+import { IoArrowDown, IoArrowUp, IoFilterOutline } from 'react-icons/io5';
 import { getFromStore } from '../language';
 import { SoundContext } from '../providers/SoundProvider';
 
@@ -36,19 +36,21 @@ export const SideContainer: FC<ContainerProps> = ({
 
     const [{ isOver }, drop] = useDrop(
         () => ({
-            accept: [ItemTypes.ELEMENT],
+            accept: [ItemTypes.ELEMENT, ItemTypes.LOCKED_ELEMENT, ItemTypes.SIDE_ELEMENT],
             drop(item: DragItem, monitor) {
                 if (monitor.didDrop()) {
                     return;
                 }
                 if (item.id !== undefined) {
-                    const { x, y } = getXY(item, monitor);
-                    moveBox(item.id, x, y).then(() => {
-                        playSound('side-drop');
-                        (new Promise(resolve => setTimeout(resolve, 100))).then(() => {
-                            removeBox(item.id);
+                    playSound('side-drop');
+                    if (item.type !== ItemTypes.LOCKED_ELEMENT) {
+                        const { x, y } = getXY(item, monitor);
+                        moveBox(item.id, x, y).then(() => {
+                            (new Promise(resolve => setTimeout(resolve, 100))).then(() => {
+                                removeBox(item.id);
+                            });
                         });
-                    });
+                    }
                 }
             },
             collect: (monitor) => ({

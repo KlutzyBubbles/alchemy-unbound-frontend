@@ -4,7 +4,7 @@ import { SettingsContext } from '../providers/SettingsProvider';
 import { BackgroundType, BackgroundTypeList, ThemeType, ThemeTypeList, DEFAULT_SETTINGS, Language, languageDisplay, languages } from '../../common/settings';
 import { getFromStore } from '../language';
 import { LoadingContext } from '../providers/LoadingProvider';
-import { IoVolumeHighOutline, IoVolumeLowOutline, IoVolumeMediumOutline, IoVolumeMuteOutline } from '../icons/io5';
+import { IoVolumeHighOutline, IoVolumeLowOutline, IoVolumeMediumOutline, IoVolumeMuteOutline } from 'react-icons/io5';
 import { ConfirmModal } from './ConfirmDialog';
 import logger from 'electron-log/renderer';
 import { UpdateContext } from '../providers/UpdateProvider';

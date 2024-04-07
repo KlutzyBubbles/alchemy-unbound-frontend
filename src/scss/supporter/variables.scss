@@ -54,6 +54,7 @@ $min-contrast-ratio:   1.5 !default;
 // Body
 $theme-bg: #171a25;
 $theme-fg: #dcdedf;// #c7d5e0;
+$theme-fg-darkened: #7f878a;
 
 $body-bg:                   $theme-bg !default;
 $body-color:                $theme-fg !default;
@@ -65,27 +66,40 @@ $body-tertiary-color:       rgba($body-color, .5) !default;
 $body-tertiary-bg:          $gray-100 !default;
 $body-emphasis-color:       $body-color !default;
 
-$side-bg:                   #1b2838;
-$side-color:                $theme-fg !default;
-$side-element-bg:           #2a475e;
-$side-element-color:        $side-color !default;
-$side-element-bg-hover:     $side-color !default;
-$side-element-color-hover:  $side-element-bg;
-$side-button-bg:            #1b2838;
-$side-button-color:         $side-color;
-$side-button-bg-hover:      #2a475e;
-$side-button-color-hover:   $side-color;
+$alt-bg: #1b2838;
+$alt-fg: #2a475e;
 
-$main-bg:                   $theme-bg !default;
-$main-color:                $theme-fg !default;
-$main-element-bg:           $side-bg !default;
-$main-element-color:        $side-color !default;
-$main-element-bg-hover:     $side-color !default;
-$main-element-color-hover:  $side-bg !default;
-$main-button-bg:            $transparent !default;
-$main-button-color:         $side-color !default;
-$main-button-bg-hover:      $transparent !default;
-$main-button-color-hover:   $side-color !default;
+$side-bg:                           $alt-bg;
+$side-color:                        $theme-fg;
+$side-element-bg:                   $alt-fg;
+$side-element-color:                $side-color;
+$side-element-border-color:         $side-color;
+$side-element-bg-hover:             $side-color;
+$side-element-color-hover:          $side-element-bg;
+$side-element-border-color-hover:   $side-color;
+$side-button-bg:                    $alt-bg;
+$side-button-color:                 $side-color;
+$side-button-bg-hover:              $alt-fg;
+$side-button-color-hover:           $side-bg;
+
+$main-bg:                                   $theme-bg;
+$main-color:                                $theme-fg;
+$main-element-bg:                           $main-bg;
+$main-element-color:                        $main-color;
+$main-element-border-color:                 $main-color;
+$main-element-bg-hover:                     $main-color;
+$main-element-color-hover:                  $main-bg;
+$main-element-border-color-hover:           $main-bg;
+$main-element-locked-bg:                    $alt-bg;
+$main-element-locked-color:                 $main-color;
+$main-element-locked-border-color:          $alt-fg;
+$main-element-locked-bg-hover:              $main-bg;
+$main-element-locked-color-hover:           $main-color;
+$main-element-locked-border-color-hover:    $main-color;
+$main-button-bg:                            $transparent;
+$main-button-color:                         $main-color;
+$main-button-bg-hover:                      $transparent;
+$main-button-color-hover:                   $main-color;
 
 // Links
 

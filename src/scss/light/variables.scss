@@ -64,27 +64,37 @@ $body-tertiary-color:       rgba($body-color, .5) !default;
 $body-tertiary-bg:          $gray-100 !default;
 $body-emphasis-color:       $body-color !default;
 
-$side-bg:                   $gray-100 !default;
-$side-color:                $gray-900 !default;
-$side-element-bg:           $side-bg !default;
-$side-element-color:        $side-color !default;
-$side-element-bg-hover:     $side-color !default;
-$side-element-color-hover:  $side-bg !default;
-$side-button-bg:            $side-bg !default;
-$side-button-color:         $side-color !default;
-$side-button-bg-hover:      $side-color !default;
-$side-button-color-hover:   $side-bg !default;
+$side-bg:                           $gray-100;
+$side-color:                        $gray-900;
+$side-element-bg:                   $side-bg;
+$side-element-color:                $side-color;
+$side-element-border-color:         $side-color;
+$side-element-bg-hover:             $side-color;
+$side-element-color-hover:          $side-bg;
+$side-element-border-color-hover:   $side-color;
+$side-button-bg:                    $side-bg;
+$side-button-color:                 $side-color;
+$side-button-bg-hover:              $side-color;
+$side-button-color-hover:           $side-bg;
 
-$main-bg:                   $gray-100 !default;
-$main-color:                $gray-900 !default;
-$main-element-bg:           $side-bg !default;
-$main-element-color:        $side-color !default;
-$main-element-bg-hover:     $side-color !default;
-$main-element-color-hover:  $side-bg !default;
-$main-button-bg:            $transparent !default;
-$main-button-color:         $side-color !default;
-$main-button-bg-hover:      $transparent !default;
-$main-button-color-hover:   $side-color !default;
+$main-bg:                                   $gray-100;
+$main-color:                                $gray-900;
+$main-element-bg:                           $main-bg;
+$main-element-color:                        $main-color;
+$main-element-border-color:                 $main-color;
+$main-element-bg-hover:                     $main-color;
+$main-element-color-hover:                  $main-bg;
+$main-element-border-color-hover:           $main-bg;
+$main-element-locked-bg:                    $gray-200;
+$main-element-locked-color:                 $main-color;
+$main-element-locked-border-color:          $gray-400;
+$main-element-locked-bg-hover:              $main-bg;
+$main-element-locked-color-hover:           $main-color;
+$main-element-locked-border-color-hover:    $main-color;
+$main-button-bg:                            $transparent;
+$main-button-color:                         $main-color;
+$main-button-bg-hover:                      $transparent;
+$main-button-color-hover:                   $main-color;
 
 // Links
 

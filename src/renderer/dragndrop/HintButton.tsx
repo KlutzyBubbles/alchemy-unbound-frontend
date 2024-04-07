@@ -3,7 +3,6 @@ import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { Tooltip } from 'react-bootstrap';
 
 import { Recipe } from '../../common/types';
-import { IoHelpOutline } from '../icons/io5';
 import { ItemTypes } from '../types';
 import { mockElement } from '../utils';
 import { ItemRenderer } from '../ItemRenderer';
@@ -12,6 +11,7 @@ import { DEFAULT_HINT, DEFAULT_MAX_HINTS } from '../../common/hints';
 import logger from 'electron-log/renderer';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { Overlay } from 'react-bootstrap';
+import { IoHelpOutline } from 'react-icons/io5';
 
 export interface HintButtonProps {
     refreshProp: number

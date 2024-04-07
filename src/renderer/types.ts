@@ -16,7 +16,8 @@ export enum ItemTypes {
     FINAL_ELEMENT = 'final',
     SIDE_ELEMENT = 'side',
     COPY_ELEMENT = 'copy',
-    RECIPE_ELEMENT = 'recipe'
+    RECIPE_ELEMENT = 'recipe',
+    LOCKED_ELEMENT = 'locked'
 }
 
 export interface Box {
@@ -27,6 +28,7 @@ export interface Box {
     loading: boolean,
     firstDiscovery: boolean,
     newDiscovery: boolean,
+    locked: boolean,
     error: number,
     element: RecipeElement
 }

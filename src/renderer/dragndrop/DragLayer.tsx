@@ -36,11 +36,14 @@ export const CustomDragLayer: FC<Record<string, never>> = () => {
         switch (itemType) {
         case ItemTypes.ELEMENT:
         case ItemTypes.SIDE_ELEMENT:
+        case ItemTypes.LOCKED_ELEMENT:
+        case ItemTypes.MAIN_ELEMENT:
             return (
                 <ItemRenderer
                     element={item.element}
                     type={itemType}
                     dragging={true}
+                    locked={itemType === ItemTypes.LOCKED_ELEMENT}
                     initialOffset={initialOffset}
                     currentOffset={currentOffset}/>
             );

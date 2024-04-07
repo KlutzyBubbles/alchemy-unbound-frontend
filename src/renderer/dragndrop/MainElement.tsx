@@ -9,6 +9,7 @@ import { Box, DragItem, ItemTypes } from '../types';
 import { ItemRenderer } from '../ItemRenderer';
 import { SoundContext } from '../providers/SoundProvider';
 import logger from 'electron-log/renderer';
+import { IoLockOpenOutline, IoLockClosedOutline } from 'react-icons/io5';
 
 export interface BoxProps {
   dragId: string
@@ -19,8 +20,11 @@ export interface BoxProps {
   moveBox: (id: string, left: number, top: number) => Promise<void>
   rawCombine: (a: string, bName: string) => Promise<void>,
   combine: (a: string, b: string) => Promise<void>,
+  lockBox: (id: string, locked: boolean) => Promise<void>,
   stopState: (key: string, state: keyof Box) => void,
   removeBox: (id: string) => void,
+  onHoverEnd?: (event: MouseEvent) => void
+  onHoverStart?: (event: MouseEvent) => void
   combining: boolean,
   newCombine: boolean,
   newDiscovery: boolean,
@@ -30,6 +34,7 @@ export interface BoxProps {
   alt: boolean,
   loading: boolean,
   error: number,
+  locked: boolean,
   // combineRaw: (a: string, b: string) => Promise<void>,
   children?: ReactNode
 }
@@ -45,11 +50,15 @@ export const MainElement: FC<BoxProps> = ({
     rawCombine,
     stopState,
     combine,
+    lockBox,
     removeBox,
+    onHoverEnd,
+    onHoverStart,
     control,
     alt,
     combining,
     loading,
+    locked,
     error,
 }) => {
     const { playSound } = useContext(SoundContext);
@@ -58,23 +67,35 @@ export const MainElement: FC<BoxProps> = ({
         drop(node, options);
     };
     const [recipes, setRecipes] = useState<Recipe[]>(element.recipes);
+    const [isBase, setIsBase] = useState<boolean>(true);
     const mounted = useRef(false);
+
+    useEffect(() => {
+        let isBase = false;
+        for (const recipe of element.recipes) {
+            if (recipe.base) {
+                isBase = true;
+                break;
+            }
+        }
+        setIsBase(isBase);
+    }, [element]);
     
     const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
         () => ({
-            type: ItemTypes.ELEMENT,
+            type: locked ? ItemTypes.LOCKED_ELEMENT : ItemTypes.ELEMENT,
             item: () => {
-                return { type: control ? ItemTypes.COPY_ELEMENT : ItemTypes.ELEMENT, id: dragId, left, top, element: element, control };
+                return { type: locked ? ItemTypes.LOCKED_ELEMENT : control ? ItemTypes.COPY_ELEMENT : ItemTypes.ELEMENT, id: dragId, left, top, element: element, control };
             },
             collect: (monitor) => ({
                 isDragging: monitor.isDragging(),
             }),
             options: {
                 force: Math.random(),
-                dropEffect: control ? 'copy' : 'move'
+                dropEffect: locked ? 'copy' : control ? 'copy' : 'move'
             } as DragSourceOptions
         }),
-        [element, dragId, left, top, control],
+        [element, dragId, left, top, control, locked],
     );
 
     useEffect(() => {
@@ -97,7 +118,7 @@ export const MainElement: FC<BoxProps> = ({
 
     const [{ isOver }, drop] = useDrop(
         () => ({
-            accept: [ItemTypes.ELEMENT, ItemTypes.COPY_ELEMENT, ItemTypes.SIDE_ELEMENT],
+            accept: locked ? [] : [ItemTypes.ELEMENT, ItemTypes.COPY_ELEMENT, ItemTypes.SIDE_ELEMENT],
             drop(item: DragItem, monitor) {
                 if (monitor.didDrop()) {
                     return;
@@ -132,11 +153,11 @@ export const MainElement: FC<BoxProps> = ({
                 return true;
             },
             collect: (monitor) => ({
-                isOver: monitor.isOver() && (monitor.getItem().id !== dragId),
-                isOverCurrent: monitor.isOver({ shallow: true }) && (monitor.getItem().id !== dragId),
+                isOver: !locked && monitor.isOver() && (monitor.getItem().id !== dragId),
+                isOverCurrent: !locked && monitor.isOver({ shallow: true }) && (monitor.getItem().id !== dragId),
             }),
         }),
-        [moveBox, addBox],
+        [moveBox, addBox, locked],
     );
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -192,7 +213,7 @@ export const MainElement: FC<BoxProps> = ({
     useEffect(() => {
         (async () => {
             if (mounted.current) {
-                if (isDragging && !control) {
+                if (isDragging && !control && !locked) {
                     controls.start('hide');
                 } else {
                     await controls.start('show');
@@ -305,8 +326,8 @@ export const MainElement: FC<BoxProps> = ({
     return (
         <ItemRenderer
             element={element}
-            type={ItemTypes.MAIN_ELEMENT}
-            dragging={isDragging && !control}
+            type={locked ? ItemTypes.LOCKED_ELEMENT : ItemTypes.MAIN_ELEMENT}
+            dragging={isDragging && !control && !locked}
             ref={dragDrop}
             top={top}
             left={left}
@@ -314,6 +335,8 @@ export const MainElement: FC<BoxProps> = ({
             newDiscovery={newDiscovery}
             initialOffset={{ x: 0, y: 0 }}
             currentOffset={{ x: 0, y: 0 }}
+            onHoverStart={onHoverStart}
+            onHoverEnd={onHoverEnd}
             onContextMenu={handleContext}
             onBlur={() => setDropdownOpen(false)}
             onClick={onClick}
@@ -325,6 +348,7 @@ export const MainElement: FC<BoxProps> = ({
             variants={customVariants}
             animate={controls}
             disabled={loading}
+            locked={locked}
             exit={{
                 opacity: 0,
                 scale: 0,
@@ -335,18 +359,22 @@ export const MainElement: FC<BoxProps> = ({
             }}>
             <Dropdown show={dropdownOpen} onToggle={(nextShow) => setDropdownOpen(nextShow)}>
                 <Dropdown.Menu>
+                    <Dropdown.ItemText>
+                        <button className={`btn badge text-bg-${locked ? 'secondary' : 'primary'} rounded-pill`} onClick={() => lockBox(dragId, !locked)}>{locked ? (<IoLockClosedOutline/>) : (<IoLockOpenOutline/>)}</button>
+                        <div className={`badge text-bg-${isBase ? 'secondary' : 'success'} rounded-pill float-end fs-6`}>{isBase ? 'Base' : 'AI'}</div>
+                    </Dropdown.ItemText>
                     {recipes.filter((item) => item.discovered).map((recipe) => {
                         if (recipe.a.name === '' || recipe.b.name === '') {
                             return (
-                                <Dropdown.Item key={`${recipe.result}`} href="#">
+                                <Dropdown.ItemText key={`${recipe.result}`}>
                                     <ItemRenderer
                                         element={mockElement(recipe)}
                                         type={ItemTypes.RECIPE_ELEMENT}
                                         dragging={false}/>
-                                </Dropdown.Item>);
+                                </Dropdown.ItemText>);
                         }
                         return (
-                            <Dropdown.Item key={`${recipe.a.name}${recipe.b.name}`} href="#">
+                            <Dropdown.ItemText key={`${recipe.a.name}${recipe.b.name}`}>
                                 <ItemRenderer
                                     element={mockElement(recipe.a)}
                                     type={ItemTypes.RECIPE_ELEMENT}
@@ -356,7 +384,7 @@ export const MainElement: FC<BoxProps> = ({
                                     element={mockElement(recipe.b)}
                                     type={ItemTypes.RECIPE_ELEMENT}
                                     dragging={false}/>
-                            </Dropdown.Item>
+                            </Dropdown.ItemText>
                         );
                     })}
                 </Dropdown.Menu>

@@ -19,6 +19,8 @@ export type ItemRendererProps = {
     currentOffset?: XYCoord
     top?: number
     left?: number
+    onHoverEnd?: (event: MouseEvent) => void
+    onHoverStart?: (event: MouseEvent) => void
     onContextMenu?: MouseEventHandler<HTMLDivElement>
     onBlur?: FocusEventHandler<HTMLDivElement>
     onClick?: MouseEventHandler<HTMLDivElement>
@@ -27,18 +29,22 @@ export type ItemRendererProps = {
     variants?: Variants
     animate?: boolean | AnimationControls | TargetAndTransition | VariantLabels
     exit?: TargetAndTransition | VariantLabels
+    locked?: boolean
     children?: ReactNode
 }
 
 function getItemStyles(
     initialOffset?: XYCoord,
     currentOffset?: XYCoord,
-    dragging?: boolean
+    dragging?: boolean,
+    locked?: boolean
 ) {
     if (dragging == undefined)
         dragging = false;
+    if (locked === undefined)
+        locked = false;
     if (!initialOffset || !currentOffset) {
-        if (dragging) {
+        if (!locked && dragging) {
             return {
                 display: 'none',
             };
@@ -59,10 +65,13 @@ function getMainStyles(
     left?: number,
     top?: number,
     isDragging?: boolean,
+    locked?: boolean
 ): CSSProperties {
     const transform = `translate3d(${left}px, ${top}px, 0)`;
     if (isDragging === undefined)
         isDragging = false;
+    if (locked === undefined)
+        locked = false;
     return {
         position: 'fixed',
         left: left === undefined ? 0 : left,
@@ -71,8 +80,8 @@ function getMainStyles(
         WebkitTransform: transform,
         // IE fallback: hide the real node using CSS when dragging
         // because IE will ignore our custom "empty image" drag preview.
-        opacity: isDragging ? 0 : 1,
-        height: isDragging ? 0 : '',
+        opacity: locked ? 1 : isDragging ? 0 : 1,
+        height: locked ? '' : isDragging ? 0 : '',
     };
 }
 
@@ -85,6 +94,8 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
         children,
         top,
         left,
+        onHoverStart,
+        onHoverEnd,
         onContextMenu,
         onBlur,
         onClick,
@@ -100,6 +111,7 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
         maxDepth,
         disabled,
         newDiscovery,
+        locked,
     } = props;
 
     const [destroying, setDestroying] = useState(false);
@@ -116,6 +128,8 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
         disabled = false;
     if (newDiscovery === undefined)
         newDiscovery = false;
+    if (locked === undefined)
+        locked = false;
     const { settings } = useContext(SettingsContext);
     //const [xy, setXY] = useState({ x: 0, y: 0 });
 
@@ -148,60 +162,12 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
         setBase(baseCheck);
     }, [element]);
 
-    if (type === ItemTypes.SIDE_ELEMENT) {
-        return (
-            <div
-                className={`${type}-element btn btn-element ${type === ItemTypes.SIDE_ELEMENT ? dragging ? '' : 'mt-2 ms-2' : ''} p-0
-                element
-                ${firstDiscovered ? 'holo' : ''}
-                ${base ? 'foil' : 'generated'}
-                ${maxDepth ? 'rainbow' : ''}
-                ${dragging ? 'shadow' : ''}
-                z-${dragging ? 'dragging' : destroying ? 'destroying' : type}Element 
-                ${dragging ? 'position-absolute': ''}
-                ${hasDropOver ? 'active': ''}
-                ${newDiscovery ? 'highlight highlight-black-white': ''}
-                ${disabled ? 'disabled': ''}`}
-                ref={ref}
-                data-type={firstDiscovered ? 'holo' : base ? 'foil' : maxDepth ? 'rainbow' : 'none'}
-                // onMouseMove={handleMove}
-                onContextMenu={onContextMenu}
-                onBlur={onBlur}
-                onClick={onClick}
-                onMouseDown={onMouseDown}
-                style={{
-                    ...getItemStyles(initialOffset, currentOffset),
-                    // zIndex: dragging ? 69 : 50,
-                    // backgroundPosition: `var(${xy.x}px) var(${xy.y}px)`,
-                    '--pointer-x': '50%',
-                    '--pointer-y': '50%',
-                    '--pointer-from-center': 0,
-                    '--pointer-from-top': 0.5,
-                    '--pointer-from-left': 0.5,
-                    '--card-opacity': 1,
-                    '--rotate-x': '0deg',
-                    '--rotate-y': '0deg',
-                    '--background-x': '50%',
-                    '--background-y': '50%'
-                }}
-            >
-                <div className='btn-holder h-100 w-100'>
-                    <div className='glare h-100 w-100'>
-                        <div className='shine h-100 w-100'>
-                            <div className={`holder ${firstDiscovered ? '' : 'not-holo'} py-2 px-2 h-100 w-100`}>
-                                {element.emoji} {element.display[settings.language]}
-                                {children}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
     return (
         <motion.div
             className={`${type}-element btn btn-element p-0
+            ${type === ItemTypes.SIDE_ELEMENT ? dragging ? '' : 'mt-2 ms-2' : ''}
             element
+            ${locked ? 'locked' : ''}
             ${firstDiscovered ? 'holo' : ''}
             ${base ? 'foil' : 'generated'}
             ${maxDepth ? 'rainbow' : ''}
@@ -214,6 +180,8 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
             ref={ref}
             data-type={firstDiscovered ? 'holo' : base ? 'foil' : maxDepth ? 'rainbow' : 'none'}
             // onMouseMove={handleMove}
+            onHoverEnd={onHoverEnd}
+            onHoverStart={onHoverStart}
             onContextMenu={onContextMenu}
             onBlur={onBlur}
             onClick={onClick}
@@ -222,8 +190,8 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
             animate={animate}
             exit={exit}
             style={{
-                ...getItemStyles(initialOffset, currentOffset),
-                ...(type === ItemTypes.MAIN_ELEMENT ? getMainStyles(left, top, dragging) : {}),
+                ...(type === ItemTypes.MAIN_ELEMENT || type === ItemTypes.LOCKED_ELEMENT ? getMainStyles(left, top, dragging, locked) : {}),
+                ...(dragging ? getItemStyles(initialOffset, currentOffset) : {}),
                 // zIndex: dragging ? 69 : 50,
                 // backgroundPosition: `var(${xy.x}px) var(${xy.y}px)`,
                 '--pointer-x': '50%',

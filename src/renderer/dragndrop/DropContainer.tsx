@@ -24,10 +24,6 @@ export interface ContainerProps {
   openModal: (option: ModalOption) => void
 }
 
-export interface ContainerState {
-  boxes: { [key: string]: { top: number; left: number; title: string } }
-}
-
 export const DropContainer: FC<ContainerProps> = ({
     openModal
 }) => {
@@ -42,6 +38,7 @@ export const DropContainer: FC<ContainerProps> = ({
     const mainElement = useRef<HTMLDivElement>();
     const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
     const [refreshHint, setRefreshHint] = useState<number>(0);
+    const currentHover = useRef<string>(undefined);
     const speedTimerRef = useRef<NodeJS.Timeout>(undefined);
     const [boxes, setBoxes] = useState<{
         [key: string]: Box
@@ -458,6 +455,42 @@ export const DropContainer: FC<ContainerProps> = ({
             });
         });
     }, [setBoxes]);
+
+    const lockBox = useCallback((id: string, locked: boolean): Promise<void> => {
+        return new Promise((resolve) => {
+            setBoxes((boxes) => {
+                if (hasProp(boxes, id)) {
+                    resolve();
+                    return update(boxes, {
+                        [id]: {
+                            $merge: { locked },
+                        },
+                    });
+                } else {
+                    resolve();
+                    return boxes;
+                }
+            });
+        });
+    }, [setBoxes]);
+
+    const invertLock = useCallback((id: string): Promise<void> => {
+        return new Promise((resolve) => {
+            setBoxes((boxes) => {
+                if (hasProp(boxes, id)) {
+                    resolve();
+                    return update(boxes, {
+                        [id]: {
+                            $merge: { locked: !boxes[id].locked },
+                        },
+                    });
+                } else {
+                    resolve();
+                    return boxes;
+                }
+            });
+        });
+    }, [setBoxes]);
     
     const addBox = useCallback((x: number, y: number, element: RecipeElement, combining: boolean): Promise<string> => {
         return new Promise((resolve) => {
@@ -471,6 +504,7 @@ export const DropContainer: FC<ContainerProps> = ({
                         combining: combining,
                         newCombining: false,
                         loading: false,
+                        locked: false,
                         newDiscovery: false,
                         firstDiscovery: false,
                         error: 0,
@@ -512,7 +546,7 @@ export const DropContainer: FC<ContainerProps> = ({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_props, drop] = useDrop(
         () => ({
-            accept: [ItemTypes.ELEMENT, ItemTypes.COPY_ELEMENT, ItemTypes.SIDE_ELEMENT],
+            accept: [ItemTypes.ELEMENT, ItemTypes.COPY_ELEMENT, ItemTypes.SIDE_ELEMENT, ItemTypes.LOCKED_ELEMENT],
             drop(item: DragItem, monitor) {
                 if (monitor.didDrop()) {
                     return;
@@ -525,7 +559,7 @@ export const DropContainer: FC<ContainerProps> = ({
                         y -= item.offset.y;
                     }
                     addBox(x, y, item.element, false);
-                } else if (item.type === ItemTypes.COPY_ELEMENT) {
+                } else if (item.type === ItemTypes.COPY_ELEMENT || item.type === ItemTypes.LOCKED_ELEMENT) {
                     addBox(x, y, item.element, false);
                 } else {
                     // Moving an existing item
@@ -563,6 +597,11 @@ export const DropContainer: FC<ContainerProps> = ({
         if (e.ctrlKey && !control) {
             setControl(true);
         }
+        if (e.key === 'l') {
+            if (currentHover.current !== undefined) {
+                invertLock(currentHover.current);
+            }
+        }
     };
 
     const handleKeyUp: KeyboardEventHandler<HTMLDivElement> = (e) => {
@@ -597,7 +636,7 @@ export const DropContainer: FC<ContainerProps> = ({
                     <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
                         <AnimatePresence>
                             {boxes === undefined ? (<Fragment/>) : Object.keys(boxes).filter((v) => v !== undefined).map((key) => {
-                                const { left, top, element, combining, newCombining, loading, error, newDiscovery, firstDiscovery } = boxes[key];
+                                const { left, top, element, combining, newCombining, loading, error, newDiscovery, firstDiscovery, locked } = boxes[key];
                                 return (
                                     <motion.div
                                         key={key}
@@ -618,10 +657,14 @@ export const DropContainer: FC<ContainerProps> = ({
                                             control={control}
                                             alt={alt}
                                             loading={loading}
+                                            locked={locked}
                                             error={error}
+                                            onHoverStart={() => currentHover.current = key}
+                                            onHoverEnd={() => currentHover.current = undefined}
                                             addBox={addBox}
                                             removeBox={removeBox}
                                             moveBox={moveBox}
+                                            lockBox={lockBox}
                                             stopState={stopState}
                                             rawCombine={rawCombine}
                                             combine={combine}
