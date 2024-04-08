@@ -30,7 +30,6 @@ export const HintButton: FC<HintButtonProps> = ({
     const tooltipRef = useRef(undefined);
 
     const refresh = async () => {
-        logger.debug('Refresh');
         try {
             const newHint = await window.HintAPI.getHint(false);
             setShowTooltip(newHint === undefined);
@@ -39,14 +38,12 @@ export const HintButton: FC<HintButtonProps> = ({
             setMaxHints(maxHintsTemp);
             const hintsLeft = await window.HintAPI.getHintsLeft();
             setHintPoints(hintsLeft);
-            logger.debug('vAlues', newHint, maxHintsTemp, hintsLeft);
         } catch (error) {
             logger.error('Failed getting hint data from main', error);
         }
     };
 
     useEffect(() => {
-        logger.debug('blank useEffect');
         refresh();
         if (tooltipRef.current !== undefined && tooltipRef.current !== null) {
             tooltipRef.current.addEventListener('hide.bs.dropdown', () => {
@@ -65,7 +62,6 @@ export const HintButton: FC<HintButtonProps> = ({
     }, []);
 
     useEffect(() => {
-        logger.debug('refreshProp useEffect');
         refresh();
     }, [refreshProp]);
 

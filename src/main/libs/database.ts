@@ -61,8 +61,9 @@ export async function save(): Promise<void> {
     //}), 'utf-8');
 }
 
-export function setDataRaw(newData: RecipeRow[]) {
+export async function setDataRaw(newData: RecipeRow[]) {
     data = newData;
+    await save();
 }
 
 export function loadDatabaseV1(loaded: Record<string, unknown>[]): RecipeRow[] {
@@ -112,6 +113,23 @@ async function loadData(): Promise<RecipeRow[]> {
 
 export async function createDatabase(): Promise<void> {
     try {
+        // RELEASE --------------------------
+        ////await verifyFolder();
+        ////try {
+        ////    JSON.parse(await fs.readFile(getFolder() + 'prerelease.json', 'utf-8'));
+        ////    logger.info('Found a prerelease file, time to reset!');
+        ////    data = await loadData();
+        ////    await resetAndBackup('prelease_');
+        ////    await fs.rm(getFolder() + 'prerelease.json');
+        ////} catch (e) {
+        ////    if (e.code === 'ENOENT') {
+        ////        logger.info('No prerelease file found, this is good!');
+        ////    } else {
+        ////        logger.error(`Failed to read prerlease file with error ${e.code}`, e);
+        ////        throw e;
+        ////    }
+        ////}
+        // RELEASE --------------------------
         // PRERELEASE -------------------------- REMOVE ON RELEASE
         await verifyFolder();
         try {
@@ -140,9 +158,9 @@ export async function createDatabase(): Promise<void> {
     setDatabaseOrder();
 }
 
-export async function resetAndBackup(): Promise<void> {
+export async function resetAndBackup(prefix = 'db_backup_'): Promise<void> {
     await verifyFolder();
-    await saveDatabaseToFile(`db_backup_${Math.floor((new Date()).getTime() / 1000)}.backup`);
+    await saveDatabaseToFile(`${prefix}${Math.floor((new Date()).getTime() / 1000)}.backup`);
     data = structuredClone(baseData) as RecipeRow[];
     await save();
     setDatabaseOrder();
@@ -163,6 +181,7 @@ export async function insertRecipeRow(recipe: Omit<RecipeRow, 'order'>): Promise
     const recipeRow: RecipeRow = { ...recipe, order: databaseOrder };
     data.push(recipeRow);
     databaseOrder++;
+    await save();
     return recipeRow;
 }
 export async function insertRecipe(recipe: Omit<Recipe, 'order'>): Promise<RecipeRow> {
@@ -174,6 +193,7 @@ export async function insertRecipe(recipe: Omit<Recipe, 'order'>): Promise<Recip
     };
     data.push(recipeRow);
     databaseOrder++;
+    await save();
     return recipeRow;
 }
 
@@ -201,6 +221,7 @@ export async function setDiscovered(a: string, b: string, discovered: boolean): 
         await addHintPoint(1);
         return true;
     }
+    await save();
     return false;
 }
 
@@ -211,6 +232,7 @@ export async function deleteRecipe(a: string, b: string): Promise<void> {
         }
         return true;
     });
+    await save();
 }
 
 export async function getRecipe(a: string, b: string): Promise<Recipe | undefined> {

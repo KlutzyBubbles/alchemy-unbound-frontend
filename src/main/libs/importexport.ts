@@ -70,13 +70,13 @@ export async function importFile(): Promise<boolean> {
         }
         if (database.version === 1) {
             try {
-                setDataRaw(loadDatabaseV1(database.data));
+                await setDataRaw(loadDatabaseV1(database.data));
             } catch (e) {
                 throw new Error('Failed loading the database from version');
             }
         } else if (database.version === 2) {
             try {
-                setDataRaw(loadDatabaseV2(database.data));
+                await setDataRaw(loadDatabaseV2(database.data));
             } catch (e) {
                 throw new Error('Failed loading the database from version');
             }

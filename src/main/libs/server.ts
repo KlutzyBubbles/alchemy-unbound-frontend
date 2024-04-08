@@ -1,6 +1,6 @@
 import logger from 'electron-log/main';
 import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse } from '../../common/types';
-import { getPlaceholderOrder, getRecipe, insertRecipeRow, save, setDiscovered, traverseAndFill } from './database';
+import { getPlaceholderOrder, getRecipe, insertRecipeRow, setDiscovered, traverseAndFill } from './database';
 import { isPackaged } from './generic';
 import { getSettings } from './settings';
 import { getSteamGameLanguage, getWebAuthTicket } from './steam';
@@ -140,7 +140,6 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
         if (!exists.discovered)
             newDiscovery = true;
         exists.discovered = 1;
-        await save();
         return {
             type: 'success',
             result: {
@@ -189,7 +188,6 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                             who_discovered: body.who_discovered,
                             base: body.base ? 1 : 0
                         });
-                        await save();
                         return {
                             type: 'success',
                             result: {
