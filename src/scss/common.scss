@@ -36,6 +36,34 @@
     background: $side-color;
 }
 
+// @font-face {
+//     font-family: 'Custom Emoji';
+//     src: url('./TwitterColorEmoji-SVGinOT.ttf');
+// }
+// 
+// .emoji {
+//     font-family: 'Custom Emoji';
+// }
+
+.btn-element {
+    @include button-variant($side-element-bg, // Background
+        $side-element-border-color, // Border
+        $side-element-color, // Color
+        $side-element-bg-hover, // Hover Background
+        $side-element-border-color-hover, // Hover Border
+        $side-element-color-hover, // Hover Color
+        $side-element-bg); // Active Background
+    border-radius: $btn-border-radius;
+
+    .btn-holder {
+        background-color: $side-element-bg;
+    }
+
+    &:hover > .btn-holder:first-child {
+        background-color: $side-element-bg-hover;
+    }
+}
+
 .side-container {
     background-color: $side-bg;
 

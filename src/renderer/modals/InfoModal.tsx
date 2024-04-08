@@ -5,10 +5,13 @@ import { SettingsContext } from '../providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { BsDiscord, BsGithub } from 'react-icons/bs';
 import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
-import { getFromStore } from '../language';
+import { getFromStore, getObjectFromStore, getPlaceholderLanguage } from '../language';
 import { DEFAULT_STATS, Stats } from '../../common/stats';
 import { ErrorItem } from './ErrorItem';
 import { IoPulseOutline } from 'react-icons/io5';
+import { ItemRenderer } from '../ItemRenderer';
+import { ItemTypes } from '../types';
+import { mockElement } from '../utils';
 
 
 export interface InfoModalProps {
@@ -61,8 +64,83 @@ export const InfoModal: FC<InfoModalProps> = ({
             <Modal.Body>
                 <div className='row'>
                     <div className='col-12 col-lg-6'>
-                        <p>{getFromStore('developedBy', settings.language)} KlutzyBubbles</p>
-                        <p>{getFromStore('steamAssetsBy', settings.language)} Piney</p>
+                        <ItemRenderer
+                            element={mockElement({
+                                name: 'game',
+                                display: getObjectFromStore('game', 'Game'),
+                                emoji: '🎮',
+                                depth: 0,
+                                first: 0,
+                                who_discovered: '',
+                                base: 1
+                            })}
+                            type={ItemTypes.RECIPE_ELEMENT}
+                            dragging={false}/>
+                        <span className='fs-3'>+</span>
+                        <ItemRenderer
+                            element={mockElement({
+                                name: 'hacker',
+                                display: getObjectFromStore('hacker', 'Hacker'),
+                                emoji: '👨‍💻',
+                                depth: 0,
+                                first: 0,
+                                who_discovered: '',
+                                base: 1
+                            })}
+                            type={ItemTypes.RECIPE_ELEMENT}
+                            dragging={false}/>
+                        <span className='fs-3'>=</span>
+                        <ItemRenderer
+                            element={mockElement({
+                                name: 'klutzybubbles',
+                                display: getPlaceholderLanguage('KlutzyBubbles'),
+                                emoji: '🤹',
+                                depth: 0,
+                                first: 0,
+                                who_discovered: '',
+                                base: 1
+                            })}
+                            type={ItemTypes.RECIPE_ELEMENT}
+                            dragging={false}/>
+                        <div className='clearfix'></div>
+                        <ItemRenderer
+                            element={mockElement({
+                                name: 'game',
+                                display: getObjectFromStore('game', 'Game'),
+                                emoji: '🎮',
+                                depth: 0,
+                                first: 0,
+                                who_discovered: '',
+                                base: 1
+                            })}
+                            type={ItemTypes.RECIPE_ELEMENT}
+                            dragging={false}/>
+                        <span className='fs-3'>+</span>
+                        <ItemRenderer
+                            element={mockElement({
+                                name: 'art',
+                                display: getObjectFromStore('art', 'Art'),
+                                emoji: '🎨',
+                                depth: 0,
+                                first: 0,
+                                who_discovered: '',
+                                base: 1
+                            })}
+                            type={ItemTypes.RECIPE_ELEMENT}
+                            dragging={false}/>
+                        <span className='fs-3'>=</span>
+                        <ItemRenderer
+                            element={mockElement({
+                                name: 'piney',
+                                display: getPlaceholderLanguage('Piney'),
+                                emoji: '🌲',
+                                depth: 0,
+                                first: 0,
+                                who_discovered: '',
+                                base: 1
+                            })}
+                            type={ItemTypes.RECIPE_ELEMENT}
+                            dragging={false}/>
                     </div>
                     <div className='col-12 col-lg-6'>
                         <h4>{getFromStore('stats', settings.language)} (Beta)</h4>
