@@ -19,7 +19,7 @@ export async function itemRecipeCheck(result: string, achievementName?: string) 
 
 export function baseRecipeCheck(baseRecipesFound: number) {
     do250Check(baseRecipesFound, 'discover_base_recipe');
-    if (baseRecipesFound >= 3000) {
+    if (baseRecipesFound >= 3150) {
         window.SteamAPI.activateAchievement('discover_base_recipe_all');
     }
 }
@@ -30,7 +30,7 @@ export function aiRecipeCheck(aiRecipesFound: number) {
 
 export function baseResultCheck(baseResultsFound: number) {
     do250Check(baseResultsFound, 'discover_base');
-    if (baseResultsFound >= 700) {
+    if (baseResultsFound >= 750) {
         window.SteamAPI.activateAchievement('discover_base_all');
     }
 }
