@@ -1,14 +1,15 @@
-import { useState, type FC, useEffect, useContext, Fragment, ChangeEventHandler } from 'react';
+import { useState, type FC, useEffect, useContext, Fragment, ChangeEventHandler, Dispatch, SetStateAction } from 'react';
 import { Alert, Button, Collapse, Form, Modal } from 'react-bootstrap';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { BackgroundType, BackgroundTypeList, ThemeType, ThemeTypeList, DEFAULT_SETTINGS, Language, languageDisplay, languages } from '../../common/settings';
 import { getFromStore } from '../language';
 import { LoadingContext } from '../providers/LoadingProvider';
-import { IoVolumeHighOutline, IoVolumeLowOutline, IoVolumeMediumOutline, IoVolumeMuteOutline } from 'react-icons/io5';
+import { IoRefreshOutline, IoVolumeHighOutline, IoVolumeLowOutline, IoVolumeMediumOutline, IoVolumeMuteOutline } from 'react-icons/io5';
 import { ConfirmModal } from './ConfirmDialog';
 import logger from 'electron-log/renderer';
 import { UpdateContext } from '../providers/UpdateProvider';
 import { InfoContext } from '../providers/InfoProvider';
+import { KEY_VALUES_TO_LEAVE } from '../types';
 
 export interface SettingsModalProps {
   show: boolean
@@ -35,6 +36,9 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
     const [errorText, setErrorText] = useState<string>('');
     const [successText, setSuccessText] = useState<string>('');
+    const [lockKeybind, setLockKeybind] = useState<string>(settings?.keybinds.lock ?? DEFAULT_SETTINGS.keybinds.lock);
+    const [copyKeybind, setCopyKeybind] = useState<string>(settings?.keybinds.copy ?? DEFAULT_SETTINGS.keybinds.copy);
+    const [removeKeybind, setRemoveKeybind] = useState<string>(settings?.keybinds.remove ?? DEFAULT_SETTINGS.keybinds.remove);
     const { setShouldUpdate } = useContext(UpdateContext);
     const { hasSupporterTheme } = useContext(InfoContext);
 
@@ -184,7 +188,12 @@ export const SettingsModal: FC<SettingsModalProps> = ({
             ...settings,
             volume: volume,
             muted: muted,
-            fps: fps
+            fps: fps,
+            keybinds: {
+                lock: lockKeybind,
+                copy: copyKeybind,
+                remove: removeKeybind
+            }
         });
         handleHide();
     };
@@ -238,6 +247,26 @@ export const SettingsModal: FC<SettingsModalProps> = ({
             logger.error('Failed to import file', e);
             setErrorText(e.message);
         }
+    };
+
+    const setKeybind = (event: React.KeyboardEvent<HTMLInputElement>, setFunc: Dispatch<SetStateAction<string>>, defaultKey: string) => {
+        event.preventDefault();
+        const key = event.key;
+        if (key === 'Unidentified') {
+            setFunc(defaultKey);
+        } else {
+            setFunc(event.key);
+        }
+    };
+
+    const getReadable = (key: string): string => {
+        if (KEY_VALUES_TO_LEAVE.includes(key)) {
+            return key;
+        }
+        if (key === ' ') {
+            return 'Space';
+        }
+        return key.toLocaleUpperCase();
     };
 
     return (
@@ -378,6 +407,73 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                     <div className='col-6 col-md-7 col-lg-9 d-flex'>
                                         <h5 className='float-start mb-2 fs-2 d-flex pe-2'>{fps}</h5>
                                         <input type="range" className="form-range mt-2" min="15" max="360" step="1" value={fps} disabled={background === 'blank'} onChange={(e) => setFPS(parseInt(e.target.value))}/>
+                                    </div>
+                                </div>
+                                <div className='row mb-2'>
+                                    <div className='col-12'>
+                                        <h3 className='text-center'>{getFromStore('keybinds', settings.language)}</h3>
+                                    </div>
+                                </div>
+                                <div className='row mb-4'>
+                                    <div className='col-6 col-md-5 col-lg-3'>
+                                        <h5 className='text-end'>{getFromStore('lockKeybind', settings.language)}</h5>
+                                    </div>
+                                    <div className='col-5 col-md-6 col-lg-8'>
+                                        <input
+                                            type="text"
+                                            className="form-control override-focus"
+                                            value={getReadable(lockKeybind)}
+                                            onChange={() => {}} // here for error
+                                            onKeyDown={(e) => setKeybind(e, setLockKeybind, DEFAULT_SETTINGS.keybinds.lock)}
+                                            placeholder={getFromStore('lockKeybind', settings.language)}/>
+                                    </div>
+                                    <div className='col-1 px-0'>
+                                        <Button variant="danger" onClick={() => setLockKeybind(DEFAULT_SETTINGS.keybinds.lock)}>
+                                            <IoRefreshOutline/>
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className='row mb-4'>
+                                    <div className='col-6 col-md-5 col-lg-3'>
+                                        <h5 className='text-end'>{getFromStore('copyKeybind', settings.language)}</h5>
+                                    </div>
+                                    <div className='col-5 col-md-6 col-lg-8'>
+                                        <input
+                                            type="text"
+                                            className="form-control override-focus"
+                                            value={getReadable(copyKeybind)}
+                                            onChange={() => {}} // here for error
+                                            onKeyDown={(e) => setKeybind(e, setCopyKeybind, DEFAULT_SETTINGS.keybinds.copy)}
+                                            placeholder={getFromStore('copyKeybind', settings.language)}/>
+                                    </div>
+                                    <div className='col-1 px-0'>
+                                        <Button variant="danger" onClick={() => setCopyKeybind(DEFAULT_SETTINGS.keybinds.copy)}>
+                                            <IoRefreshOutline/>
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className='row mb-4'>
+                                    <div className='col-6 col-md-5 col-lg-3'>
+                                        <h5 className='text-end'>{getFromStore('removeKeybind', settings.language)}</h5>
+                                    </div>
+                                    <div className='col-5 col-md-6 col-lg-8'>
+                                        <input
+                                            type="text"
+                                            className="form-control override-focus"
+                                            value={getReadable(removeKeybind)}
+                                            onChange={() => {}} // here for error
+                                            onKeyDown={(e) => setKeybind(e, setRemoveKeybind, DEFAULT_SETTINGS.keybinds.remove)}
+                                            placeholder={getFromStore('removeKeybind', settings.language)}/>
+                                    </div>
+                                    <div className='col-1 px-0'>
+                                        <Button variant="danger" onClick={() => setRemoveKeybind(DEFAULT_SETTINGS.keybinds.remove)}>
+                                            <IoRefreshOutline/>
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className='row mb-2'>
+                                    <div className='col-12'>
+                                        <h3 className='text-center'>{getFromStore('importExport', settings.language)}</h3>
                                     </div>
                                 </div>
                                 <div className='row px-3'>

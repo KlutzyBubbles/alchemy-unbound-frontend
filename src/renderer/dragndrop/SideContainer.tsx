@@ -228,8 +228,7 @@ export const SideContainer: FC<ContainerProps> = ({
                     <div className="px-2 mb-3 mt-1">
                         <input
                             type="text"
-                            id="element-search"
-                            className="form-control form-control-lg"
+                            className="form-control form-control-lg override-focus"
                             value={searchText}
                             onChange={onSearchType}
                             placeholder={getFromStore('search', settings.language).replace('{0}', `${elements.filter((item) => {

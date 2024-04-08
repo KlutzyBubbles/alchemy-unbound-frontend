@@ -19,6 +19,7 @@ import { hasProp } from '../../common/utils';
 import { LoadingContext } from '../providers/LoadingProvider';
 import { itemRecipeCheck, unlockCheck } from '../utils/achievements';
 import { MainButtons } from './MainButtons';
+import { SettingsContext } from '../providers/SettingsProvider';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
@@ -28,11 +29,10 @@ export const DropContainer: FC<ContainerProps> = ({
     openModal
 }) => {
     const [elements, setElements] = useState<RecipeElement[]>([]);
-    const [shift, setShift] = useState<boolean>(false);
-    const [alt, setAlt] = useState<boolean>(false);
+    const [copyHeld, setCopyHeld] = useState<boolean>(false);
+    const [removeHeld, setRemoveHeld] = useState<boolean>(false);
     const [rateLimited, setRateLimited] = useState<boolean>(false);
     const [deprecated, setDeprecated] = useState<boolean>(false);
-    const [control, setControl] = useState<boolean>(false);
     const { setLoading } = useContext(LoadingContext);
     const { playSound } = useContext(SoundContext);
     const mainElement = useRef<HTMLDivElement>();
@@ -40,6 +40,7 @@ export const DropContainer: FC<ContainerProps> = ({
     const [refreshHint, setRefreshHint] = useState<number>(0);
     const currentHover = useRef<string>(undefined);
     const speedTimerRef = useRef<NodeJS.Timeout>(undefined);
+    const { settings } = useContext(SettingsContext);
     const [boxes, setBoxes] = useState<{
         [key: string]: Box
     }>({});
@@ -568,7 +569,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 return undefined;
             }
         }),
-        [moveBox, alt],
+        [moveBox],
     );
 
     const elementVariants = {
@@ -588,16 +589,13 @@ export const DropContainer: FC<ContainerProps> = ({
     };
 
     const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (e) => {
-        if (e.altKey && !alt) {
-            setAlt(true);
+        if (e.key === settings.keybinds.copy) {
+            setCopyHeld(true);
         }
-        if (e.shiftKey && !shift) {
-            setShift(true);
+        if (e.key === settings.keybinds.remove) {
+            setRemoveHeld(true);
         }
-        if (e.ctrlKey && !control) {
-            setControl(true);
-        }
-        if (e.key === 'l') {
+        if (e.key === settings.keybinds.lock) {
             if (currentHover.current !== undefined) {
                 invertLock(currentHover.current);
             }
@@ -605,20 +603,22 @@ export const DropContainer: FC<ContainerProps> = ({
     };
 
     const handleKeyUp: KeyboardEventHandler<HTMLDivElement> = (e) => {
-        if (!e.altKey && alt) {
-            setAlt(false);
+        if (e.key === settings.keybinds.copy) {
+            setCopyHeld(false);
         }
-        if (!e.shiftKey && shift) {
-            setShift(false);
-        }
-        if (!e.ctrlKey && control) {
-            setControl(false);
+        if (e.key === settings.keybinds.remove) {
+            setRemoveHeld(false);
         }
     };
 
     const handleBlur: FocusEventHandler<HTMLDivElement> = (e) => {
-        if (e.relatedTarget === undefined || e.relatedTarget === null || (e.relatedTarget.id !== 'element-search' && e.relatedTarget.id !== 'hint-dropdown')) {
-            mainElement.current.focus();
+        if (e.relatedTarget === undefined || e.relatedTarget === null) {
+            return mainElement.current.focus();
+        }
+        if (e.relatedTarget.classList.contains('override-focus')) {
+            return;
+        } else {
+            return mainElement.current.focus();
         }
     };
 
@@ -653,9 +653,8 @@ export const DropContainer: FC<ContainerProps> = ({
                                             newCombine={newCombining}
                                             newDiscovery={newDiscovery}
                                             firstDiscovery={firstDiscovery}
-                                            shift={shift}
-                                            control={control}
-                                            alt={alt}
+                                            copyHeld={copyHeld}
+                                            removeHeld={removeHeld}
                                             loading={loading}
                                             locked={locked}
                                             error={error}

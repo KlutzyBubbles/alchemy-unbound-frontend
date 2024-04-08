@@ -4,7 +4,7 @@ import { dirExists } from '../utils';
 import { DEFAULT_SETTINGS, RawSettings, Settings } from '../../common/settings';
 import logger from 'electron-log/main';
 
-const SETTINGS_VERISON = 2;
+const SETTINGS_VERISON = 3;
 
 let settings: Settings = DEFAULT_SETTINGS;
 let loaded = false;
@@ -25,7 +25,7 @@ export async function saveSettings(): Promise<void> {
 
 function loadV1(loaded: RawSettings) {
     settings = {
-        theme: loaded.theme ?? ((loaded.dark ?? true) ? 'dark' : 'light'),
+        theme: loaded.theme ?? ((loaded.dark ?? DEFAULT_SETTINGS.theme === 'dark') ? 'dark' : 'light'),
         fullscreen: loaded.fullscreen,
         offline: loaded.offline,
         currentDisplay: loaded.currentDisplay,
@@ -35,24 +35,17 @@ function loadV1(loaded: RawSettings) {
         languageSet: loaded.languageSet,
         volume: loaded.volume,
         muted: loaded.muted,
-        fps: loaded.fps
+        fps: loaded.fps,
+        keybinds: loaded.keybinds ?? DEFAULT_SETTINGS.keybinds
     };
 }
 
 function loadV2(loaded: RawSettings) {
-    settings = {
-        theme: loaded.theme ?? ((loaded.dark ?? true) ? 'dark' : 'light'),
-        fullscreen: loaded.fullscreen,
-        offline: loaded.offline,
-        currentDisplay: loaded.currentDisplay,
-        background: loaded.background,
-        sidebar: loaded.sidebar,
-        language: loaded.language,
-        languageSet: loaded.languageSet,
-        volume: loaded.volume,
-        muted: loaded.muted,
-        fps: loaded.fps
-    };
+    loadV1(loaded);
+}
+
+function loadV3(loaded: RawSettings) {
+    loadV1(loaded);
 }
 
 export async function loadSettings(): Promise<void> {
@@ -65,6 +58,10 @@ export async function loadSettings(): Promise<void> {
         } else if (raw.version === 2) {
             logger.info('Found settings V2', raw.settings);
             loadV2(raw.settings);
+            loaded = true;
+        } else if (raw.version === 3) {
+            logger.info('Found settings V3', raw.settings);
+            loadV3(raw.settings);
             loaded = true;
         } else {
             logger.error(`Failed to load settings because of unknown version '${raw.version}', has this been altered?`);

@@ -132,6 +132,13 @@ export type Settings = {
     volume: number
     muted: boolean
     fps: number
+    keybinds: Keybinds
+}
+
+export type Keybinds = {
+    lock: string,
+    copy: string,
+    remove: string
 }
 
 // This is here for future settings changes
@@ -148,6 +155,7 @@ export type RawSettings = {
     volume: number
     muted: boolean
     fps: number
+    keybinds?: Keybinds
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -161,5 +169,10 @@ export const DEFAULT_SETTINGS: Settings = {
     languageSet: false,
     volume: 0.5,
     muted: false,
-    fps: 120
+    fps: 120,
+    keybinds: {
+        lock: 'l',
+        copy: 'Control',
+        remove: 'Alt'
+    }
 };

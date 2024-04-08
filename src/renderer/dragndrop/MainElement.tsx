@@ -29,9 +29,8 @@ export interface BoxProps {
   newCombine: boolean,
   newDiscovery: boolean,
   firstDiscovery: boolean,
-  shift: boolean,
-  control: boolean,
-  alt: boolean,
+  copyHeld: boolean,
+  removeHeld: boolean,
   loading: boolean,
   error: number,
   locked: boolean,
@@ -54,8 +53,8 @@ export const MainElement: FC<BoxProps> = ({
     removeBox,
     onHoverEnd,
     onHoverStart,
-    control,
-    alt,
+    copyHeld,
+    removeHeld,
     combining,
     loading,
     locked,
@@ -85,17 +84,17 @@ export const MainElement: FC<BoxProps> = ({
         () => ({
             type: locked ? ItemTypes.LOCKED_ELEMENT : ItemTypes.ELEMENT,
             item: () => {
-                return { type: locked ? ItemTypes.LOCKED_ELEMENT : control ? ItemTypes.COPY_ELEMENT : ItemTypes.ELEMENT, id: dragId, left, top, element: element, control };
+                return { type: locked ? ItemTypes.LOCKED_ELEMENT : copyHeld ? ItemTypes.COPY_ELEMENT : ItemTypes.ELEMENT, id: dragId, left, top, element: element };
             },
             collect: (monitor) => ({
                 isDragging: monitor.isDragging(),
             }),
             options: {
                 force: Math.random(),
-                dropEffect: locked ? 'copy' : control ? 'copy' : 'move'
+                dropEffect: locked ? 'copy' : copyHeld ? 'copy' : 'move'
             } as DragSourceOptions
         }),
-        [element, dragId, left, top, control, locked],
+        [element, dragId, left, top, copyHeld, locked],
     );
 
     useEffect(() => {
@@ -172,10 +171,9 @@ export const MainElement: FC<BoxProps> = ({
     };
   
     const onClick = () => {
-        if (alt) {
+        if (removeHeld && !locked) {
             removeBox(dragId);
         }
-        // controls.start('error');
     };
 
     useEffect(() => {
@@ -213,7 +211,7 @@ export const MainElement: FC<BoxProps> = ({
     useEffect(() => {
         (async () => {
             if (mounted.current) {
-                if (isDragging && !control && !locked) {
+                if (isDragging && !copyHeld && !locked) {
                     controls.start('hide');
                 } else {
                     await controls.start('show');
@@ -327,7 +325,7 @@ export const MainElement: FC<BoxProps> = ({
         <ItemRenderer
             element={element}
             type={locked ? ItemTypes.LOCKED_ELEMENT : ItemTypes.MAIN_ELEMENT}
-            dragging={isDragging && !control && !locked}
+            dragging={isDragging && !copyHeld && !locked}
             ref={dragDrop}
             top={top}
             left={left}
@@ -341,7 +339,7 @@ export const MainElement: FC<BoxProps> = ({
             onBlur={() => setDropdownOpen(false)}
             onClick={onClick}
             onMouseDown={() => {
-                if (!alt) {
+                if (!removeHeld) {
                     playSound('pickup', 0.5);
                 }
             }}
