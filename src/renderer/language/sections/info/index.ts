@@ -3,40 +3,6 @@ import { LanguageStore as StatsLanguageStore } from './stats';
 
 export const LanguageStore: LanguageStoreRecurring = {
     stats: StatsLanguageStore,
-    developedBy: {
-        english: 'Developed by',
-        schinese: '开发者',
-        russian: 'Разработано',
-        spanish: 'Desarrollado por',
-        french: 'Développé par',
-        japanese: '開発者',
-        indonesian: 'Dikembangkan oleh',
-        german: 'Entwickelt von',
-        latam: 'Desarrollado por',
-        italian: 'Sviluppato da',
-        dutch: 'Ontwikkeld door',
-        polish: 'Opracowane przez',
-        portuguese: 'Desenvolvido por',
-        tchinese: '開發者',
-        koreana: '개발자'
-    },
-    steamAssetsBy: {
-        english: 'Steam assets by',
-        schinese: 'Steam资产由',
-        russian: 'Ресурсы Steam от',
-        spanish: 'Activos de Steam por',
-        french: 'Ressources Steam par',
-        japanese: 'Steamアセット提供',
-        indonesian: 'Aset Steam oleh',
-        german: 'Steam-Assets von',
-        latam: 'Activos de Steam por',
-        italian: 'Risorse di Steam di',
-        dutch: 'Steam-assets door',
-        polish: 'Zasoby Steam przez',
-        portuguese: 'Ativos do Steam por',
-        tchinese: 'Steam資產由',
-        koreana: 'Steam 자산 제공'
-    },
     alchemyUnbound: {
         english: 'Alchemy Unbound',
         schinese: 'Alchemy Unbound',
