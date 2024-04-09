@@ -70,7 +70,7 @@ export const SideContainer: FC<ContainerProps> = ({
                 //         return true;
                 //     }
                 // }
-                if (element.display[settings.language].toLocaleLowerCase().search(searchText) !== -1) {
+                if (element.display[settings.language].toLocaleLowerCase().search(searchText.replace(/[#-.]|[[-^]|[?|{}]/g, '\\$&')) !== -1) {
                     return true;
                 }
                 if (element.emoji === searchText) {
