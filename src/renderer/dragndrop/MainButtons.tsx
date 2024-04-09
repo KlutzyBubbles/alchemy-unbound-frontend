@@ -94,7 +94,7 @@ export const MainButtons: FC<MainButtonProps> = ({
                     <Overlay target={deprecatedRef.current} show={showDeprecatedTooltip} placement="left">
                         {(props) => (
                             <Tooltip id="overlay-example" {...props}>
-                                {getFromStore('apiDeprecated', settings.language)}
+                                {getFromStore('errors.apiDeprecated', settings.language)}
                             </Tooltip>
                         )}
                     </Overlay>
@@ -109,7 +109,7 @@ export const MainButtons: FC<MainButtonProps> = ({
                 <Overlay target={rateLimitedRef.current} show={showRateTooltip} placement="left">
                     {(props) => (
                         <Tooltip id="overlay-example" {...props}>
-                            {getFromStore('rateLimited', settings.language)}
+                            {getFromStore('errors.rateLimited', settings.language)}
                         </Tooltip>
                     )}
                 </Overlay>

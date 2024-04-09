@@ -35,17 +35,17 @@ export const ConfirmModal: FC<ConfirmModalProps> = ({
             background: '#000000dd'
         }}>
             <Modal.Header closeButton data-bs-theme={settings.theme}>
-                <Modal.Title>{getFromStore('confirm', settings.language)}</Modal.Title>
+                <Modal.Title>{getFromStore('dialog.confirm', settings.language)}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {children}
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="danger" onClick={onCancel} className='me-auto'>
-                    {getFromStore('cancel', settings.language)}
+                    {getFromStore('dialog.cancel', settings.language)}
                 </Button>
                 <Button variant="primary" onClick={onConfirm}>
-                    {getFromStore('confirm', settings.language)}
+                    {getFromStore('dialog.confirm', settings.language)}
                 </Button>
             </Modal.Footer>
         </Modal>

@@ -3,6 +3,9 @@ export function clamp(number: number, min: number, max: number) {
 }
 
 export function hasProp<O extends NonNullable<unknown>, K extends keyof O>(o: O, k: K): boolean {
+    if (o === undefined || o === null) {
+        return false;
+    }
     return Object.prototype.hasOwnProperty.call(o, k);
 }
 

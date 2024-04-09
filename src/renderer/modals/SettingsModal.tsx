@@ -222,9 +222,9 @@ export const SettingsModal: FC<SettingsModalProps> = ({
             setSuccessText('');
             const result = await window.ImportExportAPI.export();
             if (!result) {
-                setErrorText(getFromStore('userCancelled', settings.language));
+                setErrorText(getFromStore('settings.userCancelled', settings.language));
             } else {
-                setSuccessText(getFromStore('exported', settings.language));
+                setSuccessText(getFromStore('settings.exported', settings.language));
             }
         } catch (e) {
             logger.error('Failed to export file', e);
@@ -238,9 +238,9 @@ export const SettingsModal: FC<SettingsModalProps> = ({
             setSuccessText('');
             const result = await window.ImportExportAPI.import();
             if (!result) {
-                setErrorText(getFromStore('userCancelled', settings.language));
+                setErrorText(getFromStore('settings.userCancelled', settings.language));
             } else {
-                setSuccessText(getFromStore('imported', settings.language));
+                setSuccessText(getFromStore('settings.imported', settings.language));
                 setShouldUpdate(true);
             }
         } catch (e) {
@@ -272,12 +272,12 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     return (
         <Fragment>
             <ConfirmModal onCancel={onResetCancel} onConfirm={onResetConfirm} show={showResetConfirm}>
-                <h5>{getFromStore('resetTitle', settings.language)}</h5>
-                <p>{getFromStore('resetText', settings.language)}</p>
+                <h5>{getFromStore('settings.resetTitle', settings.language)}</h5>
+                <p>{getFromStore('settings.resetText', settings.language)}</p>
             </ConfirmModal>
             <Modal show={show} onHide={handleHideInside} centered size="xl" data-bs-theme={theme}>
                 <Modal.Header closeButton data-bs-theme={theme}>
-                    <Modal.Title>{getFromStore('settings', settings.language)}</Modal.Title>
+                    <Modal.Title>{getFromStore('settings.title', settings.language)}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -285,12 +285,12 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                             <div className='col-6 col-md-5 col-lg-3'>
                                 <div className="form-check form-switch form-switch-lg">
                                     <input className="form-check-input" type="checkbox" role="switch" id="setFullscreen" onChange={() => setFullscreen(!fullscreen)} checked={fullscreen}/>
-                                    <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setFullscreen">{getFromStore('fullscreen', settings.language)}</label>
+                                    <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setFullscreen">{getFromStore('settings.items.fullscreen', settings.language)}</label>
                                 </div>
                             </div>
                             <div className='col-6 col-md-7 col-lg-9'>
                                 <Form.Select aria-label="Fullscreen display" onChange={onDisplaySelect} value={currentDisplay === undefined ? 'none' : currentDisplay.id} disabled={!fullscreen}>
-                                    {<option disabled key="none" value="none">{getFromStore('selectScreen', settings.language)}</option>}
+                                    {<option disabled key="none" value="none">{getFromStore('settings.selectScreen', settings.language)}</option>}
                                     {displays.map((display) => {
                                         return (<option
                                             key={display.id}
@@ -304,13 +304,13 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                             <div className='col-12'>
                                 <div className="form-check form-switch form-switch-lg">
                                     <input className="form-check-input" type="checkbox" role="switch" id="setOffline" onChange={() => setOffline(!offline)} checked={offline}/>
-                                    <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setOffline">{getFromStore('offline', settings.language)}</label>
+                                    <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setOffline">{getFromStore('settings.items.offline', settings.language)}</label>
                                 </div>
                             </div>
                         </div>
                         <div className='row mb-4'>
                             <div className='col-6 col-md-5 col-lg-3 pt-1'>
-                                <h5 className='text-end'>{getFromStore('theme', settings.language)}</h5>
+                                <h5 className='text-end'>{getFromStore('settings.items.theme', settings.language)}</h5>
                             </div>
                             <div className='col-6 col-md- col-lg-9'>
                                 <div className="btn-group" role="group">
@@ -334,7 +334,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                                         value={type}
                                                         onChange={onThemeChange}
                                                         checked={theme === type}/>
-                                                    <label className="btn btn-outline-primary" htmlFor={`${type}Theme`}>{getFromStore(`${type}Theme`, settings.language)}</label>
+                                                    <label className="btn btn-outline-primary" htmlFor={`${type}Theme`}>{getFromStore(`settings.themes.${type}`, settings.language)}</label>
                                                 </Fragment>
                                             );
                                         })
@@ -344,7 +344,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                         </div>
                         <div className='row mb-4'>
                             <div className='col-6 col-md-5 col-lg-3 pt-1'>
-                                <h5 className='text-end'>{getFromStore('background', settings.language)}</h5>
+                                <h5 className='text-end'>{getFromStore('settings.items.background', settings.language)}</h5>
                             </div>
                             <div className='col-6 col-md- col-lg-9'>
                                 <div className="btn-group" role="group">
@@ -362,7 +362,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                                         value={type}
                                                         onChange={onBackgroundChange}
                                                         checked={background === type}/>
-                                                    <label className="btn btn-outline-primary" htmlFor={`${type}Background`}>{getFromStore(`${type}Background`, settings.language)}</label>
+                                                    <label className="btn btn-outline-primary" htmlFor={`${type}Background`}>{getFromStore(`settings.backgrounds.${type}`, settings.language)}</label>
                                                 </Fragment>
                                             );
                                         })
@@ -372,7 +372,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                         </div>
                         <div className='row mb-4'>
                             <div className='col-6 col-md-5 col-lg-3'>
-                                <h5 className='text-end'>{getFromStore('language', settings.language)}</h5>
+                                <h5 className='text-end'>{getFromStore('settings.items.language', settings.language)}</h5>
                             </div>
                             <div className='col-6 col-md-7 col-lg-9'>
                                 <Form.Select aria-label="Language" onChange={onLanguageSelect} value={language}>
@@ -388,7 +388,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                         </div>
                         <div className='row'>
                             <div className='col-6 col-md-5 col-lg-3 pt-2'>
-                                <h5 className='text-end'>{getFromStore('volume', settings.language)}</h5>
+                                <h5 className='text-end'>{getFromStore('settings.items.volume', settings.language)}</h5>
                             </div>
                             <div className='col-6 col-md-7 col-lg-9 d-flex'>
                                 <div className={`btn ${muted ? 'btn-offline' : 'btn-no-outline'} float-start mb-2 fs-2 d-flex p-2`} onClick={() => setMuted(!muted)}>
@@ -402,7 +402,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                             <div>
                                 <div className='row mb-4'>
                                     <div className='col-6 col-md-5 col-lg-3 pt-2'>
-                                        <h5 className='text-end'>{getFromStore('fps', settings.language)}</h5>
+                                        <h5 className='text-end'>{getFromStore('settings.items.fps', settings.language)}</h5>
                                     </div>
                                     <div className='col-6 col-md-7 col-lg-9 d-flex'>
                                         <h5 className='float-start mb-2 fs-2 d-flex pe-2'>{fps}</h5>
@@ -411,12 +411,12 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                 </div>
                                 <div className='row mb-2'>
                                     <div className='col-12'>
-                                        <h3 className='text-center'>{getFromStore('keybinds', settings.language)}</h3>
+                                        <h3 className='text-center'>{getFromStore('settings.keybinds', settings.language)}</h3>
                                     </div>
                                 </div>
                                 <div className='row mb-4'>
                                     <div className='col-6 col-md-5 col-lg-3'>
-                                        <h5 className='text-end'>{getFromStore('lockKeybind', settings.language)}</h5>
+                                        <h5 className='text-end'>{getFromStore('settings.items.lockKeybind', settings.language)}</h5>
                                     </div>
                                     <div className='col-5 col-md-6 col-lg-8'>
                                         <input
@@ -425,7 +425,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                             value={getReadable(lockKeybind)}
                                             onChange={() => {}} // here for error
                                             onKeyDown={(e) => setKeybind(e, setLockKeybind, DEFAULT_SETTINGS.keybinds.lock)}
-                                            placeholder={getFromStore('lockKeybind', settings.language)}/>
+                                            placeholder={getFromStore('settings.items.lockKeybind', settings.language)}/>
                                     </div>
                                     <div className='col-1 px-0'>
                                         <Button variant="danger" onClick={() => setLockKeybind(DEFAULT_SETTINGS.keybinds.lock)}>
@@ -435,7 +435,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                 </div>
                                 <div className='row mb-4'>
                                     <div className='col-6 col-md-5 col-lg-3'>
-                                        <h5 className='text-end'>{getFromStore('copyKeybind', settings.language)}</h5>
+                                        <h5 className='text-end'>{getFromStore('settings.items.copyKeybind', settings.language)}</h5>
                                     </div>
                                     <div className='col-5 col-md-6 col-lg-8'>
                                         <input
@@ -444,7 +444,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                             value={getReadable(copyKeybind)}
                                             onChange={() => {}} // here for error
                                             onKeyDown={(e) => setKeybind(e, setCopyKeybind, DEFAULT_SETTINGS.keybinds.copy)}
-                                            placeholder={getFromStore('copyKeybind', settings.language)}/>
+                                            placeholder={getFromStore('settings.items.copyKeybind', settings.language)}/>
                                     </div>
                                     <div className='col-1 px-0'>
                                         <Button variant="danger" onClick={() => setCopyKeybind(DEFAULT_SETTINGS.keybinds.copy)}>
@@ -454,7 +454,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                 </div>
                                 <div className='row mb-4'>
                                     <div className='col-6 col-md-5 col-lg-3'>
-                                        <h5 className='text-end'>{getFromStore('removeKeybind', settings.language)}</h5>
+                                        <h5 className='text-end'>{getFromStore('settings.items.removeKeybind', settings.language)}</h5>
                                     </div>
                                     <div className='col-5 col-md-6 col-lg-8'>
                                         <input
@@ -463,7 +463,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                             value={getReadable(removeKeybind)}
                                             onChange={() => {}} // here for error
                                             onKeyDown={(e) => setKeybind(e, setRemoveKeybind, DEFAULT_SETTINGS.keybinds.remove)}
-                                            placeholder={getFromStore('removeKeybind', settings.language)}/>
+                                            placeholder={getFromStore('settings.items.removeKeybind', settings.language)}/>
                                     </div>
                                     <div className='col-1 px-0'>
                                         <Button variant="danger" onClick={() => setRemoveKeybind(DEFAULT_SETTINGS.keybinds.remove)}>
@@ -473,7 +473,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                 </div>
                                 <div className='row mb-2'>
                                     <div className='col-12'>
-                                        <h3 className='text-center'>{getFromStore('importExport', settings.language)}</h3>
+                                        <h3 className='text-center'>{getFromStore('settings.importExport', settings.language)}</h3>
                                     </div>
                                 </div>
                                 <div className='row px-3'>
@@ -492,13 +492,13 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                 </div>
                                 <div className='row'>
                                     <div className='col-6 col-md-4 col-lg-4 pt-2 d-grid'>
-                                        <div className='btn btn-primary' onClick={importFile}>{getFromStore('importButton', settings.language)}</div>
+                                        <div className='btn btn-primary' onClick={importFile}>{getFromStore('settings.buttons.import', settings.language)}</div>
                                     </div>
                                     <div className='col-6 col-md-4 col-lg-4 pt-2 d-grid'>
-                                        <div className='btn btn-primary' onClick={exportFile}>{getFromStore('exportButton', settings.language)}</div>
+                                        <div className='btn btn-primary' onClick={exportFile}>{getFromStore('settings.buttons.export', settings.language)}</div>
                                     </div>
                                     <div className='col-12 col-md-4 col-lg-4 pt-2 d-grid'>
-                                        <div className='btn btn-outline-danger' onClick={() => setShowResetConfirm(true)}>{getFromStore('resetButton', settings.language)}</div>
+                                        <div className='btn btn-outline-danger' onClick={() => setShowResetConfirm(true)}>{getFromStore('settings.buttons.reset', settings.language)}</div>
                                     </div>
                                 </div>
                             </div>
@@ -507,13 +507,13 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="danger" onClick={() => window.GenericAPI.quit()} className='me-auto'>
-                        {getFromStore('quit', settings.language)}
+                        {getFromStore('settings.buttons.quit', settings.language)}
                     </Button>
                     <Button variant={advanced ? 'primary' : 'outline-primary'} onClick={handleAdvanced}>
-                        {getFromStore('advanced', settings.language)}
+                        {getFromStore('settings.buttons.advanced', settings.language)}
                     </Button>
                     <Button variant="primary" onClick={handleHideInside}>
-                        {getFromStore('saveChanges', settings.language)}
+                        {getFromStore('settings.buttons.saveChanges', settings.language)}
                     </Button>
                 </Modal.Footer>
             </Modal>

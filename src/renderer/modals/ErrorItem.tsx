@@ -21,7 +21,7 @@ export const ErrorItem: FC<ErrorItemProps> = ({
             <div className="ms-2 me-auto">
                 <div className="fw-bold">
                     {error.date.toLocaleString()}
-                    &nbsp;-&nbsp;{getFromStore(`${error.type}Error`, settings.language)}
+                    &nbsp;-&nbsp;{getFromStore(`errors.${error.type}Error`, settings.language)}
                     &nbsp;{error.a !== undefined || error.b !== undefined ? 
                         `(${error.a === undefined ? '' : `a: '${error.a}'`}${error.a !== undefined && error.b !== undefined ? ', ' : ''}${error.b === undefined ? '' : `b: '${error.b}'`})` : ''}
                 </div>
@@ -32,18 +32,18 @@ export const ErrorItem: FC<ErrorItemProps> = ({
                         {showAdvanced ? <IoArrowUpOutline/> : <IoArrowDownOutline/>}
                     </div>
                 )}
-                {getFromStore(ErrorCodeToString[error.code], settings.language)}
+                {getFromStore(`errors.${ErrorCodeToString[error.code]}`, settings.language)}
                 &nbsp;{[
                     ServerErrorCode.QUERY_INVALID,
                     ServerErrorCode.QUERY_MISSING,
                     ServerErrorCode.QUERY_UNDEFINED,
                     ServerErrorCode.AB_NOT_KNOWN,
                     ServerErrorCode.ITEM_UNKNOWN
-                ].includes(error.code as number) ? `(${getFromStore('tryUpdatingOrReport', settings.language)})` : 
+                ].includes(error.code as number) ? `(${getFromStore('errors.tryUpdatingOrReport', settings.language)})` : 
                     [
                         ServerErrorCode.STEAM_TICKET_INVALID,
                         ServerErrorCode.TOKEN_EXPIRED,
-                    ].includes(error.code as number) ? `(${getFromStore('tryUpdatingOrAgain', settings.language)})` : ''}
+                    ].includes(error.code as number) ? `(${getFromStore('errors.tryUpdatingOrAgain', settings.language)})` : ''}
                 <Collapse in={showAdvanced}>
                     <div>
                         {error.message ?? ''}

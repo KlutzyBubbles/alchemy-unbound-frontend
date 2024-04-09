@@ -59,7 +59,7 @@ export const InfoModal: FC<InfoModalProps> = ({
     return (
         <Modal show={show} onHide={handleHide} centered size="xl" data-bs-theme={settings.theme}>
             <Modal.Header closeButton>
-                <Modal.Title>Alchemy Unbound</Modal.Title>
+                <Modal.Title>{getFromStore('info.alchemyUnbound', settings.language)}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <div className='row'>
@@ -67,7 +67,7 @@ export const InfoModal: FC<InfoModalProps> = ({
                         <ItemRenderer
                             element={mockElement({
                                 name: 'game',
-                                display: getObjectFromStore('game', 'Game'),
+                                display: getObjectFromStore('info.game', 'Game'),
                                 emoji: '🎮',
                                 depth: 0,
                                 first: 0,
@@ -80,7 +80,7 @@ export const InfoModal: FC<InfoModalProps> = ({
                         <ItemRenderer
                             element={mockElement({
                                 name: 'hacker',
-                                display: getObjectFromStore('hacker', 'Hacker'),
+                                display: getObjectFromStore('info.hacker', 'Hacker'),
                                 emoji: '👨‍💻',
                                 depth: 0,
                                 first: 0,
@@ -106,7 +106,7 @@ export const InfoModal: FC<InfoModalProps> = ({
                         <ItemRenderer
                             element={mockElement({
                                 name: 'game',
-                                display: getObjectFromStore('game', 'Game'),
+                                display: getObjectFromStore('info.game', 'Game'),
                                 emoji: '🎮',
                                 depth: 0,
                                 first: 0,
@@ -119,7 +119,7 @@ export const InfoModal: FC<InfoModalProps> = ({
                         <ItemRenderer
                             element={mockElement({
                                 name: 'art',
-                                display: getObjectFromStore('art', 'Art'),
+                                display: getObjectFromStore('info.art', 'Art'),
                                 emoji: '🎨',
                                 depth: 0,
                                 first: 0,
@@ -143,43 +143,43 @@ export const InfoModal: FC<InfoModalProps> = ({
                             dragging={false}/>
                     </div>
                     <div className='col-12 col-lg-6'>
-                        <h4>{getFromStore('stats', settings.language)} (Beta)</h4>
+                        <h4>{getFromStore('info.stats.title', settings.language)} (Beta)</h4>
                         <Table striped bordered hover size="sm">
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>{getFromStore('base', settings.language)}</th>
-                                    <th>{getFromStore('ai', settings.language)}</th>
-                                    <th>{getFromStore('total', settings.language)}</th>
+                                    <th>{getFromStore('info.stats.base', settings.language)}</th>
+                                    <th>{getFromStore('info.stats.ai', settings.language)}</th>
+                                    <th>{getFromStore('info.stats.total', settings.language)}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>{getFromStore('recipesFound', settings.language)}</td>
+                                    <td>{getFromStore('info.stats.recipesFound', settings.language)}</td>
                                     <td>{stats.baseRecipesFound}</td>
                                     <td>{stats.aiRecipesFound}</td>
                                     <td>{stats.baseRecipesFound + stats.aiRecipesFound}</td>
                                 </tr>
                                 <tr>
-                                    <td>{getFromStore('resultsFound', settings.language)}</td>
+                                    <td>{getFromStore('info.stats.resultsFound', settings.language)}</td>
                                     <td>{stats.baseResultsFound}</td>
                                     <td>{stats.aiResultsFound}</td>
                                     <td>{stats.baseResultsFound + stats.aiResultsFound}</td>
                                 </tr>
                                 <tr>
-                                    <td>{getFromStore('highestDepth', settings.language)}</td>
+                                    <td>{getFromStore('info.stats.highestDepth', settings.language)}</td>
                                     <td>{stats.baseHighestDepth}</td>
                                     <td>{stats.aiHighestDepth}</td>
                                     <td>{stats.baseHighestDepth + stats.aiHighestDepth}</td>
                                 </tr>
                                 <tr>
-                                    <td>{getFromStore('firstDiscoveries', settings.language)}</td>
+                                    <td>{getFromStore('info.stats.firstDiscoveries', settings.language)}</td>
                                     <td></td>
                                     <td></td>
                                     <td>{stats.firstDiscoveries}</td>
                                 </tr>
                                 <tr>
-                                    <td>{getFromStore('itemsCombined', settings.language)}</td>
+                                    <td>{getFromStore('info.stats.itemsCombined', settings.language)}</td>
                                     <td></td>
                                     <td></td>
                                     <td>{stats.itemsCombined}</td>
@@ -232,9 +232,9 @@ export const InfoModal: FC<InfoModalProps> = ({
                                 </Table>
                             </div>
                         </div>
-                        <h5>{getFromStore('apiErrorsTitle', settings.language)}</h5>
+                        <h5>{getFromStore('info.apiErrorsTitle', settings.language)}</h5>
                         <ul className="list-group">
-                            {errors.length === 0 ? getFromStore('noErrors', settings.language) : ''}
+                            {errors.length === 0 ? getFromStore('errors.noErrors', settings.language) : ''}
                             {errors.map((error) => (
                                 <ErrorItem key={error.date.getMilliseconds()} error={error}/>
                             ))}

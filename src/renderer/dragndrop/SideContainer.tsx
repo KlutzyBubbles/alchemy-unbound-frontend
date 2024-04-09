@@ -208,7 +208,7 @@ export const SideContainer: FC<ContainerProps> = ({
                         <div
                             className='btn btn-no-radius btn-left-hover'
                             onClick={onFilterClick}>
-                            <IoFilterOutline/> {getFromStore(filterOptions[filter], settings.language)}
+                            <IoFilterOutline/> {getFromStore(`side.${filterOptions[filter]}`, settings.language)}
                         </div>
                     </div>
                     <div className='col-2 d-grid gap-0 px-0'>
@@ -220,7 +220,7 @@ export const SideContainer: FC<ContainerProps> = ({
                     </div>
                     <div className='col-5 d-grid gap-0 px-0'>
                         <div className='btn btn-no-radius btn-right-hover' onClick={onSortClick}>
-                            {getFromStore('sortBy', settings.language)} {getFromStore(sortByOptions[sortBy], settings.language)}
+                            {getFromStore('side.sortBy', settings.language)} {getFromStore(`side.${sortByOptions[sortBy]}`, settings.language)}
                         </div>
                     </div>
                 </div>
@@ -231,7 +231,7 @@ export const SideContainer: FC<ContainerProps> = ({
                             className="form-control form-control-lg override-focus"
                             value={searchText}
                             onChange={onSearchType}
-                            placeholder={getFromStore('search', settings.language).replace('{0}', `${elements.filter((item) => {
+                            placeholder={getFromStore('side.search', settings.language).replace('{0}', `${elements.filter((item) => {
                                 for (const recipe of item.recipes) {
                                     if (recipe.discovered)
                                         return true;
