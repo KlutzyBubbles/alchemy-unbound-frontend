@@ -36,7 +36,7 @@ export const SideContainer: FC<ContainerProps> = ({
 
     const [{ isOver }, drop] = useDrop(
         () => ({
-            accept: [ItemTypes.ELEMENT, ItemTypes.LOCKED_ELEMENT, ItemTypes.SIDE_ELEMENT],
+            accept: [ItemTypes.ELEMENT, ItemTypes.LOCKED_ELEMENT],
             drop(item: DragItem, monitor) {
                 if (monitor.didDrop()) {
                     return;
