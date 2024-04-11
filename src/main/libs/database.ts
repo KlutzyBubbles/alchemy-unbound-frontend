@@ -114,39 +114,22 @@ async function loadData(): Promise<RecipeRow[]> {
 export async function createDatabase(): Promise<void> {
     try {
         // RELEASE --------------------------
-        ////await verifyFolder();
-        ////try {
-        ////    JSON.parse(await fs.readFile(getFolder() + 'prerelease.json', 'utf-8'));
-        ////    logger.info('Found a prerelease file, time to reset!');
-        ////    data = await loadData();
-        ////    await resetAndBackup('prelease_');
-        ////    await fs.rm(getFolder() + 'prerelease.json');
-        ////} catch (e) {
-        ////    if (e.code === 'ENOENT') {
-        ////        logger.info('No prerelease file found, this is good!');
-        ////    } else {
-        ////        logger.error(`Failed to read prerlease file with error ${e.code}`, e);
-        ////        throw e;
-        ////    }
-        ////}
-        // RELEASE --------------------------
-        // PRERELEASE -------------------------- REMOVE ON RELEASE
         await verifyFolder();
         try {
             JSON.parse(await fs.readFile(getFolder() + 'prerelease.json', 'utf-8'));
+            logger.info('Found a prerelease file, time to reset!');
+            data = await loadData();
+            await resetAndBackup('prelease_');
+            await fs.rm(getFolder() + 'prerelease.json');
         } catch (e) {
             if (e.code === 'ENOENT') {
-                logger.info('No prerelease file found, creating');
-                await fs.writeFile(getFolder() + 'prerelease.json', JSON.stringify({
-                    data: 'DO NOT REMOVE ME',
-                    version: 1
-                }), 'utf-8');
+                logger.info('No prerelease file found, this is good!');
             } else {
-                logger.error(`Failed to read prerlease file with error ${e.code}`);
+                logger.error(`Failed to read prerlease file with error ${e.code}`, e);
                 throw e;
             }
         }
-        // PRERELEASE -------------------------- REMOVE ON RELEASE
+        // RELEASE --------------------------
         data = await loadData();
     } catch(e) {
         logger.error(`Failed to load database '${e.message}'`);
