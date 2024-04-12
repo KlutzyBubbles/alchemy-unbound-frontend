@@ -1,7 +1,7 @@
 import logger from 'electron-log/main';
 import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse } from '../../common/types';
 import { getPlaceholderOrder, getRecipe, insertRecipeRow, setDiscovered, traverseAndFill } from './database';
-import { isPackaged } from './generic';
+import { getAppVersion, isPackaged } from './generic';
 import { getSettings } from './settings';
 import { getSteamGameLanguage, getWebAuthTicket } from './steam';
 import fetch, { Response } from 'electron-fetch';
@@ -35,8 +35,8 @@ async function refreshToken(): Promise<TokenHolderResponse> {
         if (token.expiryDate < (new Date()).getTime() + 600000) {
             let response: Response | undefined = undefined;
             try {
-                logger.debug('token request url', `${endpoint}/session/v1?token=${token.token}`);
-                response = await fetch(`${endpoint}/session/v1?token=${token.token}`, {
+                logger.debug('token request url', `${endpoint}/session/v1?version=${getAppVersion()}&token=${token.token}`);
+                response = await fetch(`${endpoint}/session/v1?version=${getAppVersion()}&token=${token.token}`, {
                     method: 'GET',
                 });
             } catch(e) {
@@ -84,10 +84,10 @@ async function refreshToken(): Promise<TokenHolderResponse> {
 
 async function createToken(): Promise<TokenHolderResponse> {
     const ticket = await getWebAuthTicket();
-    logger.debug('trying to get token', `${endpoint}/session/v1?steamToken=${ticket.getBytes().toString('hex')}`);
+    logger.debug('trying to get token', `${endpoint}/session/v1?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}`);
     let response: Response | undefined = undefined;
     try {
-        response = await fetch(`${endpoint}/session/v1?steamToken=${ticket.getBytes().toString('hex')}&steamLanguage=${getSteamGameLanguage()}`, {
+        response = await fetch(`${endpoint}/session/v1?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}&steamLanguage=${getSteamGameLanguage()}`, {
             method: 'POST',
         });
     } catch(e) {
@@ -159,7 +159,7 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
             } catch (e) {
                 logger.error('Failed to get token response', e);
             }
-            let url = `${endpoint}/api/v1?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
+            let url = `${endpoint}/api/v1?version=${getAppVersion()}&a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
             let hasDeprecated = false;
             if (tokenResponse !== undefined) {
                 hasDeprecated = tokenResponse.deprecated;

@@ -7,8 +7,12 @@ export function getAppVersions(): AppVersions {
         node: process.versions.node,
         electron: process.versions.electron,
         chrome: process.versions.chrome,
-        app: appInfo.version
+        app: getAppVersion()
     };
+}
+
+export function getAppVersion(): string {
+    return  appInfo.version;
 }
 
 export function getSystemInformation(): SystemVersion {
