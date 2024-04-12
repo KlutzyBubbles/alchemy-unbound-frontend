@@ -290,6 +290,23 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '商店物品未知',
         koreana: '상점 아이템이 알려지지 않았습니다'
     },
+    translateError: {
+        english: 'The AI failed when translating the item',
+        schinese: 'AI在翻译项目时失败了',
+        russian: 'ИИ потерпел неудачу при переводе элемента',
+        spanish: 'La IA falló al traducir el elemento',
+        french: 'L\'IA a échoué lors de la traduction de l\'élément',
+        japanese: 'AIはアイテムの翻訳に失敗しました',
+        indonesian: 'AI gagal saat menerjemahkan item',
+        german: 'Die KI ist beim Übersetzen des Elements gescheitert',
+        latam: 'La IA falló al traducir el elemento',
+        italian: 'L\'IA ha fallito nel tradurre l\'elemento',
+        dutch: 'De AI faalde bij het vertalen van het item',
+        polish: 'Sztuczna inteligencja nie poradziła sobie z tłumaczeniem elementu',
+        portuguese: 'A IA falhou ao traduzir o item',
+        tchinese: 'AI在翻譯項目時失敗了',
+        koreana: 'AI가 항목을 번역하는 데 실패했습니다'
+    },
     apiDeprecated: {
         english: 'The server is ahead of your client version',
         schinese: '服务器版本超前于您的客户端版本',

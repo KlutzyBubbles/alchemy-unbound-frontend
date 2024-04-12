@@ -188,6 +188,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 MAX_DEPTH = 9,
                 STEAM_ERROR = 10,
                 ITEM_UNKNOWN = 11
+                TRANSLATION_ERROR = 12
                 */
                 const errorCode = combinedResult.result.code;
                 if (errorCode <= 7 || errorCode === ServerErrorCode.STEAM_ERROR) {
@@ -201,6 +202,8 @@ export const DropContainer: FC<ContainerProps> = ({
                         logger.error(`Combine a/b is max depth '${aName}', '${bName}'`);
                     } else if (errorCode === ServerErrorCode.ITEM_UNKNOWN) {
                         logger.error(`Combine a/b is unknown (this is usually because of modified save files / updates) '${aName}', '${bName}'`);
+                    } else if (errorCode === ServerErrorCode.TRANSLATION_ERROR) {
+                        logger.error(`Combine a/b translation failed, just try again '${aName}', '${bName}'`);
                     } else {
                         logger.error(`Combine a/b unknown error '${aName}', '${bName}'`);
                     }

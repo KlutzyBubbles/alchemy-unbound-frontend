@@ -107,7 +107,8 @@ export enum ServerErrorCode {
     AB_NUMBER = 8,
     MAX_DEPTH = 9,
     STEAM_ERROR = 10,
-    ITEM_UNKNOWN = 11
+    ITEM_UNKNOWN = 11,
+    TRANSLATION_ERROR = 12,
 }
 
 export enum LocalErrorCode {
@@ -130,6 +131,7 @@ export const ErrorCodeToString: {
     9: 'maxDepth',
     10: 'steamError',
     11: 'itemUnknown',
+    12: 'translateError',
     1001: 'unknownError'
 };
 

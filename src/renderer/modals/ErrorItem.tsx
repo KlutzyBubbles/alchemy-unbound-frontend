@@ -38,11 +38,12 @@ export const ErrorItem: FC<ErrorItemProps> = ({
                     ServerErrorCode.QUERY_MISSING,
                     ServerErrorCode.QUERY_UNDEFINED,
                     ServerErrorCode.AB_NOT_KNOWN,
-                    ServerErrorCode.ITEM_UNKNOWN
+                    ServerErrorCode.ITEM_UNKNOWN,
                 ].includes(error.code as number) ? `(${getFromStore('errors.tryUpdatingOrReport', settings.language)})` : 
                     [
                         ServerErrorCode.STEAM_TICKET_INVALID,
                         ServerErrorCode.TOKEN_EXPIRED,
+                        ServerErrorCode.TRANSLATION_ERROR
                     ].includes(error.code as number) ? `(${getFromStore('errors.tryUpdatingOrAgain', settings.language)})` : ''}
                 <Collapse in={showAdvanced}>
                     <div>
