@@ -32,7 +32,9 @@ export const ErrorItem: FC<ErrorItemProps> = ({
                         {showAdvanced ? <IoArrowUpOutline/> : <IoArrowDownOutline/>}
                     </div>
                 )}
-                {getFromStore(`errors.${ErrorCodeToString[error.code]}`, settings.language)}
+                {Object.keys(ErrorCodeToString).includes(`${error.code}`) ?
+                    getFromStore(`errors.${ErrorCodeToString[error.code]}`, settings.language) :
+                    getFromStore('errors.unknownError', settings.language)}
                 &nbsp;{[
                     ServerErrorCode.QUERY_INVALID,
                     ServerErrorCode.QUERY_MISSING,

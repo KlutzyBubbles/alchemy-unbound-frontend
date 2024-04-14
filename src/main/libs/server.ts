@@ -4,15 +4,16 @@ import { getPlaceholderOrder, getRecipe, insertRecipeRow, setDiscovered, travers
 import { getAppVersion, isPackaged } from './generic';
 import { getSettings } from './settings';
 import { getSteamGameLanguage, getWebAuthTicket } from './steam';
-import fetch, { Response } from 'electron-fetch';
+import fetch, { HeadersInit, Response } from 'electron-fetch';
 
 export type RequestErrorResult = {
   code: number,
   message: string
 }
 
-let endpoint = 'http://localhost:5001';
-// let endpoint = 'https://api.alchemyunbound.net';
+// let endpoint = 'http://localhost:5001';
+let endpoint = 'https://api.alchemyunbound.net';
+// let endpoint = 'https://alchemy-unbound-prerelease-b687af701d77.herokuapp.com';
 if (isPackaged()) {
     // Production
     endpoint = 'https://api.alchemyunbound.net';
@@ -35,9 +36,13 @@ async function refreshToken(): Promise<TokenHolderResponse> {
         if (token.expiryDate < (new Date()).getTime() + 600000) {
             let response: Response | undefined = undefined;
             try {
-                logger.debug('token request url', `${endpoint}/session/v1?version=${getAppVersion()}&token=${token.token}`);
-                response = await fetch(`${endpoint}/session/v1?version=${getAppVersion()}&token=${token.token}`, {
+                logger.debug('token request url', `${endpoint}/session/v1?version=${getAppVersion()}`, token.token);
+                response = await fetch(`${endpoint}/session/v1?version=${getAppVersion()}`, {
                     method: 'GET',
+                    headers: new Headers({
+                        'Authorization': `Bearer ${token.token}`, 
+                        'Content-Type': 'application/json'
+                    })
                 });
             } catch(e) {
                 logger.error('Failed to make token API request', e);
@@ -159,17 +164,24 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
             } catch (e) {
                 logger.error('Failed to get token response', e);
             }
-            let url = `${endpoint}/api/v1?version=${getAppVersion()}&a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
+            const url = `${endpoint}/api/v1?version=${getAppVersion()}&a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
             let hasDeprecated = false;
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json'
+            };
             if (tokenResponse !== undefined) {
                 hasDeprecated = tokenResponse.deprecated;
                 if (tokenResponse.tokenHolder !== undefined) {
-                    url += `&token=${tokenResponse.tokenHolder.token}`;
+                    // url += `&token=${tokenResponse.tokenHolder.token}`;
+                    headers.Authorization = `Bearer ${tokenResponse.tokenHolder.token}`;
                 }
             }
             try {
-                logger.debug('combine url: ', url);
-                const response = await fetch(url);
+                logger.debug('combine url', url, headers.Authorization);
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: headers
+                });
                 if (response.ok) {
                     const body: Recipe = (await response.json()) as Recipe;
                     logger.debug('combine response body', body);
