@@ -6,20 +6,6 @@ window.onerror = (error, url, line) => {
     logger.error('window onerror', error, url, line);
 };
 
-try {
-    if (process.type === 'browser') {
-        process.on('uncaughtException', (error) => {
-            logger.error('uncaught exception', error);
-        });
-    } else {
-        window.addEventListener('error', (error) => {
-            logger.error('uncaught exception', error);
-        });
-    }
-} catch (error) {
-    logger.error('Failed creating extra error catchers', error);
-}
-
 (async() => {
     if (await window.GenericAPI.isPackaged()) {
         let test = 'text-shadow: -1px -1px hsl(0,100%,50%),';
