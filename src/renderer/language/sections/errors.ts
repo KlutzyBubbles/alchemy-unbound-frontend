@@ -341,4 +341,21 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '你制作得太快了',
         koreana: '제작 속도가 너무 빠릅니다'
     },
+    offline: {
+        english: 'Cannot make API requests while in offline mode',
+        schinese: '离线模式下无法进行API请求',
+        russian: 'Невозможно делать запросы API в оффлайн-режиме',
+        spanish: 'No se pueden hacer solicitudes de API mientras está en modo sin conexión',
+        french: 'Impossible de faire des requêtes API en mode hors ligne',
+        japanese: 'オフラインモードでAPIリクエストを行うことはできません',
+        indonesian: 'Tidak dapat melakukan permintaan API saat dalam mode offline',
+        german: 'API-Anfragen können nicht im Offline-Modus durchgeführt werden',
+        latam: 'No se pueden hacer solicitudes de API mientras estás en modo sin conexión',
+        italian: 'Impossibile effettuare richieste API in modalità offline',
+        dutch: 'Kan geen API-verzoeken doen terwijl in offline-modus',
+        polish: 'Nie można wykonywać żądań API w trybie offline',
+        portuguese: 'Não é possível fazer solicitações de API enquanto estiver no modo offline',
+        tchinese: '無法在離線模式下進行API請求',
+        koreana: '오프라인 모드에서 API 요청을 할 수 없습니다'
+    },
 };

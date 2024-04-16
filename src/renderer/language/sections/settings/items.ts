@@ -53,6 +53,23 @@ export const LanguageStore: LanguageStoreRecurring = {
         koreana: '언어'
     },
     offline: {
+        english: 'Disable AI Generation',
+        schinese: '禁用AI生成',
+        russian: 'Отключить генерацию ИИ',
+        spanish: 'Desactivar generación de IA',
+        french: 'Désactiver la génération d\'IA',
+        japanese: 'AI生成を無効にする',
+        indonesian: 'Nonaktifkan Generasi AI',
+        german: 'KI-Generierung deaktivieren',
+        latam: 'Desactivar generación de IA',
+        italian: 'Disattiva generazione AI',
+        dutch: 'AI-generatie uitschakelen',
+        polish: 'Wyłącz generowanie sztucznej inteligencji',
+        portuguese: 'Desativar geração de IA',
+        tchinese: '禁用AI生成',
+        koreana: 'AI 생성 비활성화'
+    },
+    offlineOrig: {
         english: 'Offline Mode',
         schinese: '离线模式',
         russian: 'Оффлайн режим',

@@ -16,14 +16,28 @@ export const ErrorItem: FC<ErrorItemProps> = ({
     const { settings } = useContext(SettingsContext);
     const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
+    let prefix = '';
+    let valueText = '';
+    if (error.a !== undefined) {
+        valueText += `${prefix}a: '${error.a}'`;
+        prefix = ', ';
+    }
+    if (error.b !== undefined) {
+        valueText += `${prefix}b: '${error.b}'`;
+        prefix = ', ';
+    }
+    if (error.result !== undefined) {
+        valueText += `${prefix}result: '${error.result}'`;
+        prefix = ', ';
+    }
+
     return (
         <li key={error.date.getMilliseconds()} className="list-group-item list-group-item-danger d-flex justify-content-between align-items-start">
             <div className="ms-2 me-auto">
                 <div className="fw-bold">
                     {error.date.toLocaleString()}
                     &nbsp;-&nbsp;{getFromStore(`errors.${error.type}Error`, settings.language)}
-                    &nbsp;{error.a !== undefined || error.b !== undefined ? 
-                        `(${error.a === undefined ? '' : `a: '${error.a}'`}${error.a !== undefined && error.b !== undefined ? ', ' : ''}${error.b === undefined ? '' : `b: '${error.b}'`})` : ''}
+                    &nbsp;{valueText}
                 </div>
                 {error.message === undefined ? '' : (
                     <div

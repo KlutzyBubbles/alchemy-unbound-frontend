@@ -135,11 +135,12 @@ export const ErrorCodeToString: {
     1001: 'unknownError'
 };
 
-export type ErrorType = 'combine' | 'token';
+export type ErrorType = 'combine' | 'token' | 'idea';
 
 export type ErrorEntry = {
     a?: string,
     b?: string,
+    result?: string,
     message?: string,
     type: ErrorType,
     code: ErrorCode,

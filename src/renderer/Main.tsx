@@ -11,8 +11,6 @@ import log from 'electron-log/renderer';
 import { UpdateProvider } from './providers/UpdateProvider';
 import { InfoProvider } from './providers/InfoProvider';
 
-export type ModalOption = 'settings' | 'info' | 'none'
-
 function App() {
     log.info('Info from app renderer');
     return (

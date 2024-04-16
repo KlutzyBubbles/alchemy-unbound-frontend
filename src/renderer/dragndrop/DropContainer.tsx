@@ -9,7 +9,7 @@ import { CustomDragLayer } from './DragLayer';
 import Split from 'react-split';
 import { SideContainer } from './SideContainer';
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
-import { ModalOption } from '../Main';
+import { ModalOption } from '../Container';
 import { Box, DragItem, ItemTypes } from '../types';
 import { getAllRecipes, getXY, makeId } from '../utils';
 import { SoundContext } from '../providers/SoundProvider';
@@ -334,21 +334,35 @@ export const DropContainer: FC<ContainerProps> = ({
                 playSound('drop', 0.5);
                 const updatedRecipes = await window.RecipeAPI.getRecipesFor(recipe.result);
                 setBoxes((boxes) => {
-                    const temp = update(boxes, {
-                        [a]: {
-                            $merge: {
-                                newDiscovery: newDiscovery,
-                                firstDiscovery: firstDiscovery,
-                                element: {
-                                    name: recipe.result,
-                                    display: recipe.display,
-                                    emoji: recipe.emoji,
-                                    recipes: updatedRecipes
+                    if (newDiscovery !== undefined 
+                        && firstDiscovery !== undefined
+                        && recipe !== undefined
+                        && recipe.result !== undefined
+                        && recipe.display !== undefined
+                        && recipe.emoji !== undefined
+                        && updatedRecipes !== undefined) {
+                        try {
+                            const temp = update(boxes, {
+                                [a]: {
+                                    $merge: {
+                                        newDiscovery: newDiscovery,
+                                        firstDiscovery: firstDiscovery,
+                                        element: {
+                                            name: recipe.result,
+                                            display: recipe.display,
+                                            emoji: recipe.emoji,
+                                            recipes: updatedRecipes
+                                        }
+                                    },
                                 }
-                            },
+                            });
+                            return temp;
+                        } catch (e) {
+                            logger.error('Failed to update boxes', e);
                         }
-                    });
-                    return temp;
+                    } else {
+                        return boxes;
+                    }
                 });
                 await refreshRecipes();
             } catch(e) {
@@ -400,22 +414,36 @@ export const DropContainer: FC<ContainerProps> = ({
                 const updatedRecipes = await window.RecipeAPI.getRecipesFor(recipe.result);
                 logger.debug('Resulintg updaterd recipes', recipe.result, updatedRecipes);
                 setBoxes((boxes) => {
-                    const temp = update(boxes, {
-                        [a]: {
-                            $merge: {
-                                newDiscovery: newDiscovery,
-                                firstDiscovery: firstDiscovery,
-                                element: {
-                                    name: recipe.result,
-                                    display: recipe.display,
-                                    emoji: recipe.emoji,
-                                    recipes: updatedRecipes
+                    if (newDiscovery !== undefined 
+                        && firstDiscovery !== undefined
+                        && recipe !== undefined
+                        && recipe.result !== undefined
+                        && recipe.display !== undefined
+                        && recipe.emoji !== undefined
+                        && updatedRecipes !== undefined) {
+                        try {
+                            const temp = update(boxes, {
+                                [a]: {
+                                    $merge: {
+                                        newDiscovery: newDiscovery,
+                                        firstDiscovery: firstDiscovery,
+                                        element: {
+                                            name: recipe.result,
+                                            display: recipe.display,
+                                            emoji: recipe.emoji,
+                                            recipes: updatedRecipes
+                                        }
+                                    },
                                 }
-                            },
+                            });
+                            delete temp[b];
+                            return temp;
+                        } catch (e) {
+                            logger.error('Failed to update boxes', e);
                         }
-                    });
-                    delete temp[b];
-                    return temp;
+                    } else {
+                        return boxes;
+                    }
                 });
                 await refreshRecipes();
             } catch(e) {

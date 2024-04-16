@@ -49,7 +49,7 @@ function getRawObjectFromStore(name: string): Languages {
 export function getFromStore(name: string, language: Language): string {
     const foundStore = getRawObjectFromStore(name);
     if (foundStore.latam === 'INVALID') {
-        return 'UNKNOWN_LANGUAGE_DEF';
+        return `UNKNOWN_LANGUAGE_DEF (${name})`;
     }
     return foundStore[language];
 }

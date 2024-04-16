@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import { ErrorEntryAdd, Recipe } from '../common/types';
 import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor, hasAllRecipes } from './libs/database';
-import { combine, getToken } from './libs/server';
+import { combine, getToken, submitIdea } from './libs/server';
 import { DisplayChannel, ErrorChannel, GenericChannel, HintChannel, ImportExportChannel, RecipeChannel, ServerChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
 import { Settings } from '../common/settings';
 import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './libs/settings';
@@ -45,6 +45,9 @@ export function register() {
     });
     ipcMain.handle(ServerChannel.GET_TOKEN, async () => {
         return getToken();
+    });
+    ipcMain.handle(ServerChannel.IDEA, async (_, a: string, b: string, result: string) => {
+        return submitIdea(a, b, result);
     });
 
     // Error handlers

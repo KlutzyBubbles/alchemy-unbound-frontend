@@ -10,8 +10,9 @@ import options from './particles';
 import { SettingsContext } from './providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { LoadingContext } from './providers/LoadingProvider';
+import { IdeaModal } from './modals/IdeaModal';
 
-export type ModalOption = 'settings' | 'info' | 'none'
+export type ModalOption = 'settings' | 'info' | 'idea' | 'none';
 
 export const ContentContainer: FC = () => {
     const { settings } = useContext(SettingsContext);
@@ -80,6 +81,7 @@ export const ContentContainer: FC = () => {
                     </Row>
                     <SettingsModal show={currentModal === 'settings'} handleHide={handleModalClose} />
                     <InfoModal show={currentModal === 'info'} handleHide={handleModalClose} />
+                    <IdeaModal show={currentModal === 'idea'} handleHide={handleModalClose} />
                 </Container>
             </div>
         );

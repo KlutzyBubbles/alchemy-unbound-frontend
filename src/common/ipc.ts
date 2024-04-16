@@ -10,6 +10,7 @@ export enum RecipeChannel {
 
 export enum ServerChannel {
     COMBINE = 'server:combine',
+    IDEA = 'server:idea',
     GET_TOKEN = 'server:getToken'
 }
 

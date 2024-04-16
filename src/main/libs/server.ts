@@ -33,7 +33,8 @@ async function refreshToken(): Promise<TokenHolderResponse> {
     if (token === undefined) {
         return await createToken();
     } else {
-        if (token.expiryDate < (new Date()).getTime() + 600000) {
+        logger.debug('Expiry dates', token.expiryDate, ((new Date()).getTime() + 600000) / 1000);
+        if (token.expiryDate < ((new Date()).getTime() + 600000) / 1000) {
             let response: Response | undefined = undefined;
             try {
                 logger.debug('token request url', `${endpoint}/session/v1?version=${getAppVersion()}`, token.token);
@@ -172,7 +173,6 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
             if (tokenResponse !== undefined) {
                 hasDeprecated = tokenResponse.deprecated;
                 if (tokenResponse.tokenHolder !== undefined) {
-                    // url += `&token=${tokenResponse.tokenHolder.token}`;
                     headers.Authorization = `Bearer ${tokenResponse.tokenHolder.token}`;
                 }
             }
@@ -264,5 +264,113 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
         } else {
             return undefined;
         }
+    }
+}
+
+export async function submitIdea(a: string, b: string, result: string): Promise<CombineOutput | undefined> {
+    if (!(await getSettings(false)).offline) {
+        const recipe: Recipe = {
+            order: 0,
+            a: {
+                name: a,
+                display: undefined,
+                emoji: '❓',
+                depth: 0,
+                first: 0,
+                who_discovered: '',
+                base: 0
+            },
+            b: {
+                name: b,
+                display: undefined,
+                emoji: '❓',
+                depth: 0,
+                first: 0,
+                who_discovered: '',
+                base: 0
+            },
+            discovered: 0,
+            result: result,
+            display: undefined,
+            emoji: '❓',
+            depth: 0,
+            first: 0,
+            who_discovered: '',
+            base: 0
+        };
+        let tokenResponse: TokenHolderResponse | undefined = undefined;
+        try {
+            tokenResponse = await getToken();
+        } catch (e) {
+            logger.error('Failed to get token response', e);
+        }
+        const url = `${endpoint}/idea/v1?version=${getAppVersion()}&a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}&result=${encodeURIComponent(result)}`;
+        let hasDeprecated = false;
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json'
+        };
+        if (tokenResponse !== undefined) {
+            hasDeprecated = tokenResponse.deprecated;
+            if (tokenResponse.tokenHolder !== undefined) {
+                headers.Authorization = `Bearer ${tokenResponse.tokenHolder.token}`;
+            }
+        }
+        try {
+            logger.debug('idea url', url, headers.Authorization);
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: headers
+            });
+            if (response.ok) {
+                const body: Recipe = (await response.json()) as Recipe;
+                logger.debug('combine response body', body);
+                return {
+                    type: 'success',
+                    result: {
+                        responseCode: response.status,
+                        deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
+                        hintAdded: false,
+                        newDiscovery: false,
+                        firstDiscovery: false,
+                        recipe: recipe
+                    }
+                };
+            } else {
+                const json = (await response.json()) as RequestErrorResult;
+                if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
+                    throw('Unknown issue with input a/b/result');
+                } else if (json.code === ServerErrorCode.MAX_DEPTH) {
+                    // TODO Need to add server method to rectify this
+                    logger.debug('Idea already exists');
+                    return {
+                        type: 'success',
+                        result: {
+                            responseCode: response.status,
+                            deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
+                            hintAdded: false,
+                            newDiscovery: false,
+                            firstDiscovery: false,
+                            recipe: recipe
+                        }
+                    };
+                }
+                if (json.code === undefined) {
+                    throw('Unknown error occurred');
+                }
+                return {
+                    type: 'error',
+                    result: {
+                        responseCode: response.status,
+                        deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
+                        code: json.code
+                    }
+                };
+            }
+        } catch(e) {
+            logger.error('Failed to make api request', e);
+            throw(e);
+        }
+    } else {
+        return undefined;
     }
 }
