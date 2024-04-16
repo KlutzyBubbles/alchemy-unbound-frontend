@@ -40,3 +40,22 @@ export function getColor(color: ColorType, theme: ThemeType): string {
     //}
     return lightTheme[color];
 }
+
+export type LegacyColor = 'light' | 'dark';
+
+export function getLegacyColor(theme: ThemeType): LegacyColor {
+    if (theme === 'dark') {
+        return 'dark';
+    } else if (theme === 'supporter') {
+        return 'dark';
+    } else {
+        return 'light';
+    }
+}
+
+export function invertLegacyColor(color: LegacyColor): LegacyColor {
+    if (color === 'dark') {
+        return 'light';
+    }
+    return 'dark';
+}

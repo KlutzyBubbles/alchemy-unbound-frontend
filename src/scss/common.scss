@@ -105,6 +105,15 @@
     .is-over {
         background-color: mix($side-bg, $danger, 20%);
     }
+    
+    .overlay {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        top: 40%;
+        left: 0px;
+    }
 
     .footer {
         border-top-color: $side-color;

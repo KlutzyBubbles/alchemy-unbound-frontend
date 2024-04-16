@@ -46,7 +46,21 @@ export type RecipeElement = {
     name: string;
     display: Languages;
     emoji: string;
+    sortDepth: number;
+    sortOrder: number;
+    base: boolean;
+    first: boolean;
     recipes: Recipe[];
+}
+
+export type OrderDepth = {
+    order: number;
+    depth: number;
+}
+
+export type BaseFirst = {
+    base: boolean;
+    first: boolean;
 }
 
 export type SystemVersion = {

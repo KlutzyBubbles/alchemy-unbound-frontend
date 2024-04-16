@@ -1,6 +1,6 @@
 import { DropTargetMonitor, XYCoord } from 'react-dnd';
 import { DragItem } from '../types';
-import { BasicElement, Languages, Recipe, RecipeElement } from '../../common/types';
+import { BaseFirst, BasicElement, Languages, OrderDepth, Recipe, RecipeElement } from '../../common/types';
 import { languages } from '../../common/settings';
 import logger from 'electron-log/renderer';
 
@@ -42,10 +42,16 @@ export async function getAllRecipes(): Promise<RecipeElement[]> {
             if (recipes.length === 0) {
                 logger.warn(`Invalid recipe data for name ${name}`);
             } else {
+                const ordering = getOrderDepth(recipes);
+                const filtering = await getBaseFirst(recipes);
                 formattedData.push({
                     name: name,
                     display: recipes[0].display,
                     emoji: recipes[0].emoji,
+                    first: filtering.first,
+                    base: filtering.base,
+                    sortOrder: ordering.order,
+                    sortDepth: ordering.depth,
                     recipes: recipes
                 });
             }
@@ -61,6 +67,10 @@ export function mockElement(recipe: Recipe | BasicElement): RecipeElement {
             name: recipe.result,
             display: recipe.display,
             emoji: recipe.emoji,
+            base: false,
+            first: false,
+            sortDepth: 0,
+            sortOrder: 0,
             recipes: [
                 recipe
             ]
@@ -74,6 +84,10 @@ export function mockElement(recipe: Recipe | BasicElement): RecipeElement {
             name: recipe.name,
             display: recipe.display,
             emoji: recipe.emoji,
+            base: false,
+            first: false,
+            sortDepth: 0,
+            sortOrder: 0,
             recipes: [
                 {
                     ...recipe,
@@ -102,4 +116,36 @@ export function mockElement(recipe: Recipe | BasicElement): RecipeElement {
             ]
         };
     }
+}
+
+export function getOrderDepth(recipes: Recipe[]): OrderDepth {
+    let depth = Infinity;
+    let order = Infinity;
+    for (const recipe of recipes) {
+        if (recipe.depth < depth)
+            depth = recipe.depth;
+        if (recipe.order < order)
+            order = recipe.order;
+    }
+    return {
+        depth,
+        order
+    };
+}
+
+
+export async function getBaseFirst(recipes: Recipe[]): Promise<BaseFirst> {
+    let base = false;
+    let first = false;
+    const steamId = window.SteamAPI.getSteamId() ?? 'NO_STEAM_ID';
+    for (const recipe of recipes) {
+        if (!base && recipe.base)
+            base = true;
+        if (!first && (recipe.who_discovered === steamId || recipe.first))
+            first = true;
+    }
+    return {
+        base,
+        first
+    };
 }

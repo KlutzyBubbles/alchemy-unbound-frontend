@@ -1,4 +1,4 @@
-import { useState, type ChangeEventHandler, type FC, useEffect, useContext, MouseEventHandler } from 'react';
+import { useState, type ChangeEventHandler, type FC, useEffect, useContext, MouseEventHandler, useRef } from 'react';
 import { useDrop } from 'react-dnd';
 import { RecipeElement } from '../../common/types';
 import { SideElement } from './SideElement';
@@ -8,6 +8,7 @@ import { SettingsContext } from '../providers/SettingsProvider';
 import { IoArrowDown, IoArrowUp, IoFilterOutline } from 'react-icons/io5';
 import { getFromStore } from '../language';
 import { SoundContext } from '../providers/SoundProvider';
+import logger from 'electron-log/renderer';
 
 export interface ContainerProps {
   removeBox: (id: string) => void,
@@ -27,10 +28,12 @@ export const SideContainer: FC<ContainerProps> = ({
     elements                     
 }) => {
     const [filteredElements, setFilteredElements] = useState<RecipeElement[]>(elements);
+    const timeout = useRef<NodeJS.Timeout>(undefined);
     const [sortBy, setSortBy] = useState<number>(0);
     const [sortAscending, setSortAscending] = useState<boolean>(false);
     const [filter, setFilter] = useState<number>(0);
     const [searchText, setSearchText] = useState<string>('');
+    const [searchTextFinal, setSearchTextFinal] = useState<string>('');
     const { settings } = useContext(SettingsContext);
     const { playSound } = useContext(SoundContext);
 
@@ -60,17 +63,12 @@ export const SideContainer: FC<ContainerProps> = ({
         [removeBox],
     );
 
-    const filterList = (list: RecipeElement[], searchText: string, currentFilter: string): RecipeElement[] => {
+    const filterList = async (list: RecipeElement[], searchText: string, currentFilter: string): Promise<RecipeElement[]> => {
         let filteredTemp = list;
         if (searchText !== '') {
+            const sanitizedSearch = searchText.replace(/[#-.]|[[-^]|[?|{}]/g, '\\$&');
             filteredTemp = filteredTemp.filter((element) => {
-                // for (const name of Object.values(element.display)) {
-                //     console.log(`Comparing ${name.toLocaleLowerCase()} to ${value}`);
-                //     if (name.toLocaleLowerCase().search(value) !== -1) {
-                //         return true;
-                //     }
-                // }
-                if (element.display[settings.language].toLocaleLowerCase().search(searchText.replace(/[#-.]|[[-^]|[?|{}]/g, '\\$&')) !== -1) {
+                if (element.display[settings.language].toLocaleLowerCase().search(sanitizedSearch) !== -1) {
                     return true;
                 }
                 if (element.emoji === searchText) {
@@ -79,56 +77,39 @@ export const SideContainer: FC<ContainerProps> = ({
                 return false;
             });
         }
-        const steamId = window.SteamAPI.getSteamId() ?? 'NO_STEAM_ID';
         if (currentFilter !== 'all') {
-            filteredTemp = filteredTemp.filter((element) => {
-                if (currentFilter === 'base') {
-                    return element.recipes[0].base;
-                } else if (currentFilter === 'firstDiscovered') {
-                    let firstDiscovered = false;
-                    for (const recipe of element.recipes) {
-                        if (recipe.who_discovered === steamId || recipe.first) {
-                            firstDiscovered = true;
-                            break;
-                        }
-                    }
-                    return firstDiscovered;
-                }
-                return true;
-            });
+            if (currentFilter === 'base') {
+                filteredTemp = filteredTemp.filter((element) => element.base);
+            } else if (currentFilter === 'firstDiscovered') {
+                filteredTemp = filteredTemp.filter((element) => element.first);
+            }
         }
         return filteredTemp;
     };
 
     useEffect(() => {
-        let filteredTemp = filterList(elements.map((x) => x), searchText, filterOptions[filter]);
-        filteredTemp = sortList(filteredTemp.map((x) => x), sortByOptions[sortBy], sortAscending);
-        setFilteredElements(filteredTemp);
-    }, [searchText, filter]);
+        runFilter();
+    }, [filter, searchTextFinal]);
 
-    const sortList = (list: RecipeElement[], sortByOption: string, sortAscending: boolean): RecipeElement[] => {
+    const runFilter = async () => {
+        let filteredTemp = await filterList(elements.map((x) => x), searchTextFinal, filterOptions[filter]);
+        filteredTemp = await sortList(filteredTemp.map((x) => x), sortByOptions[sortBy], sortAscending);
+        setFilteredElements(filteredTemp);
+    };
+
+    const runSort = async () => {
+        const sortByOption = sortByOptions[sortBy];
+        const sortedTemp = await sortList(filteredElements.map((x) => x), sortByOption, sortAscending);
+        setFilteredElements(sortedTemp);
+    };
+
+    const sortList = async (list: RecipeElement[], sortByOption: string, sortAscending: boolean): Promise<RecipeElement[]> => {
         let sortedTemp = list.sort((a, b) => {
             // const sortByOptions = ['discovered', 'name', 'emoji', 'depth'];
-            let aDepth = Infinity;
-            let bDepth = Infinity;
-            let aOrder = Infinity;
-            let bOrder = Infinity;
-            for (const recipe of a.recipes) {
-                if (recipe.depth < aDepth)
-                    aDepth = recipe.depth;
-                if (recipe.order < aOrder)
-                    aOrder = recipe.order;
-            }
-            for (const recipe of b.recipes) {
-                if (recipe.depth < bDepth)
-                    bDepth = recipe.depth;
-                if (recipe.order < bOrder)
-                    bOrder = recipe.order;
-            }
             if (sortByOption === 'discovered') {
                 // This one is inverted to go from most recent
                 //console.log('Sorting discovered', aOrder < bOrder ? 1 : aOrder > bOrder ? -1 : 0, a.name, b.name, aOrder, bOrder);
-                return aOrder < bOrder ? -1 : aOrder > bOrder ? 1 : 0;
+                return a.sortOrder < b.sortOrder ? -1 : a.sortOrder > b.sortOrder ? 1 : 0;
             } else if (sortByOption === 'name') {
                 //console.log('Sorting name', a.name < b.name ? -1 : a.name > b.name ? 1 : 0, a.name, b.name);
                 return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
@@ -137,7 +118,7 @@ export const SideContainer: FC<ContainerProps> = ({
                 return a.emoji < b.emoji ? -1 : a.emoji > b.emoji ? 1 : 0;
             } else if (sortByOption === 'depth') {
                 //console.log('Sorting depth', aDepth < bDepth ? -1 : aDepth > bDepth ? 1 : 0, a.name, b.name, aDepth, bDepth);
-                return aDepth < bDepth ? -1 : aDepth > bDepth ? 1 : 0;
+                return a.sortDepth < b.sortDepth ? -1 : a.sortDepth > b.sortDepth ? 1 : 0;
             }
             return 0;
         });
@@ -148,22 +129,26 @@ export const SideContainer: FC<ContainerProps> = ({
     };
 
     useEffect(() => {
-        const sortByOption = sortByOptions[sortBy];
-        const sortedTemp = sortList(filteredElements.map((x) => x), sortByOption, sortAscending);
-        setFilteredElements(sortedTemp);
+        runSort();
     }, [sortBy, sortAscending]);
 
     const onSearchType: ChangeEventHandler<HTMLInputElement> = (e) => {
-        if (e.target.value.toLocaleLowerCase() === 'send help') {
+        if (['send help', 'help me', 'please help', 'halp'].includes(e.target.value.toLocaleLowerCase())) {
+            logger.debug('Activating send help achievement');
             window.SteamAPI.activateAchievement('help');
         }
         setSearchText(e.target.value.toLocaleLowerCase());
+        if (timeout.current !== undefined) {
+            clearTimeout(timeout.current);
+        }
+        timeout.current = setTimeout(() => {
+            const value = e.target.value.toLocaleLowerCase();
+            setSearchTextFinal(value);
+        }, 500);
     };
 
     useEffect(() => {
-        let filteredTemp = filterList(elements.map((x) => x), searchText, filterOptions[filter]);
-        filteredTemp = sortList(filteredTemp.map((x) => x), sortByOptions[sortBy], sortAscending);
-        setFilteredElements(filteredTemp);
+        runFilter();
     }, [elements]);
 
     const onFilterClick: MouseEventHandler<HTMLDivElement> = () => {
@@ -244,23 +229,3 @@ export const SideContainer: FC<ContainerProps> = ({
         </div>
     );
 };
-
-// export const SideContainer = memo(SideContainerInternal, (prevProps, nextProps) => {
-//     if (prevProps.elements.map((item) => item.name) === nextProps.elements.map((item) => item.name)) {
-//         return true;
-//     }
-//     if (prevProps.elements.length !== nextProps.elements.length) {
-//         return false;
-//     }
-//     for (let i = 0; i < prevProps.elements.length; i++) {
-//         if (prevProps.elements[i].name !== nextProps.elements[i].name) {
-//             return false;
-//         }
-//         if (!arrayEquals(
-//             prevProps.elements[i].recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.discovered),
-//             nextProps.elements[i].recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.discovered))) {
-//             return false;
-//         }
-//     }
-//     return true;
-// });

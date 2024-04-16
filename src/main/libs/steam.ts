@@ -7,6 +7,7 @@ import os from 'os';
 export const APP_ID = 2858840;
 
 let steamworksClient: Omit<steamworks.Client, 'init' | 'runCallbacks'>;
+let steamId: PlayerSteamId | undefined = undefined;
 
 export function getSteamworksClient(): Omit<steamworks.Client, 'init' | 'runCallbacks'> {
     if (steamworksClient === undefined || steamworksClient === null) {
@@ -16,11 +17,14 @@ export function getSteamworksClient(): Omit<steamworks.Client, 'init' | 'runCall
 }
 
 export function getSteamId(): PlayerSteamId | undefined {
+    if (steamId !== undefined)
+        return steamId;
     const client = getSteamworksClient();
     if (!client) {
         return undefined;
     }
-    return client.localplayer.getSteamId();
+    steamId = client.localplayer.getSteamId();
+    return steamId;
 }
 
 export function getSteamGameLanguage(): Language {
