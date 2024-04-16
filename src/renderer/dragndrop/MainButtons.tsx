@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { Fragment, useContext, useRef, useState } from 'react';
 
-import { IoBandageOutline, IoBulbOutline, IoCloudDownloadOutline, IoCloudOfflineOutline, IoInformationCircleOutline, IoSettingsOutline, IoSpeedometerOutline } from 'react-icons/io5';
+import { IoBandageOutline, IoBulbOutline, IoCloudDownloadOutline, IoCloudOfflineOutline, IoInformationCircleOutline, IoSettingsOutline, IoSpeedometerOutline, IoTrashOutline } from 'react-icons/io5';
 import { motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../Container';
 import { SettingsContext } from '../providers/SettingsProvider';
@@ -13,6 +13,7 @@ import { getFromStore } from '../language';
 export interface MainButtonProps {
     openModal: (option: ModalOption) => void
     devButton: () => void
+    clearAll: () => void
     refreshHint: number,
     deprecated: boolean,
     rateLimited: boolean
@@ -21,6 +22,7 @@ export interface MainButtonProps {
 export const MainButtons: FC<MainButtonProps> = ({
     openModal,
     devButton,
+    clearAll,
     refreshHint,
     deprecated,
     rateLimited
@@ -68,6 +70,7 @@ export const MainButtons: FC<MainButtonProps> = ({
 
     return (
         <div className='footer mt-auto z-mainButtons'>
+            <div className='btn btn-clear float-start mb-2 fs-2 d-flex p-2' onClick={clearAll}><IoTrashOutline /></div>
             <motion.div
                 className='btn btn-no-outline float-end mb-2 me-2 fs-2 d-flex p-2'
                 onMouseEnter={onSettingsMouseEnter}

@@ -653,6 +653,10 @@ export const DropContainer: FC<ContainerProps> = ({
         }
     };
 
+    const clearAll = () => {
+        setBoxes({});
+    };
+
     const elementControls = useAnimation();
 
     return (
@@ -704,7 +708,7 @@ export const DropContainer: FC<ContainerProps> = ({
                             })}
                         </AnimatePresence>
                         <CustomDragLayer/>
-                        <MainButtons openModal={openModal} refreshHint={refreshHint} deprecated={deprecated} rateLimited={rateLimited} devButton={devButton}/>
+                        <MainButtons clearAll={clearAll} openModal={openModal} refreshHint={refreshHint} deprecated={deprecated} rateLimited={rateLimited} devButton={devButton}/>
                     </div>
                 </div>
                 <SideContainer

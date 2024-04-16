@@ -216,6 +216,20 @@
         );
     }
 
+    .btn-clear {
+        @include button-variant(
+            $main-button-bg, // Background
+            $main-button-bg, // Border
+            $main-button-color, // Color
+            $main-button-bg-hover, // Hover Background
+            $main-button-bg-hover, // Hover Border
+            $danger, // Hover Color
+            $main-button-bg-hover, // Active Background
+            $main-button-bg-hover, // Active Border
+            $danger // Active Color
+        );
+    }
+
     .dropdown-menu {
         cursor: default;
 
