@@ -227,7 +227,7 @@ export const SideContainer: FC<ContainerProps> = ({
                 <div className='row mx-0'>
                     <div className="px-2 mb-3 mt-1">
                         <input
-                            type="text"
+                            type="search"
                             className="form-control form-control-lg override-focus"
                             value={searchText}
                             onChange={onSearchType}
