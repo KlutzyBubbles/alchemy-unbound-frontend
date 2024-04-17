@@ -52,10 +52,19 @@ export async function loadDatabaseV2(loaded: Compressed): Promise<RecipeRow[]> {
     let backup = false;
     for (const baseItem of baseClone) {
         let matchedItem: RecipeRow | undefined = undefined;
-        for (const tempItem of tempData) {
-            if ((tempItem.a === baseItem.a && tempItem.b === baseItem.b) || (tempItem.a === baseItem.b && tempItem.b === baseItem.a)) {
-                matchedItem = tempItem;
-                break;
+        if (baseItem.a === '' && baseItem.b === '') {
+            for (const tempItem of tempData) {
+                if ((tempItem.a === baseItem.a && tempItem.b === baseItem.b) && tempItem.result === baseItem.result) {
+                    matchedItem = tempItem;
+                    break;
+                }
+            }
+        } else {
+            for (const tempItem of tempData) {
+                if ((tempItem.a === baseItem.a && tempItem.b === baseItem.b) || (tempItem.a === baseItem.b && tempItem.b === baseItem.a)) {
+                    matchedItem = tempItem;
+                    break;
+                }
             }
         }
         if (matchedItem === undefined) {
