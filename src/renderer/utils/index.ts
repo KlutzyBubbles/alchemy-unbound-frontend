@@ -37,13 +37,14 @@ export async function getAllRecipes(): Promise<RecipeElement[]> {
         const namesUnique = [...new Set(data.map(item => item.result))];
 
         const formattedData: RecipeElement[] = [];
+        const steamId = await window.SteamAPI.getSteamId() ?? 'NO_STEAM_ID';
         for (const name of namesUnique) {
             const recipes = data.filter((item) => item.result === name);
             if (recipes.length === 0) {
                 logger.warn(`Invalid recipe data for name ${name}`);
             } else {
                 const ordering = getOrderDepth(recipes);
-                const filtering = await getBaseFirst(recipes);
+                const filtering = getBaseFirst(recipes, steamId);
                 formattedData.push({
                     name: name,
                     display: recipes[0].display,
@@ -134,10 +135,9 @@ export function getOrderDepth(recipes: Recipe[]): OrderDepth {
 }
 
 
-export async function getBaseFirst(recipes: Recipe[]): Promise<BaseFirst> {
+export function getBaseFirst(recipes: Recipe[], steamId: string): BaseFirst {
     let base = false;
     let first = false;
-    const steamId = window.SteamAPI.getSteamId() ?? 'NO_STEAM_ID';
     for (const recipe of recipes) {
         if (!base && recipe.base)
             base = true;

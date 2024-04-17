@@ -16,7 +16,7 @@ export function getSteamworksClient(): Omit<steamworks.Client, 'init' | 'runCall
     return steamworksClient;
 }
 
-export function getSteamId(): PlayerSteamId | undefined {
+export function getSteamIdRaw(): PlayerSteamId | undefined {
     if (steamId !== undefined)
         return steamId;
     const client = getSteamworksClient();
@@ -25,6 +25,14 @@ export function getSteamId(): PlayerSteamId | undefined {
     }
     steamId = client.localplayer.getSteamId();
     return steamId;
+}
+
+export function getSteamId(): string | undefined {
+    const raw = getSteamIdRaw();
+    if (raw === undefined) {
+        return undefined;
+    }
+    return `${raw.steamId64}`;
 }
 
 export function getSteamGameLanguage(): Language {
@@ -55,7 +63,7 @@ export function isDlcInstalled(appid: number): boolean {
 }
 
 export function getFolder() {
-    const steamId = getSteamId().steamId64;
+    const steamId = getSteamId();
     // windows
     if (process.env.APPDATA)
         return `${process.env.APPDATA}\\..\\LocalLow\\KlutzyBubbles\\${APP_ID}\\${steamId}\\`;
@@ -69,5 +77,5 @@ export function getFolder() {
 }
 
 export async function getWebAuthTicket(): Promise<auth.Ticket> {
-    return await getSteamworksClient().auth.getSessionTicketWithSteamId(getSteamId().steamId64);
+    return await getSteamworksClient().auth.getSessionTicketWithSteamId(getSteamIdRaw().steamId64);
 }

@@ -333,6 +333,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 mergeState(a, undefined, 'loading', false);
                 playSound('drop', 0.5);
                 const updatedRecipes = await window.RecipeAPI.getRecipesFor(recipe.result);
+                const steamId = await window.SteamAPI.getSteamId() ?? 'NO_STEAM_ID';
                 setBoxes((boxes) => {
                     if (newDiscovery !== undefined 
                         && firstDiscovery !== undefined
@@ -343,30 +344,27 @@ export const DropContainer: FC<ContainerProps> = ({
                         && updatedRecipes !== undefined) {
                         try {
                             const ordering = getOrderDepth(updatedRecipes);
-                            getBaseFirst(updatedRecipes).then((filtering) => {
-                                const temp = update(boxes, {
-                                    [a]: {
-                                        $merge: {
-                                            newDiscovery: newDiscovery,
-                                            firstDiscovery: firstDiscovery,
-                                            element: {
-                                                name: recipe.result,
-                                                display: recipe.display,
-                                                emoji: recipe.emoji,
-                                                first: filtering.first,
-                                                base: filtering.base,
-                                                sortOrder: ordering.order,
-                                                sortDepth: ordering.depth,
-                                                recipes: updatedRecipes
-                                            }
-                                        },
-                                    }
-                                });
-                                return temp;
-                            }).catch((e) => {
-                                logger.error('Failed to update boxes internally', e);
-                                return boxes;
+                            const filtering = getBaseFirst(updatedRecipes, steamId);
+                            const temp = update(boxes, {
+                                [a]: {
+                                    $merge: {
+                                        newDiscovery: newDiscovery,
+                                        firstDiscovery: firstDiscovery,
+                                        element: {
+                                            name: recipe.result,
+                                            display: recipe.display,
+                                            emoji: recipe.emoji,
+                                            first: filtering.first,
+                                            base: filtering.base,
+                                            sortOrder: ordering.order,
+                                            sortDepth: ordering.depth,
+                                            recipes: updatedRecipes
+                                        }
+                                    },
+                                }
                             });
+                            logger.debug('result', temp);
+                            return temp;
                         } catch (e) {
                             logger.error('Failed to update boxes', e);
                         }
@@ -422,6 +420,7 @@ export const DropContainer: FC<ContainerProps> = ({
                     recipes: recipes
                 });
                 const updatedRecipes = await window.RecipeAPI.getRecipesFor(recipe.result);
+                const steamId = await window.SteamAPI.getSteamId() ?? 'NO_STEAM_ID';
                 logger.debug('Resulintg updaterd recipes', recipe.result, updatedRecipes);
                 setBoxes((boxes) => {
                     if (newDiscovery !== undefined 
@@ -433,31 +432,27 @@ export const DropContainer: FC<ContainerProps> = ({
                         && updatedRecipes !== undefined) {
                         try {
                             const ordering = getOrderDepth(updatedRecipes);
-                            getBaseFirst(updatedRecipes).then((filtering) => {
-                                const temp = update(boxes, {
-                                    [a]: {
-                                        $merge: {
-                                            newDiscovery: newDiscovery,
-                                            firstDiscovery: firstDiscovery,
-                                            element: {
-                                                name: recipe.result,
-                                                display: recipe.display,
-                                                emoji: recipe.emoji,
-                                                first: filtering.first,
-                                                base: filtering.base,
-                                                sortOrder: ordering.order,
-                                                sortDepth: ordering.depth,
-                                                recipes: updatedRecipes
-                                            }
-                                        },
-                                    }
-                                });
-                                delete temp[b];
-                                return temp;
-                            }).catch((e) => {
-                                logger.error('Failed to update boxes internally', e);
-                                return boxes;
+                            const filtering = getBaseFirst(updatedRecipes, steamId);
+                            const temp = update(boxes, {
+                                [a]: {
+                                    $merge: {
+                                        newDiscovery: newDiscovery,
+                                        firstDiscovery: firstDiscovery,
+                                        element: {
+                                            name: recipe.result,
+                                            display: recipe.display,
+                                            emoji: recipe.emoji,
+                                            first: filtering.first,
+                                            base: filtering.base,
+                                            sortOrder: ordering.order,
+                                            sortDepth: ordering.depth,
+                                            recipes: updatedRecipes
+                                        }
+                                    },
+                                }
                             });
+                            delete temp[b];
+                            return temp;
                         } catch (e) {
                             logger.error('Failed to update boxes', e);
                         }
