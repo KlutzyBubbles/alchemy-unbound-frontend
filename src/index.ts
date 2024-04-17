@@ -117,9 +117,9 @@ app.on('window-all-closed', () => {
     }).catch((e) => {
         log.error('Failed to save settings', e);
     });
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+    app.quit();
+    app.quit();
+    return;
 });
 
 app.on('will-quit', () => {
@@ -135,6 +135,8 @@ app.on('will-quit', () => {
     }).catch((e) => {
         log.error('Failed to save settings', e);
     });
+    app.quit();
+    return;
 });
 
 app.on('activate', () => {

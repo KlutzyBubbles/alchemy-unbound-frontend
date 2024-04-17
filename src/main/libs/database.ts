@@ -34,31 +34,6 @@ export function getDatabaseSaveFormat() {
 export async function save(): Promise<void> {
     await verifyFolder();
     await saveDatabaseToFile('db.json');
-    //let existing: RecipeRow[] = [];
-    //try {
-    //    if (fileExists(getFolder() + 'db.json')) {
-    //        existing = await loadData();
-    //    }
-    //} catch(e) {
-    //    if (e.code === 'ENOENT') {
-    //        console.log('Error was coulnd\'t find file, which is fine');
-    //    } else if (!(e.message as string).startsWith('Failed to load database')) {
-    //        console.error('Failed to load file, not overriding just incase, saving to temp instead');
-    //        await fs.writeFile(getFolder() + `db_backup_${(new Date()).toISOString().slice(0, 16)}.json`, JSON.stringify({
-    //            version: DATABASE_VERISON,
-    //            data: data
-    //        }), 'utf-8');
-    //        return;
-    //    }
-    //}
-    //const uniques = new Set(existing.map((value) => {
-    //    return value.a.localeCompare(value.b) > 0 ? `${value.a}${value.b}` : `${value.b}${value.a}`;
-    //}));
-    //const newData = [...existing, ...data.filter((value) => !uniques.has(value.a.localeCompare(value.b) > 0 ? `${value.a}${value.b}` : `${value.b}${value.a}`))];
-    //await fs.writeFile(getFolder() + 'db.json', JSON.stringify({
-    //    version: DATABASE_VERISON,
-    //    data: newData
-    //}), 'utf-8');
 }
 
 export async function setDataRaw(newData: RecipeRow[]) {
@@ -70,21 +45,55 @@ export function loadDatabaseV1(loaded: Record<string, unknown>[]): RecipeRow[] {
     return loaded as RecipeRow[];
 }
 
-export function loadDatabaseV2(loaded: Compressed): RecipeRow[] {
+export async function loadDatabaseV2(loaded: Compressed): Promise<RecipeRow[]> {
     const tempData = decompress(loaded) as RecipeRow[];
-    for (const baseItem of structuredClone(baseData)) {
-        let hasDiscovered = false;
+    const baseClone: RecipeRow[] = structuredClone(baseData);
+    const newData: RecipeRow[] = [];
+    let backup = false;
+    for (const baseItem of baseClone) {
+        let matchedItem: RecipeRow | undefined = undefined;
         for (const tempItem of tempData) {
             if ((tempItem.a === baseItem.a && tempItem.b === baseItem.b) || (tempItem.a === baseItem.b && tempItem.b === baseItem.a)) {
-                hasDiscovered = true;
+                matchedItem = tempItem;
                 break;
             }
         }
-        if (!hasDiscovered) {
-            tempData.push(baseItem);
+        if (matchedItem === undefined) {
+            newData.push(baseItem);
+        } else {
+            if (matchedItem.result !== baseItem.result) {
+                if (baseItem.a !== '' && baseItem.b !== '') {
+                    logger.debug('Matched items dont match', matchedItem, baseItem);
+                    baseItem.discovered = 1;
+                    newData.push(baseItem);
+                    backup = true;
+                } else {
+                    newData.push(matchedItem);
+                }
+            } else {
+                newData.push(matchedItem);
+            }
         }
     }
-    return tempData;
+    for (const tempItem of tempData) {
+        let matchedItem: boolean = false;
+        for (const baseItem of baseClone) {
+            if ((tempItem.a === baseItem.a && tempItem.b === baseItem.b) || (tempItem.a === baseItem.b && tempItem.b === baseItem.a)) {
+                matchedItem = true;
+                break;
+            }
+        }
+        if (!matchedItem) {
+            newData.push(tempItem);
+        }
+    }
+    if (backup) {
+        const holdData = data;
+        data = tempData;
+        await saveDatabaseToFile(`db_itemchange_${Math.floor((new Date()).getTime() / 1000)}.backup`);
+        data = holdData;
+    }
+    return newData;
 }
 
 async function loadData(): Promise<RecipeRow[]> {
