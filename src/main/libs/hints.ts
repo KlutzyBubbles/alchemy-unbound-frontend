@@ -13,16 +13,30 @@ let maxHints = DEFAULT_MAX_HINTS;
 let hint: Hint = DEFAULT_HINT;
 let loaded = false;
 
+const EXCLUDED = ['piney', 'shep3rd', 'klutzybubbles', 'ango', 'uncle', 'flikz', 'tvision'];
+
 async function getBaseHint(): Promise<Recipe | undefined> {
     const alreadyFound = [...new Set(data.filter((value) => value.discovered).map((item) => item.result))];
     let undiscovered = data.filter((value) => !alreadyFound.includes(value.result));
     undiscovered = undiscovered.filter((item) => alreadyFound.includes(item.a) && alreadyFound.includes(item.b));
+    undiscovered = undiscovered.filter((item) => {
+        if (EXCLUDED.includes(item.result) || EXCLUDED.includes(item.a) || EXCLUDED.includes(item.b)) {
+            return false;
+        }
+        return true;
+    });
     undiscovered = undiscovered.sort((a, b) => a.depth - b.depth);
     if (undiscovered.length > 0) {
         return traverseAndFill(undiscovered[0]);
     }
     const alreadyFoundRecipes = [...new Set(data.filter((value) => value.discovered).map((item) => `${item.a}:${item.b}`))];
     let undiscoveredRecipes = data.filter((value) => !alreadyFoundRecipes.includes(`${value.a}:${value.b}`));
+    undiscoveredRecipes = undiscoveredRecipes.filter((item) => {
+        if (EXCLUDED.includes(item.result) || EXCLUDED.includes(item.a) || EXCLUDED.includes(item.b)) {
+            return false;
+        }
+        return true;
+    });
     undiscoveredRecipes = undiscoveredRecipes.sort((a, b) => a.depth - b.depth);
     if (undiscoveredRecipes.length > 0) {
         return traverseAndFill(undiscoveredRecipes[0]);

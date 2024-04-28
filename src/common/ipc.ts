@@ -6,6 +6,7 @@ export enum RecipeChannel {
     GET_FOR = 'recipe:getFor',
     SAVE = 'recipe:save',
     HAS_ALL = 'recipe:hasAll',
+    HAS_ATLEAST = 'recipe:hasAtleast',
 }
 
 export enum ServerChannel {

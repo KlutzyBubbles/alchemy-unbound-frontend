@@ -317,3 +317,18 @@ export function hasAllRecipes(result: string): boolean {
     }
     return hasAll;
 }
+
+export function hasAtleastRecipe(result: string): boolean {
+    const recipes = data.filter((value) => (value.result === result && value.base));
+    if (recipes.length === 0) {
+        return false;
+    }
+    let hasOne = false;
+    for (const recipe of recipes) {
+        if (recipe.discovered) {
+            hasOne = true;
+            break;
+        }
+    }
+    return hasOne;
+}

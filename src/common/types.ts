@@ -39,6 +39,7 @@ export type RecipeRow = {
     depth: number;
     first: number;
     who_discovered: string;
+    hint_ignore?: boolean;
     base: number;
 }
 

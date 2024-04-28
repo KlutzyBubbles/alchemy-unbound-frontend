@@ -1,3 +1,4 @@
+import logger from 'electron-log/renderer';
 import { Stats } from '../../common/stats';
 
 export function unlockCheck(stats: Stats): void {
@@ -12,7 +13,8 @@ export function unlockCheck(stats: Stats): void {
 }
 
 export async function itemRecipeCheck(result: string, achievementName?: string) {
-    if (await window.RecipeAPI.hasAllRecipes(result)) {
+    if (await window.RecipeAPI.hasAtleastRecipe(result)) {
+        logger.debug(`Unlocking achievement ${achievementName ?? result}`);
         window.SteamAPI.activateAchievement(achievementName ?? result);
     }
 }
@@ -30,7 +32,7 @@ export function aiRecipeCheck(aiRecipesFound: number) {
 
 export function baseResultCheck(baseResultsFound: number) {
     do250Check(baseResultsFound, 'discover_base');
-    if (baseResultsFound >= 750) {
+    if (baseResultsFound >= 700) {
         window.SteamAPI.activateAchievement('discover_base_all');
     }
 }

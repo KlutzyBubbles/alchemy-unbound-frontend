@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { Recipe } from '../../common/types';
-import { deleteRecipe, getAllRecipes, getRecipe, getRecipesFor, hasAllRecipes, insertRecipe, save } from '../../main/libs/database';
+import { deleteRecipe, getAllRecipes, getRecipe, getRecipesFor, hasAllRecipes, hasAtleastRecipe, insertRecipe, save } from '../../main/libs/database';
 import { RecipeChannel } from '../../common/ipc';
 
 export const RecipeAPIName = 'RecipeAPI';
@@ -13,6 +13,7 @@ export interface IRecipeAPI {
     getAllRecipes: typeof getAllRecipes,
     save: typeof save,
     hasAllRecipes: typeof hasAllRecipes,
+    hasAtleastRecipe: typeof hasAtleastRecipe,
 }
 
 contextBridge.exposeInMainWorld(RecipeAPIName, {
@@ -23,4 +24,5 @@ contextBridge.exposeInMainWorld(RecipeAPIName, {
     getAllRecipes: () => ipcRenderer.invoke(RecipeChannel.GET_ALL),
     save: () => ipcRenderer.invoke(RecipeChannel.SAVE),
     hasAllRecipes: (result: string) => ipcRenderer.invoke(RecipeChannel.HAS_ALL, result),
+    hasAtleastRecipe: (result: string) => ipcRenderer.invoke(RecipeChannel.HAS_ATLEAST, result),
 });
