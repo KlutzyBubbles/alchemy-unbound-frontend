@@ -1,4 +1,4 @@
-import { useState, type FC, type ReactNode, useEffect, useContext, useRef } from 'react';
+import { useState, type FC, type ReactNode, useEffect, useContext, useRef, Fragment } from 'react';
 import { ConnectableElement, DragSourceOptions, useDrag, useDrop } from 'react-dnd';
 import { Recipe, RecipeElement } from '../../common/types';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -67,17 +67,21 @@ export const MainElement: FC<BoxProps> = ({
     };
     const [recipes, setRecipes] = useState<Recipe[]>(element.recipes);
     const [isBase, setIsBase] = useState<boolean>(true);
+    const [isAI, setIsAI] = useState<boolean>(false);
     const mounted = useRef(false);
 
     useEffect(() => {
         let isBase = false;
+        let isAI = false;
         for (const recipe of element.recipes) {
             if (recipe.base) {
                 isBase = true;
-                break;
+            } else {
+                isAI = true;
             }
         }
         setIsBase(isBase);
+        setIsAI(isAI);
     }, [element]);
     
     const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
@@ -359,7 +363,8 @@ export const MainElement: FC<BoxProps> = ({
                 <Dropdown.Menu>
                     <Dropdown.ItemText>
                         <button className={`btn badge text-bg-${locked ? 'secondary' : 'primary'} rounded-pill`} onClick={() => lockBox(dragId, !locked)}>{locked ? (<IoLockClosedOutline/>) : (<IoLockOpenOutline/>)}</button>
-                        <div className={`badge text-bg-${isBase ? 'secondary' : 'success'} rounded-pill float-end fs-6`}>{isBase ? 'Base' : 'AI'}</div>
+                        {isBase ? (<div className='badge text-bg-secondary rounded-pill float-end fs-6 ms-2'>Base</div>) : (<Fragment/>)}
+                        {isAI ? (<div className='badge text-bg-success rounded-pill float-end fs-6 ms-2'>AI</div>) : (<Fragment/>)}
                     </Dropdown.ItemText>
                     {recipes.filter((item) => item.discovered).map((recipe) => {
                         if (recipe.a.name === '' || recipe.b.name === '') {

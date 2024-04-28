@@ -168,7 +168,7 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
             ${type === ItemTypes.SIDE_ELEMENT ? dragging ? '' : 'mt-2 ms-2' : ''}
             element
             ${locked ? 'locked' : ''}
-            ${firstDiscovered ? 'holo' : ''}
+            ${firstDiscovered && !base ? 'holo' : ''}
             ${base ? 'foil' : 'generated'}
             ${maxDepth ? 'rainbow' : ''}
             ${dragging ? 'shadow' : ''}
