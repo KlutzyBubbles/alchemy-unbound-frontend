@@ -329,7 +329,12 @@ export const DropContainer: FC<ContainerProps> = ({
         if (hasProp(workingBoxes, a)) {
             try {
                 mergeState(a, undefined, 'loading', true);
-                const { recipe, newDiscovery, firstDiscovery } = await backendCombine(workingBoxes[a].element.name, bName);
+                const backendResult = await backendCombine(workingBoxes[a].element.name, bName);
+                if (backendResult === undefined) {
+                    mergeState(a, undefined, 'loading', false);
+                    return;
+                }
+                const { recipe, newDiscovery, firstDiscovery } = backendResult;
                 mergeState(a, undefined, 'loading', false);
                 playSound('drop', 0.5);
                 const updatedRecipes = await window.RecipeAPI.getRecipesFor(recipe.result);
@@ -410,7 +415,12 @@ export const DropContainer: FC<ContainerProps> = ({
         if (hasProp(workingBoxes, a) && hasProp(workingBoxes, b)) {
             try {
                 mergeState(a, b, 'loading', true);
-                const { recipe, recipes, newDiscovery, firstDiscovery } = await backendCombine(workingBoxes[a].element.name, workingBoxes[b].element.name);
+                const backendResult = await backendCombine(workingBoxes[a].element.name, workingBoxes[b].element.name);
+                if (backendResult === undefined) {
+                    mergeState(a, b, 'loading', false);
+                    return;
+                }
+                const { recipe, recipes, newDiscovery, firstDiscovery } = backendResult;
                 mergeState(a, b, 'loading', false);
                 playSound('drop', 0.5);
                 logger.debug('updatingboxes', {

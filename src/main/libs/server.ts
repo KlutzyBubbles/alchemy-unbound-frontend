@@ -11,6 +11,8 @@ export type RequestErrorResult = {
   message: string
 }
 
+const TIMEOUT = 30000;
+
 // let endpoint = 'http://localhost:5001';
 let endpoint = 'https://api.alchemyunbound.net';
 // let endpoint = 'https://alchemy-unbound-prerelease-b687af701d77.herokuapp.com';
@@ -43,7 +45,8 @@ async function refreshToken(): Promise<TokenHolderResponse> {
                     headers: new Headers({
                         'Authorization': `Bearer ${token.token}`, 
                         'Content-Type': 'application/json'
-                    })
+                    }),
+                    timeout: TIMEOUT
                 });
             } catch(e) {
                 logger.error('Failed to make token API request', e);
@@ -95,6 +98,7 @@ async function createToken(): Promise<TokenHolderResponse> {
     try {
         response = await fetch(`${endpoint}/session/v1?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}&steamLanguage=${getSteamGameLanguage()}`, {
             method: 'POST',
+            timeout: TIMEOUT
         });
     } catch(e) {
         logger.error('Failed to make steam token API request', e);
@@ -180,7 +184,8 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                 logger.debug('combine url', url, headers.Authorization);
                 const response = await fetch(url, {
                     method: 'GET',
-                    headers: headers
+                    headers: headers,
+                    timeout: TIMEOUT
                 });
                 if (response.ok) {
                     const body: Recipe = (await response.json()) as Recipe;
@@ -319,7 +324,8 @@ export async function submitIdea(a: string, b: string, result: string): Promise<
             logger.debug('idea url', url, headers.Authorization);
             const response = await fetch(url, {
                 method: 'GET',
-                headers: headers
+                headers: headers,
+                timeout: TIMEOUT
             });
             if (response.ok) {
                 const body: Recipe = (await response.json()) as Recipe;
