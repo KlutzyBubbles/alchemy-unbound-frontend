@@ -31,6 +31,7 @@ export type ItemRendererProps = {
     exit?: TargetAndTransition | VariantLabels
     locked?: boolean
     children?: ReactNode
+    style?: CSSProperties
 }
 
 function getItemStyles(
@@ -102,7 +103,8 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
         onMouseDown,
         variants,
         animate,
-        exit
+        exit,
+        style
     } = props;
 
     let {
@@ -165,7 +167,7 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
     return (
         <motion.div
             className={`${type}-element btn btn-element p-0
-            ${type === ItemTypes.SIDE_ELEMENT ? dragging ? '' : 'mt-2 ms-2' : ''}
+            ${dragging ? '' : type === ItemTypes.SIDE_ELEMENT ? 'mt-2 ms-2' : ''}
             element
             ${locked ? 'locked' : ''}
             ${firstDiscovered && !base ? 'holo' : ''}
@@ -192,6 +194,7 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
             style={{
                 ...(type === ItemTypes.MAIN_ELEMENT || type === ItemTypes.LOCKED_ELEMENT ? getMainStyles(left, top, dragging, locked) : {}),
                 ...(dragging ? getItemStyles(initialOffset, currentOffset) : {}),
+                ...(style === undefined ? {} : style),
                 // zIndex: dragging ? 69 : 50,
                 // backgroundPosition: `var(${xy.x}px) var(${xy.y}px)`,
                 '--pointer-x': '50%',

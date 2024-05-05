@@ -1,4 +1,4 @@
-import { useEffect, type FC, type ReactNode, useContext, useRef, memo } from 'react';
+import { useEffect, type FC, type ReactNode, useContext, useRef, memo, CSSProperties } from 'react';
 import { XYCoord, useDrag } from 'react-dnd';
 import { RecipeElement } from '../../common/types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -12,6 +12,8 @@ export type SideElementProps = {
   removeBox: (id: string) => void,
   addBox: (element: RecipeElement, combining: boolean) => Promise<string>
   children?: ReactNode
+  style?: CSSProperties
+  performance: boolean
 }
 
 const SideElementInternal: FC<SideElementProps> = ({

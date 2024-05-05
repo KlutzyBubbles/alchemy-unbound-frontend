@@ -1,14 +1,10 @@
-import { useState, type ChangeEventHandler, type FC, useEffect, useContext, MouseEventHandler, useRef } from 'react';
-import { useDrop } from 'react-dnd';
+import { useState, type ChangeEventHandler, type FC, useContext, MouseEventHandler, useRef } from 'react';
 import { RecipeElement } from '../../common/types';
-import { SideElement } from './SideElement';
-import { DragItem, ItemTypes } from '../types';
-import { getXY } from '../utils';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { IoArrowDown, IoArrowUp, IoFilterOutline } from 'react-icons/io5';
 import { getFromStore } from '../language';
-import { SoundContext } from '../providers/SoundProvider';
 import logger from 'electron-log/renderer';
+import { SideList } from './SideList';
 
 export interface ContainerProps {
   removeBox: (id: string) => void,
@@ -27,7 +23,6 @@ export const SideContainer: FC<ContainerProps> = ({
     addBox,
     elements                     
 }) => {
-    const [filteredElements, setFilteredElements] = useState<RecipeElement[]>(elements);
     const timeout = useRef<NodeJS.Timeout>(undefined);
     const [sortBy, setSortBy] = useState<number>(0);
     const [sortAscending, setSortAscending] = useState<boolean>(false);
@@ -35,102 +30,6 @@ export const SideContainer: FC<ContainerProps> = ({
     const [searchText, setSearchText] = useState<string>('');
     const [searchTextFinal, setSearchTextFinal] = useState<string>('');
     const { settings } = useContext(SettingsContext);
-    const { playSound } = useContext(SoundContext);
-
-    const [{ isOver }, drop] = useDrop(
-        () => ({
-            accept: [ItemTypes.ELEMENT, ItemTypes.LOCKED_ELEMENT],
-            drop(item: DragItem, monitor) {
-                if (monitor.didDrop()) {
-                    return;
-                }
-                if (item.id !== undefined) {
-                    playSound('side-drop');
-                    if (item.type !== ItemTypes.LOCKED_ELEMENT) {
-                        const { x, y } = getXY(item, monitor);
-                        moveBox(item.id, x, y).then(() => {
-                            (new Promise(resolve => setTimeout(resolve, 100))).then(() => {
-                                removeBox(item.id);
-                            });
-                        });
-                    }
-                }
-            },
-            collect: (monitor) => ({
-                isOver: monitor.isOver(),
-            }),
-        }),
-        [removeBox],
-    );
-
-    const filterList = async (list: RecipeElement[], searchText: string, currentFilter: string): Promise<RecipeElement[]> => {
-        let filteredTemp = list;
-        if (searchText !== '') {
-            const sanitizedSearch = searchText.replace(/[#-.]|[[-^]|[?|{}]/g, '\\$&');
-            filteredTemp = filteredTemp.filter((element) => {
-                if (element.display[settings.language].toLocaleLowerCase().search(sanitizedSearch) !== -1) {
-                    return true;
-                }
-                if (element.emoji === searchText) {
-                    return true;
-                }
-                return false;
-            });
-        }
-        if (currentFilter !== 'all') {
-            if (currentFilter === 'base') {
-                filteredTemp = filteredTemp.filter((element) => element.base);
-            } else if (currentFilter === 'firstDiscovered') {
-                filteredTemp = filteredTemp.filter((element) => element.first);
-            }
-        }
-        return filteredTemp;
-    };
-
-    useEffect(() => {
-        runFilter();
-    }, [filter, searchTextFinal]);
-
-    const runFilter = async () => {
-        let filteredTemp = await filterList(elements.map((x) => x), searchTextFinal, filterOptions[filter]);
-        filteredTemp = await sortList(filteredTemp.map((x) => x), sortByOptions[sortBy], sortAscending);
-        setFilteredElements(filteredTemp);
-    };
-
-    const runSort = async () => {
-        const sortByOption = sortByOptions[sortBy];
-        const sortedTemp = await sortList(filteredElements.map((x) => x), sortByOption, sortAscending);
-        setFilteredElements(sortedTemp);
-    };
-
-    const sortList = async (list: RecipeElement[], sortByOption: string, sortAscending: boolean): Promise<RecipeElement[]> => {
-        let sortedTemp = list.sort((a, b) => {
-            // const sortByOptions = ['discovered', 'name', 'emoji', 'depth'];
-            if (sortByOption === 'discovered') {
-                // This one is inverted to go from most recent
-                //console.log('Sorting discovered', aOrder < bOrder ? 1 : aOrder > bOrder ? -1 : 0, a.name, b.name, aOrder, bOrder);
-                return a.sortOrder < b.sortOrder ? -1 : a.sortOrder > b.sortOrder ? 1 : 0;
-            } else if (sortByOption === 'name') {
-                //console.log('Sorting name', a.name < b.name ? -1 : a.name > b.name ? 1 : 0, a.name, b.name);
-                return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
-            } else if (sortByOption === 'emoji') {
-                //console.log('Sorting emoji', a.emoji < b.emoji ? -1 : a.emoji > b.emoji ? 1 : 0, a.emoji, b.emoji);
-                return a.emoji < b.emoji ? -1 : a.emoji > b.emoji ? 1 : 0;
-            } else if (sortByOption === 'depth') {
-                //console.log('Sorting depth', aDepth < bDepth ? -1 : aDepth > bDepth ? 1 : 0, a.name, b.name, aDepth, bDepth);
-                return a.sortDepth < b.sortDepth ? -1 : a.sortDepth > b.sortDepth ? 1 : 0;
-            }
-            return 0;
-        });
-        if (sortAscending) {
-            sortedTemp = sortedTemp.reverse();
-        }
-        return sortedTemp;
-    };
-
-    useEffect(() => {
-        runSort();
-    }, [sortBy, sortAscending]);
 
     const onSearchType: ChangeEventHandler<HTMLInputElement> = (e) => {
         if (['send help', 'help me', 'please help', 'halp'].includes(e.target.value.toLocaleLowerCase())) {
@@ -146,10 +45,6 @@ export const SideContainer: FC<ContainerProps> = ({
             setSearchTextFinal(value);
         }, 500);
     };
-
-    useEffect(() => {
-        runFilter();
-    }, [elements]);
 
     const onFilterClick: MouseEventHandler<HTMLDivElement> = () => {
         let newFilter = filter + 1;
@@ -173,20 +68,16 @@ export const SideContainer: FC<ContainerProps> = ({
 
     return (
         <div className='side-container vh-100 d-flex flex-column position-sticky z-side'>
-            <div ref={drop} className={`${isOver ? 'is-over' : ''} overflow-y-scroll overflow-x-hidden h-100 pb-2 pe-2`}>
-                {filteredElements.filter((item) => {
-                    let discovered = false;
-                    for (const recipe of item.recipes) {
-                        if (recipe.discovered) {
-                            discovered = true;
-                            break;
-                        }
-                    }
-                    return discovered;
-                }).map((element) => {
-                    return (<SideElement key={element.name} element={element} removeBox={removeBox} addBox={addBox} />);
-                })}
-            </div>
+            <SideList
+                removeBox={removeBox}
+                addBox={addBox}
+                moveBox={moveBox}
+                elements={elements}
+                filter={filter}
+                searchText={searchTextFinal}
+                sortBy={sortBy}
+                sortAscending={sortAscending}
+                performance={false}/>
             <div className='footer mt-auto'>
                 <div className='row mx-0'>
                     <div className='col-5 d-grid gap-0 px-0'>
