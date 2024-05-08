@@ -5,6 +5,7 @@ import { LanguageStore as DialogLanguageStore } from './sections/dialog';
 import { LanguageStore as SideLanguageStore } from './sections/side';
 import { LanguageStore as ErrorsLanguageStore } from './sections/errors';
 import { LanguageStore as IdeaLanguageStore } from './sections/idea';
+import { LanguageStore as MenuLanguageStore } from './sections/menu';
 
 export type LanguageStoreRecurring = {
     [key: string]: Languages | LanguageStoreRecurring
@@ -17,6 +18,7 @@ export const LanguageStore: LanguageStoreRecurring = {
     side: SideLanguageStore,
     errors: ErrorsLanguageStore,
     idea: IdeaLanguageStore,
+    menu: MenuLanguageStore,
     hintTooltip: {
         english: 'Click to use a hint point',
         schinese: '点击使用提示点',

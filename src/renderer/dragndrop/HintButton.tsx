@@ -87,14 +87,14 @@ export const HintButton: FC<HintButtonProps> = ({
     return (
         <Fragment>
             <div
-                className="hint-drop dropstart float-end mb-2 fs-2"
+                className="hint-drop dropstart float-end mb-2 fs-1"
                 ref={tooltipRef}
                 data-bs-display="static"
                 onMouseEnter={onHoverStart}
                 onMouseLeave={onHoverEnd}
             >
                 <button
-                    className="btn btn-secondary btn btn-info fs-2 p-2 d-flex"
+                    className="btn btn-secondary btn btn-info fs-1 p-2 d-flex"
                     type="button"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
@@ -104,7 +104,7 @@ export const HintButton: FC<HintButtonProps> = ({
                     <span className={`
                         position-absolute
                         top-0
-                        start-100
+                        start-0
                         translate-middle
                         badge
                         rounded-pill

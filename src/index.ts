@@ -153,6 +153,9 @@ app
         protocol.handle('sound', (request) => {
             return net.fetch('file://' + path.join(__dirname, 'sounds', request.url.slice('sound://'.length)));
         });
+        protocol.handle('image', (request) => {
+            return net.fetch('file://' + path.join(__dirname, 'images', request.url.slice('image://'.length)));
+        });
         await createDatabase();
         register();
         await installExtension(REACT_DEVELOPER_TOOLS);

@@ -1,5 +1,5 @@
 import update from 'immutability-helper';
-import type { FC, FocusEventHandler, KeyboardEventHandler } from 'react';
+import type { FC } from 'react';
 import { Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
 
@@ -20,6 +20,7 @@ import { LoadingContext } from '../providers/LoadingProvider';
 import { itemRecipeCheck, unlockCheck } from '../utils/achievements';
 import { MainButtons } from './MainButtons';
 import { SettingsContext } from '../providers/SettingsProvider';
+import { IoMenuOutline } from 'react-icons/io5';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
@@ -53,10 +54,15 @@ export const DropContainer: FC<ContainerProps> = ({
     useEffect(() => {
         refreshRecipes();
         mainElement.current.focus();
+        
+        document.addEventListener('keydown', handleKeyDown2, false);
+        document.addEventListener('keyup', handleKeyUp2, false);
         return () => {
             if (speedTimerRef.current !== undefined) {
                 clearTimeout(speedTimerRef.current);
             }
+            document.removeEventListener('keydown', handleKeyDown2, false);
+            document.removeEventListener('keyup', handleKeyUp2, false);
         };
     }, []);
 
@@ -644,42 +650,39 @@ export const DropContainer: FC<ContainerProps> = ({
         }
     };
 
-    const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (e) => {
-        if (e.key === settings.keybinds.copy) {
+    const handleKeyDown2: EventListenerOrEventListenerObject = (e) => {
+        console.log('keydown', e);
+        const event = e as KeyboardEvent;
+        if (event.key === settings.keybinds.copy) {
             setCopyHeld(true);
         }
-        if (e.key === settings.keybinds.remove) {
+        if (event.key === settings.keybinds.remove) {
             setRemoveHeld(true);
         }
-        if (e.key === settings.keybinds.lock) {
+        if (event.key === settings.keybinds.lock) {
             if (currentHover.current !== undefined) {
                 invertLock(currentHover.current);
             }
         }
     };
 
-    const handleKeyUp: KeyboardEventHandler<HTMLDivElement> = (e) => {
-        if (e.key === settings.keybinds.copy) {
+    const handleKeyUp2: EventListenerOrEventListenerObject = (e) => {
+        console.log('keyup', e);
+        const event = e as KeyboardEvent;
+        if (event.key === settings.keybinds.copy) {
             setCopyHeld(false);
         }
-        if (e.key === settings.keybinds.remove) {
+        if (event.key === settings.keybinds.remove) {
             setRemoveHeld(false);
-        }
-    };
-
-    const handleBlur: FocusEventHandler<HTMLDivElement> = (e) => {
-        if (e.relatedTarget === undefined || e.relatedTarget === null) {
-            return mainElement.current.focus();
-        }
-        if (e.relatedTarget.classList.contains('override-focus')) {
-            return;
-        } else {
-            return mainElement.current.focus();
         }
     };
 
     const clearAll = () => {
         setBoxes({});
+    };
+
+    const openMenu = () => {
+        console.log('openMenu');
     };
 
     const elementControls = useAnimation();
@@ -692,8 +695,16 @@ export const DropContainer: FC<ContainerProps> = ({
                 gutterSize={2}
                 snapOffset={0}
             >
-                <div className='main-container' ref={mainElement} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} tabIndex={0} onBlur={handleBlur}>
+                <div
+                    className='main-container'
+                    ref={mainElement}
+                    tabIndex={0}
+                >
                     <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
+                        <div
+                            className='btn btn-no-outline float-start mb-2 fs-1 d-flex p-2 position-fixed z-mainButtons'
+                            onClick={openMenu}
+                            data-bs-toggle="offcanvas" data-bs-target="#sideMenu"><IoMenuOutline /></div>
                         <AnimatePresence>
                             {boxes === undefined ? (<Fragment/>) : Object.keys(boxes).filter((v) => v !== undefined).map((key) => {
                                 const { left, top, element, combining, newCombining, loading, error, newDiscovery, firstDiscovery, locked } = boxes[key];

@@ -11,8 +11,10 @@ import { SettingsContext } from './providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { LoadingContext } from './providers/LoadingProvider';
 import { IdeaModal } from './modals/IdeaModal';
+import { SideMenu } from './dragndrop/SideMenu';
+import { StatsModal } from './modals/StatsModal';
 
-export type ModalOption = 'settings' | 'info' | 'idea' | 'none';
+export type ModalOption = 'settings' | 'info' | 'idea' | 'stats' | 'store' | 'none';
 
 export const ContentContainer: FC = () => {
     const { settings } = useContext(SettingsContext);
@@ -79,8 +81,10 @@ export const ContentContainer: FC = () => {
                         /> : <Fragment/>}
                         <DropContainer openModal={openModal}/>
                     </Row>
+                    <SideMenu openModal={openModal} />
                     <SettingsModal show={currentModal === 'settings'} handleHide={handleModalClose} />
                     <InfoModal show={currentModal === 'info'} handleHide={handleModalClose} />
+                    <StatsModal show={currentModal === 'stats'} handleHide={handleModalClose} />
                     <IdeaModal show={currentModal === 'idea'} handleHide={handleModalClose} />
                 </Container>
             </div>

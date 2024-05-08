@@ -82,29 +82,31 @@ export const SideContainer: FC<ContainerProps> = ({
                 <div className='row mx-0'>
                     <div className='col-5 d-grid gap-0 px-0'>
                         <div
-                            className='btn btn-no-radius btn-left-hover'
+                            className='btn btn-no-radius btn-left-hover px-1'
                             onClick={onFilterClick}>
                             <IoFilterOutline/> {getFromStore(`side.${filterOptions[filter]}`, settings.language)}
                         </div>
                     </div>
                     <div className='col-2 d-grid gap-0 px-0'>
                         <div
-                            className='btn btn-no-radius btn-left-hover'
+                            className='btn btn-no-radius btn-left-hover px-1'
                             onClick={onDirectionClick}>
                             { sortAscending ? <IoArrowUp/> : <IoArrowDown/> }
                         </div>
                     </div>
                     <div className='col-5 d-grid gap-0 px-0'>
-                        <div className='btn btn-no-radius btn-right-hover' onClick={onSortClick}>
+                        <div 
+                            className='btn btn-no-radius btn-right-hover px-1'
+                            onClick={onSortClick}>
                             {getFromStore('side.sortBy', settings.language)} {getFromStore(`side.${sortByOptions[sortBy]}`, settings.language)}
                         </div>
                     </div>
                 </div>
                 <div className='row mx-0'>
-                    <div className="px-2 mb-3 mt-1">
+                    <div className="p-0 m-0">
                         <input
                             type="search"
-                            className="form-control form-control-lg override-focus"
+                            className="form-control form-control-lg override-focus border-start-0 border-end-0 border-bottom-0 rounded-0"
                             value={searchText}
                             onChange={onSearchType}
                             placeholder={getFromStore('side.search', settings.language).replace('{0}', `${elements.filter((item) => {

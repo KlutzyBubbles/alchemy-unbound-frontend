@@ -64,6 +64,27 @@
     }
 }
 
+.side-menu {
+    background-color: $side-bg;
+
+    .btn-left-hover {
+        background: $side-button-bg;
+        color: $side-button-color;
+        background-size: 210% 100%;
+        background-position: right bottom;
+        transition: background-color 0.3s ease-out;
+        transition: background-position 0.2s ease-out;
+    }
+
+    .btn-left-hover:hover,
+    .btn-left-hover:active {
+        color: $side-button-color-hover;
+        background: linear-gradient(to right, $side-button-bg-hover 50%, $side-button-bg 50%);
+        background-size: 210% 100%;
+        background-position: left bottom;
+    }
+}
+
 .side-container {
     background-color: $side-bg;
 
