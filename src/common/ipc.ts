@@ -12,7 +12,9 @@ export enum RecipeChannel {
 export enum ServerChannel {
     COMBINE = 'server:combine',
     IDEA = 'server:idea',
-    GET_TOKEN = 'server:getToken'
+    GET_TOKEN = 'server:getToken',
+    GET_VERSION = 'server:getVersion',
+    GET_ENDPOINT = 'server:getEndpoint'
 }
 
 export enum ErrorChannel {
@@ -55,6 +57,7 @@ export enum StatsChannel {
 
 export enum GenericChannel {
     GET_VERSIONS = 'generic:getVersions',
+    GET_FILE_VERSIONS = 'generic:getFileVersions',
     GET_SYSTEM_INFO = 'generic:getSystemInfo',
     GET_IS_PACKAGED = 'generic:isPackaged',
     QUIT = 'generic:quit',

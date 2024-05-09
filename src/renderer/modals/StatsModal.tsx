@@ -1,6 +1,6 @@
 import { useState, type FC, useEffect, useContext } from 'react';
 import { Collapse, Modal, Table } from 'react-bootstrap';
-import { AppVersions, ErrorEntry, SystemVersion } from '../../common/types';
+import { AppVersions, ErrorEntry, FileVersions, LATEST_SERVER_VERSION, SystemVersion } from '../../common/types';
 import { SettingsContext } from '../providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
@@ -20,7 +20,10 @@ export const StatsModal: FC<StatsModalProps> = ({
 }) => {
     const { settings } = useContext(SettingsContext);
     const [appVersions, setAppVersions] = useState<AppVersions>({ node: '', electron: '', chrome: '', app: ''});
+    const [fileVersions, setFileVersions] = useState<FileVersions>({ database: -3, hint: -3, stats: -3, settings: -3});
     const [systemInformation, setSystemInformation] = useState<SystemVersion>({ arch: '', platform: '', version: '' });
+    const [serverVersion, setServerVersion] = useState<number>(LATEST_SERVER_VERSION);
+    const [serverEndpoint, setServerEndpoint] = useState<string>('UNKNONW');
     const [advanced, setAdvanced] = useState<boolean>(false);
     const [stats, setStats] = useState<Stats>(DEFAULT_STATS);
     const [errors, setErrors] = useState<ErrorEntry[]>([]);
@@ -29,7 +32,10 @@ export const StatsModal: FC<StatsModalProps> = ({
         (async () => {
             try {
                 setAppVersions(await window.GenericAPI.getAppVersions());
+                setFileVersions(await window.GenericAPI.getFileVersions());
                 setSystemInformation(await window.GenericAPI.getSystemInformation());
+                setServerVersion(await window.ServerAPI.getVersion());
+                setServerEndpoint(await window.ServerAPI.getEndpoint());
             } catch (e) {
                 logger.error('Failed to load system information', e);
             }
@@ -106,7 +112,7 @@ export const StatsModal: FC<StatsModalProps> = ({
                 <Collapse in={advanced}>
                     <div>
                         <div className='row'>
-                            <div className='col-12 col-lg-6'>
+                            <div className='col-12 col-lg-6 col-xl-3'>
                                 <Table striped bordered hover size="sm">
                                     <tbody>
                                         <tr>
@@ -128,7 +134,7 @@ export const StatsModal: FC<StatsModalProps> = ({
                                     </tbody>
                                 </Table>
                             </div>
-                            <div className='col-12 col-lg-6'>
+                            <div className='col-12 col-lg-6 col-xl-3'>
                                 <Table striped bordered hover size="sm">
                                     <tbody>
                                         <tr>
@@ -142,6 +148,42 @@ export const StatsModal: FC<StatsModalProps> = ({
                                         <tr>
                                             <td>Version</td>
                                             <td>{systemInformation.version}</td>
+                                        </tr>
+                                    </tbody>
+                                </Table>
+                            </div>
+                            <div className='col-12 col-lg-6 col-xl-3'>
+                                <Table striped bordered hover size="sm">
+                                    <tbody>
+                                        <tr>
+                                            <td>Database</td>
+                                            <td>{fileVersions.database}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Hints</td>
+                                            <td>{fileVersions.hint}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Stats</td>
+                                            <td>{fileVersions.stats}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Settings</td>
+                                            <td>{fileVersions.settings}</td>
+                                        </tr>
+                                    </tbody>
+                                </Table>
+                            </div>
+                            <div className='col-12 col-lg-6 col-xl-3'>
+                                <Table striped bordered hover size="sm">
+                                    <tbody>
+                                        <tr>
+                                            <td>Server Version</td>
+                                            <td>{serverVersion}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Server URI</td>
+                                            <td>{serverEndpoint}</td>
                                         </tr>
                                     </tbody>
                                 </Table>

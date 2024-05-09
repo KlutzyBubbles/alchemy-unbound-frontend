@@ -1,11 +1,11 @@
 import { ipcMain } from 'electron';
 import { ErrorEntryAdd, Recipe } from '../common/types';
 import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor, hasAllRecipes, hasAtleastRecipe } from './libs/database';
-import { combine, getToken, submitIdea } from './libs/server';
+import { combine, getEndpoint, getToken, getVersion, submitIdea } from './libs/server';
 import { DisplayChannel, ErrorChannel, GenericChannel, HintChannel, ImportExportChannel, RecipeChannel, ServerChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
 import { Settings } from '../common/settings';
 import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './libs/settings';
-import { getAppVersions, isPackaged, getSystemInformation, quit } from './libs/generic';
+import { getAppVersions, isPackaged, getSystemInformation, quit, getFileVersions } from './libs/generic';
 import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from './libs/display';
 import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated, isDlcInstalled } from './libs/steam';
 import { getStats, loadStats, saveStats, setStat, setStats } from './libs/stats';
@@ -51,6 +51,12 @@ export function register() {
     });
     ipcMain.handle(ServerChannel.IDEA, async (_, a: string, b: string, result: string) => {
         return submitIdea(a, b, result);
+    });
+    ipcMain.handle(ServerChannel.GET_VERSION, async () => {
+        return getVersion();
+    });
+    ipcMain.handle(ServerChannel.GET_ENDPOINT, async () => {
+        return getEndpoint();
     });
 
     // Error handlers
@@ -98,6 +104,9 @@ export function register() {
     // Generic handlers
     ipcMain.handle(GenericChannel.GET_VERSIONS, async () => {
         return getAppVersions();
+    });
+    ipcMain.handle(GenericChannel.GET_FILE_VERSIONS, async () => {
+        return getFileVersions();
     });
     ipcMain.handle(GenericChannel.GET_SYSTEM_INFO, async () => {
         return getSystemInformation();

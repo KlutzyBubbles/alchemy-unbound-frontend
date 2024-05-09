@@ -77,6 +77,13 @@ export type AppVersions = {
     app: string
 }
 
+export type FileVersions = {
+    database: number,
+    hint: number,
+    stats: number,
+    settings: number
+}
+
 export type TokenHolder = {
     token: string,
     steamId: string,
@@ -170,3 +177,5 @@ export const SoundFiles: SoundFile[] = ['first-discovery', 'new-discovery', 'pic
 
 export const SUPPORTER_DLC = 2911170;
 export const HINT_DLC = 2920230;
+
+export const LATEST_SERVER_VERSION = 2;

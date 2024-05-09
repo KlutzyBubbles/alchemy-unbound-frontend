@@ -1,6 +1,9 @@
 import { app } from 'electron';
 import * as appInfo from '../../../package.json';
-import { SystemVersion, AppVersions } from '../../common/types';
+import { SystemVersion, AppVersions, FileVersions } from '../../common/types';
+import { getHintVersion } from './hints';
+import { getDatabaseVersion } from './database';
+import { getSettingsVersion } from './settings';
 
 export function getAppVersions(): AppVersions {
     return {
@@ -8,6 +11,15 @@ export function getAppVersions(): AppVersions {
         electron: process.versions.electron,
         chrome: process.versions.chrome,
         app: getAppVersion()
+    };
+}
+
+export function getFileVersions(): FileVersions {
+    return {
+        database: getDatabaseVersion(),
+        hint: getHintVersion(),
+        stats: -1,
+        settings: getSettingsVersion()
     };
 }
 

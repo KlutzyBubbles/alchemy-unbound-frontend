@@ -358,4 +358,21 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '無法在離線模式下進行API請求',
         koreana: '오프라인 모드에서 API 요청을 할 수 없습니다'
     },
+    legacy: {
+        english: 'Your save file is legacy and may not work properly',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
+    },
 };

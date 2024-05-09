@@ -744,7 +744,13 @@ export const DropContainer: FC<ContainerProps> = ({
                             })}
                         </AnimatePresence>
                         <CustomDragLayer/>
-                        <MainButtons clearAll={clearAll} openModal={openModal} refreshHint={refreshHint} deprecated={deprecated} rateLimited={rateLimited} devButton={devButton}/>
+                        <MainButtons
+                            clearAll={clearAll}
+                            openModal={openModal}
+                            refreshHint={refreshHint}
+                            deprecated={deprecated}
+                            rateLimited={rateLimited}
+                            devButton={devButton}/>
                     </div>
                 </div>
                 <SideContainer

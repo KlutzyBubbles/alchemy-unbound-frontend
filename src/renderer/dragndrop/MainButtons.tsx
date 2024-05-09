@@ -1,14 +1,14 @@
 import type { FC } from 'react';
 import { Fragment, useContext, useRef, useState } from 'react';
 
-import { IoCloudDownloadOutline, IoCloudOfflineOutline, IoSpeedometerOutline, IoTrashOutline } from 'react-icons/io5';
+import { IoCloudDownloadOutline, IoCloudOfflineOutline, IoConstructOutline, IoSpeedometerOutline, IoTrashOutline } from 'react-icons/io5';
 //import { useAnimation } from 'framer-motion';
 import { ModalOption } from '../Container';
 import { SettingsContext } from '../providers/SettingsProvider';
-//import { InfoContext } from '../providers/InfoProvider';
 import { HintButton } from './HintButton';
 import { Overlay, Tooltip } from 'react-bootstrap';
 import { getFromStore } from '../language';
+import { InfoContext } from '../providers/InfoProvider';
 
 export interface MainButtonProps {
     openModal: (option: ModalOption) => void
@@ -28,11 +28,13 @@ export const MainButtons: FC<MainButtonProps> = ({
     rateLimited
 }) => {
     const { settings } = useContext(SettingsContext);
-    //const { isProduction } = useContext(InfoContext);
+    const { isLegacy } = useContext(InfoContext);
     const [showDeprecatedTooltip, setShowDeprecatedTooltip] = useState<boolean>(false);
     const [showRateTooltip, setShowRateTooltip] = useState<boolean>(false);
+    const [showLegacyTooltip, setShowLegacyTooltip] = useState<boolean>(false);
     const deprecatedRef = useRef(undefined);
     const rateLimitedRef = useRef(undefined);
+    const legacyRef = useRef(undefined);
 
     // const onSettingsMouseEnter = () => {
     //     settingsControls.start('start');
@@ -100,6 +102,21 @@ export const MainButtons: FC<MainButtonProps> = ({
                     {(props) => (
                         <Tooltip id="overlay-example" {...props}>
                             {getFromStore('errors.rateLimited', settings.language)}
+                        </Tooltip>
+                    )}
+                </Overlay>
+            </Fragment>) : (<Fragment/>)}
+            {isLegacy ? (<Fragment>
+                <div
+                    ref={legacyRef}
+                    className='btn btn-deprecated float-end mb-2 fs-1 d-flex p-2'
+                    onMouseEnter={() => setShowLegacyTooltip(true)}
+                    onMouseLeave={() => setShowLegacyTooltip(false)}
+                ><IoConstructOutline /></div>
+                <Overlay target={legacyRef.current} show={showLegacyTooltip} placement="left">
+                    {(props) => (
+                        <Tooltip id="overlay-example" {...props}>
+                            {getFromStore('errors.legacy', settings.language)}
                         </Tooltip>
                     )}
                 </Overlay>

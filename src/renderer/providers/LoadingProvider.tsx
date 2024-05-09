@@ -22,13 +22,18 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
     children
 }) => {
     const { setSettings } = useContext(SettingsContext);
-    const { setIsProduction, setHasSupporterTheme } = useContext(InfoContext);
+    const { setIsProduction, setHasSupporterTheme, setIsLegacy } = useContext(InfoContext);
     const [loading, setLoading] = useState<boolean>(true);
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout>(undefined);
 
     useEffect(() => {
         (async () => {
             if (loading) {
+                try {
+                    setIsLegacy((await window.ServerAPI.getVersion()) === 1);
+                } catch (e) {
+                    logger.error('Failed to load legacy check', e);
+                }
                 try {
                     setIsProduction(await window.GenericAPI.isPackaged());
                 } catch (e) {

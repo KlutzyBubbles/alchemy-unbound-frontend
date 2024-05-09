@@ -1,4 +1,4 @@
-import { BasicElement, Languages, Recipe, RecipeRow } from '../../common/types';
+import { BasicElement, LATEST_SERVER_VERSION, Languages, Recipe, RecipeRow } from '../../common/types';
 import { promises as fs } from 'fs';
 import { Compressed, compress, decompress } from 'compress-json';
 import { getFolder } from './steam';
@@ -12,12 +12,22 @@ import { addHintPoint, resetHint } from './hints';
 const DATABASE_VERISON = 2;
 
 export let data: RecipeRow[] = [];
+export let serverVersion: number = 1;
+let loadedVersion: number = -2;
 let databaseOrder = 0;
+
+export function getDatabaseVersion(): number {
+    return loadedVersion;
+}
 
 export function getPlaceholderOrder(): number {
     const temp = databaseOrder;
     databaseOrder++;
     return temp;
+}
+
+export function setServerVersion(version: number) {
+    serverVersion = version;
 }
 
 async function saveDatabaseToFile(filename: string, fullpath = false) {
@@ -27,7 +37,8 @@ async function saveDatabaseToFile(filename: string, fullpath = false) {
 export function getDatabaseSaveFormat() {
     return {
         version: DATABASE_VERISON,
-        data: compress(data.filter((item) => item.discovered))
+        data: compress(data.filter((item) => item.discovered)),
+        server: serverVersion
     };
 }
 
@@ -108,15 +119,28 @@ export async function loadDatabaseV2(loaded: Compressed): Promise<RecipeRow[]> {
 async function loadData(): Promise<RecipeRow[]> {
     try {
         const raw = JSON.parse(await fs.readFile(getFolder() + 'db.json', 'utf-8'));
+        serverVersion = raw.server;
+        if (serverVersion === undefined) {
+            serverVersion = 1;
+        }
+        if (raw.version !== undefined) {
+            loadedVersion = raw.version;
+        } else {
+            loadedVersion = 0;
+        }
         if (raw.version === 1) {
             return loadDatabaseV1(raw.data);
         } else if (raw.version === 2) {
             return loadDatabaseV2(raw.data);
         } else {
+            loadedVersion = -1;
+            serverVersion = LATEST_SERVER_VERSION;
             logger.error(`Failed to load database because of unknown version '${raw.version}', has this been altered?`);
             throw(Error(`Failed to load database because of unknown version '${raw.version}', has this been altered?`));
         }
     } catch (e) {
+        loadedVersion = -2;
+        serverVersion = LATEST_SERVER_VERSION;
         if (e.code === 'ENOENT') {
             logger.info('No database file found, returning blank data');
             // const raw: RecipeRow[] = JSON.parse(await fs.readFile(MAIN_WINDOW_WEBPACK_ENTRY + '/base.json', 'utf-8'));
@@ -150,6 +174,8 @@ export async function createDatabase(): Promise<void> {
         // RELEASE --------------------------
         data = await loadData();
     } catch(e) {
+        loadedVersion = -2;
+        serverVersion = LATEST_SERVER_VERSION;
         logger.error(`Failed to load database '${e.message}'`);
     }
     if (data.length === 0) {
@@ -163,6 +189,8 @@ export async function resetAndBackup(prefix = 'db_backup_'): Promise<void> {
     await verifyFolder();
     await saveDatabaseToFile(`${prefix}${Math.floor((new Date()).getTime() / 1000)}.backup`);
     data = structuredClone(baseData) as RecipeRow[];
+    loadedVersion = DATABASE_VERISON;
+    serverVersion = LATEST_SERVER_VERSION;
     await save();
     setDatabaseOrder();
     await resetHint();

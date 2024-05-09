@@ -3,7 +3,8 @@ import logger from 'electron-log/main';
 import { dialog } from 'electron';
 import { hasProp } from '../../common/utils';
 import { getHintSaveFormat, loadHintV1, setHintRaw } from './hints';
-import { getDatabaseSaveFormat, loadDatabaseV1, loadDatabaseV2, setDataRaw } from './database';
+import { getDatabaseSaveFormat, loadDatabaseV1, loadDatabaseV2, setDataRaw, setServerVersion } from './database';
+import { LATEST_SERVER_VERSION } from '../../common/types';
 
 const EXPORT_VERSION = 1;
 
@@ -68,6 +69,18 @@ export async function importFile(): Promise<boolean> {
         if (version < 1) {
             throw new Error('Database version isnt supported');
         }
+        let tempServerVersion = -1;
+        try {
+            tempServerVersion = parseInt(database.server ?? `${LATEST_SERVER_VERSION}`);
+        } catch (e) {
+            tempServerVersion = LATEST_SERVER_VERSION;
+            logger.error('Failed to translate imported database to JSON');
+            throw new Error('Imported database server version isnt supported');
+        }
+        if (tempServerVersion < 1) {
+            throw new Error('Database server version isnt supported');
+        }
+        setServerVersion(tempServerVersion);
         if (database.version === 1) {
             try {
                 await setDataRaw(loadDatabaseV1(database.data));

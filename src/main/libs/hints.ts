@@ -11,9 +11,14 @@ const HINT_VERISON = 1;
 
 let maxHints = DEFAULT_MAX_HINTS;
 let hint: Hint = DEFAULT_HINT;
+let loadedVersion: number = -2;
 let loaded = false;
 
 const EXCLUDED = ['piney', 'shep3rd', 'klutzybubbles', 'ango', 'uncle', 'flikz', 'tvision'];
+
+export function getHintVersion(): number {
+    return loadedVersion;
+}
 
 async function getBaseHint(): Promise<Recipe | undefined> {
     const alreadyFound = [...new Set(data.filter((value) => value.discovered).map((item) => item.result))];
@@ -93,9 +98,15 @@ export async function loadHint(): Promise<void> {
             maxHints = 25;
         }
         const raw = JSON.parse(await fs.readFile(getFolder() + 'hint.json', 'utf-8'));
+        if (raw.version !== undefined) {
+            loadedVersion = raw.version;
+        } else {
+            loadedVersion = 0;
+        }
         if (raw.version === 1) {
             hint = loadHintV1(raw.hint);
         } else {
+            loadedVersion = -1;
             logger.error(`Failed to load hint because of unknown version '${raw.version}', has this been altered?`);
             throw(Error(`Failed to load hint because of unknown version '${raw.version}', has this been altered?`));
         }
@@ -105,12 +116,16 @@ export async function loadHint(): Promise<void> {
             logger.error('Error reading hint JSON', e);
         } else {
             logger.info('Hint file could not be found, initializing with default hint');
-            if (hint === null || hint === undefined)
+            if (hint === null || hint === undefined) {
                 hint = DEFAULT_HINT;
+                loadedVersion = -2;
+            }
         }
     }
-    if (hint === null || hint === undefined)
+    if (hint === null || hint === undefined) {
         hint = DEFAULT_HINT;
+        loadedVersion = -2;
+    }
 }
 
 async function generateHint(): Promise<Recipe | undefined> {

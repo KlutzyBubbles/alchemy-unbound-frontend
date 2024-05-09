@@ -8,6 +8,11 @@ const SETTINGS_VERISON = 3;
 
 let settings: Settings = DEFAULT_SETTINGS;
 let loaded = false;
+let loadedVersion: number = -2;
+
+export function getSettingsVersion(): number {
+    return loadedVersion;
+}
 
 export async function saveSettings(): Promise<void> {
     try {
@@ -51,6 +56,11 @@ function loadV3(loaded: RawSettings) {
 export async function loadSettings(): Promise<void> {
     try {
         const raw = JSON.parse(await fs.readFile(getFolder() + 'settings.json', 'utf-8'));
+        if (raw.version !== undefined) {
+            loadedVersion = raw.version;
+        } else {
+            loadedVersion = 0;
+        }
         if (raw.version === 1) {
             logger.info('Found settings V1', raw.settings);
             loadV1(raw.settings);
@@ -64,6 +74,7 @@ export async function loadSettings(): Promise<void> {
             loadV3(raw.settings);
             loaded = true;
         } else {
+            loadedVersion = -1;
             logger.error(`Failed to load settings because of unknown version '${raw.version}', has this been altered?`);
         }
     } catch(e) {
@@ -71,14 +82,17 @@ export async function loadSettings(): Promise<void> {
             logger.error('Error reading settings JSON', e);
         } else {
             logger.info('Settings file could not be found, initializing with default settings');
-            if (settings === null || settings === undefined)
+            if (settings === null || settings === undefined) {
                 settings = DEFAULT_SETTINGS;
+                loadedVersion = -2;
+            }
             settings.language = getSteamGameLanguage();
         }
     }
     if (settings === null || settings === undefined) {
         logger.warn('Failed to load settings, using defaults');
         settings = DEFAULT_SETTINGS;
+        loadedVersion = -2;
     }
 }
 

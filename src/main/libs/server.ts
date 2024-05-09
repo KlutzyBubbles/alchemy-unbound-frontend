@@ -1,6 +1,6 @@
 import logger from 'electron-log/main';
 import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse } from '../../common/types';
-import { getPlaceholderOrder, getRecipe, insertRecipeRow, setDiscovered, traverseAndFill } from './database';
+import { getPlaceholderOrder, getRecipe, insertRecipeRow, serverVersion, setDiscovered, traverseAndFill } from './database';
 import { getAppVersion, isPackaged } from './generic';
 import { getSettings } from './settings';
 import { getSteamGameLanguage, getWebAuthTicket } from './steam';
@@ -13,8 +13,8 @@ export type RequestErrorResult = {
 
 const TIMEOUT = 30000;
 
-// let endpoint = 'http://localhost:5001';
-let endpoint = 'https://api.alchemyunbound.net';
+let endpoint = 'http://localhost:5001';
+// let endpoint = 'https://api.alchemyunbound.net';
 // let endpoint = 'https://alchemy-unbound-prerelease-b687af701d77.herokuapp.com';
 if (isPackaged()) {
     // Production
@@ -31,6 +31,14 @@ export async function getToken(): Promise<TokenHolderResponse> {
     }
 }
 
+export function getVersion(): number {
+    return serverVersion;
+}
+
+export function getEndpoint(): string {
+    return endpoint;
+}
+
 async function refreshToken(): Promise<TokenHolderResponse> {
     if (token === undefined) {
         return await createToken();
@@ -39,8 +47,8 @@ async function refreshToken(): Promise<TokenHolderResponse> {
         if (token.expiryDate < ((new Date()).getTime() + 600000) / 1000) {
             let response: Response | undefined = undefined;
             try {
-                logger.debug('token request url', `${endpoint}/session/v1?version=${getAppVersion()}`, token.token);
-                response = await fetch(`${endpoint}/session/v1?version=${getAppVersion()}`, {
+                logger.debug('token request url', `${endpoint}/session/v${serverVersion}?version=${getAppVersion()}`, token.token);
+                response = await fetch(`${endpoint}/session/v${serverVersion}?version=${getAppVersion()}`, {
                     method: 'GET',
                     headers: new Headers({
                         'Authorization': `Bearer ${token.token}`, 
@@ -93,10 +101,10 @@ async function refreshToken(): Promise<TokenHolderResponse> {
 
 async function createToken(): Promise<TokenHolderResponse> {
     const ticket = await getWebAuthTicket();
-    logger.debug('trying to get token', `${endpoint}/session/v1?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}`);
+    logger.debug('trying to get token', `${endpoint}/session/v${serverVersion}?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}`);
     let response: Response | undefined = undefined;
     try {
-        response = await fetch(`${endpoint}/session/v1?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}&steamLanguage=${getSteamGameLanguage()}`, {
+        response = await fetch(`${endpoint}/session/v${serverVersion}?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}&steamLanguage=${getSteamGameLanguage()}`, {
             method: 'POST',
             timeout: TIMEOUT
         });
@@ -169,7 +177,7 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
             } catch (e) {
                 logger.error('Failed to get token response', e);
             }
-            const url = `${endpoint}/api/v1?version=${getAppVersion()}&a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
+            const url = `${endpoint}/api/v${serverVersion}?version=${getAppVersion()}&a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
             let hasDeprecated = false;
             const headers: HeadersInit = {
                 'Content-Type': 'application/json'
