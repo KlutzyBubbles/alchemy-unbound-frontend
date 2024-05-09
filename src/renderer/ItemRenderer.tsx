@@ -68,11 +68,15 @@ function getMainStyles(
     isDragging?: boolean,
     locked?: boolean
 ): CSSProperties {
-    const transform = `translate3d(${left}px, ${top}px, 0)`;
     if (isDragging === undefined)
         isDragging = false;
     if (locked === undefined)
         locked = false;
+    if (isDragging) {
+        left = -100;
+        top = -100;
+    }
+    const transform = `translate3d(${left}px, ${top}px, 0)`;
     return {
         position: 'fixed',
         left: left === undefined ? 0 : left,
