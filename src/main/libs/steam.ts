@@ -8,6 +8,7 @@ export const APP_ID = 2858840;
 
 let steamworksClient: Omit<steamworks.Client, 'init' | 'runCallbacks'>;
 let steamId: PlayerSteamId | undefined = undefined;
+// let steamTicket: auth.Ticket | undefined = undefined;
 
 export function getSteamworksClient(): Omit<steamworks.Client, 'init' | 'runCallbacks'> {
     if (steamworksClient === undefined || steamworksClient === null) {
@@ -79,3 +80,16 @@ export function getFolder() {
 export async function getWebAuthTicket(): Promise<auth.Ticket> {
     return await getSteamworksClient().auth.getSessionTicketWithSteamId(getSteamIdRaw().steamId64);
 }
+
+// export async function getWebAuthTicket(): Promise<auth.Ticket> {
+//     if (steamTicket === undefined) {
+//         steamTicket = await getSteamworksClient().auth.getSessionTicketWithSteamId(getSteamIdRaw().steamId64);
+//     }
+//     return steamTicket;
+// }
+// 
+// export async function cancelWebAuthTicket() {
+//     if (steamTicket !== undefined) {
+//         steamTicket.cancel();
+//     }
+// }

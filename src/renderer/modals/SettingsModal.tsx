@@ -1,5 +1,5 @@
 import { useState, type FC, useEffect, useContext, Fragment, ChangeEventHandler, Dispatch, SetStateAction } from 'react';
-import { Alert, Button, Collapse, Form, Modal } from 'react-bootstrap';
+import { Button, Collapse, Form, Modal } from 'react-bootstrap';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { BackgroundType, BackgroundTypeList, ThemeType, ThemeTypeList, DEFAULT_SETTINGS, Language, languageDisplay, languages } from '../../common/settings';
 import { getFromStore } from '../language';
@@ -10,6 +10,7 @@ import logger from 'electron-log/renderer';
 import { UpdateContext } from '../providers/UpdateProvider';
 import { InfoContext } from '../providers/InfoProvider';
 import { KEY_VALUES_TO_LEAVE } from '../types';
+import * as bootstrap from 'bootstrap';
 
 export interface SettingsModalProps {
   show: boolean
@@ -34,8 +35,6 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     const [fps, setFPS] = useState<number>(settings?.fps ?? DEFAULT_SETTINGS.fps);
     const [advanced, setAdvanced] = useState<boolean>(false);
     const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
-    const [errorText, setErrorText] = useState<string>('');
-    const [successText, setSuccessText] = useState<string>('');
     const [lockKeybind, setLockKeybind] = useState<string>(settings?.keybinds.lock ?? DEFAULT_SETTINGS.keybinds.lock);
     const [copyKeybind, setCopyKeybind] = useState<string>(settings?.keybinds.copy ?? DEFAULT_SETTINGS.keybinds.copy);
     const [removeKeybind, setRemoveKeybind] = useState<string>(settings?.keybinds.remove ?? DEFAULT_SETTINGS.keybinds.remove);
@@ -204,8 +203,12 @@ export const SettingsModal: FC<SettingsModalProps> = ({
 
     const onResetConfirm = async () => {
         setShowResetConfirm(false);
+        handleHide();
         try {
             await window.ImportExportAPI.reset();
+            const myOffCanvas = document.getElementById('sideMenu');
+            const openedCanvas = bootstrap.Offcanvas.getInstance(myOffCanvas);
+            openedCanvas?.hide();
             setShouldUpdate(true);
         } catch (e) {
             logger.error('Failed resetting data', e);
@@ -214,39 +217,6 @@ export const SettingsModal: FC<SettingsModalProps> = ({
 
     const onResetCancel = () => {
         setShowResetConfirm(false);
-    };
-
-    const exportFile = async () => {
-        try {
-            setErrorText('');
-            setSuccessText('');
-            const result = await window.ImportExportAPI.export();
-            if (!result) {
-                setErrorText(getFromStore('settings.userCancelled', settings.language));
-            } else {
-                setSuccessText(getFromStore('settings.exported', settings.language));
-            }
-        } catch (e) {
-            logger.error('Failed to export file', e);
-            setErrorText(e.message);
-        }
-    };
-
-    const importFile = async () => {
-        try {
-            setErrorText('');
-            setSuccessText('');
-            const result = await window.ImportExportAPI.import();
-            if (!result) {
-                setErrorText(getFromStore('settings.userCancelled', settings.language));
-            } else {
-                setSuccessText(getFromStore('settings.imported', settings.language));
-                setShouldUpdate(true);
-            }
-        } catch (e) {
-            logger.error('Failed to import file', e);
-            setErrorText(e.message);
-        }
     };
 
     const setKeybind = (event: React.KeyboardEvent<HTMLInputElement>, setFunc: Dispatch<SetStateAction<string>>, defaultKey: string) => {
@@ -304,7 +274,9 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                             <div className='col-12'>
                                 <div className="form-check form-switch form-switch-lg">
                                     <input className="form-check-input" type="checkbox" role="switch" id="setOffline" onChange={() => setOffline(!offline)} checked={offline}/>
-                                    <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setOffline">{getFromStore('settings.items.offline', settings.language)}</label>
+                                    <label className="form-check-label h5 pt-2 mb-0 ps-3" htmlFor="setOffline">
+                                        {getFromStore('settings.items.offline', settings.language)} ({getFromStore('settings.items.offlineOrig', settings.language)})
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -423,6 +395,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                             type="text"
                                             className="form-control override-focus"
                                             value={getReadable(lockKeybind)}
+                                            onFocus={() => console.log('focus3')}
                                             onChange={() => {}} // here for error
                                             onKeyDown={(e) => setKeybind(e, setLockKeybind, DEFAULT_SETTINGS.keybinds.lock)}
                                             placeholder={getFromStore('settings.items.lockKeybind', settings.language)}/>
@@ -442,6 +415,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                             type="text"
                                             className="form-control override-focus"
                                             value={getReadable(copyKeybind)}
+                                            onFocus={() => console.log('focus2')}
                                             onChange={() => {}} // here for error
                                             onKeyDown={(e) => setKeybind(e, setCopyKeybind, DEFAULT_SETTINGS.keybinds.copy)}
                                             placeholder={getFromStore('settings.items.copyKeybind', settings.language)}/>
@@ -460,6 +434,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                         <input
                                             type="text"
                                             className="form-control override-focus"
+                                            onFocus={() => console.log('focus1')}
                                             value={getReadable(removeKeybind)}
                                             onChange={() => {}} // here for error
                                             onKeyDown={(e) => setKeybind(e, setRemoveKeybind, DEFAULT_SETTINGS.keybinds.remove)}
@@ -471,33 +446,9 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                         </Button>
                                     </div>
                                 </div>
-                                <div className='row mb-2'>
-                                    <div className='col-12'>
-                                        <h3 className='text-center'>{getFromStore('settings.importExport', settings.language)}</h3>
-                                    </div>
-                                </div>
-                                <div className='row px-3'>
-                                    {errorText !== '' ?
-                                        <Alert variant="danger" onClose={() => setErrorText('')} dismissible>
-                                            <span>{errorText}</span>
-                                        </Alert>
-                                        : (<Fragment/>)}
-                                </div>
-                                <div className='row px-3'>
-                                    {successText !== '' ?
-                                        <Alert variant="success" onClose={() => setSuccessText('')} dismissible>
-                                            <span>{successText}</span>
-                                        </Alert>
-                                        : (<Fragment/>)}
-                                </div>
+                                <div className='row mb-2'></div>
                                 <div className='row'>
-                                    <div className='col-6 col-md-4 col-lg-4 pt-2 d-grid'>
-                                        <div className='btn btn-primary' onClick={importFile}>{getFromStore('settings.buttons.import', settings.language)}</div>
-                                    </div>
-                                    <div className='col-6 col-md-4 col-lg-4 pt-2 d-grid'>
-                                        <div className='btn btn-primary' onClick={exportFile}>{getFromStore('settings.buttons.export', settings.language)}</div>
-                                    </div>
-                                    <div className='col-12 col-md-4 col-lg-4 pt-2 d-grid'>
+                                    <div className='col-12 d-grid'>
                                         <div className='btn btn-outline-danger' onClick={() => setShowResetConfirm(true)}>{getFromStore('settings.buttons.reset', settings.language)}</div>
                                     </div>
                                 </div>

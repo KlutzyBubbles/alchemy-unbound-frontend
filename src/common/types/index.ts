@@ -1,4 +1,4 @@
-import { Language } from './settings';
+import { Language } from '../settings';
 
 export type Languages = {
     [key in Language]: string;
@@ -100,7 +100,20 @@ export type CombineOutput = {
     result: CombineSuccess
 } | {
     type: 'error',
-    result: CombineError
+    result: ServerError
+}
+
+export type PurchaseOutput = {
+    type: 'success',
+    result: PurchaseSuccess
+} | {
+    type: 'error',
+    result: ServerError
+}
+
+export type PurchaseSuccess = {
+    success: boolean,
+    softError: boolean
 }
 
 export type CombineSuccess = {
@@ -112,13 +125,14 @@ export type CombineSuccess = {
     recipe: Recipe
 }
 
-export type CombineError = {
+export type ServerError = {
     responseCode: number,
     deprecated: boolean,
     code: ServerErrorCode
 }
 
 export enum ServerErrorCode {
+    NO_TOKEN = -10,
     QUERY_MISSING = 1,
     QUERY_INVALID = 2,
     QUERY_UNDEFINED = 3,
@@ -142,6 +156,7 @@ export type ErrorCode = ServerErrorCode | LocalErrorCode;
 export const ErrorCodeToString: {
     [key in ErrorCode]: string
 } = {
+    '-10': 'noToken',
     1: 'queryMissing',
     2: 'queryInvalid',
     3: 'queryUndefined',

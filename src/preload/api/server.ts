@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { combine, getEndpoint, getToken, getVersion, submitIdea } from '../../main/libs/server';
+import { combine, getEndpoint, getToken, getVersion, initTransaction, submitIdea } from '../../main/libs/server';
 import { ServerChannel } from '../../common/ipc';
 
 export const ServerAPIName = 'ServerAPI';
@@ -10,6 +10,7 @@ export interface IServerAPI {
     submitIdea: typeof submitIdea,
     getVersion: typeof getVersion,
     getEndpoint: typeof getEndpoint
+    initTransaction: typeof initTransaction
 }
 
 contextBridge.exposeInMainWorld(ServerAPIName, {
@@ -18,4 +19,5 @@ contextBridge.exposeInMainWorld(ServerAPIName, {
     submitIdea: (a: string, b: string, result: string) => ipcRenderer.invoke(ServerChannel.IDEA, a, b, result),
     getVersion: () => ipcRenderer.invoke(ServerChannel.GET_VERSION),
     getEndpoint: () => ipcRenderer.invoke(ServerChannel.GET_ENDPOINT),
+    initTransaction: (item: string) => ipcRenderer.invoke(ServerChannel.INIT_TRANSACTION, item),
 });

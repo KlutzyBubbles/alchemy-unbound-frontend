@@ -53,7 +53,7 @@ export const DropContainer: FC<ContainerProps> = ({
 
     useEffect(() => {
         refreshRecipes();
-        mainElement.current.focus();
+        //mainElement.current.focus();
         
         document.addEventListener('keydown', handleKeyDown2, false);
         document.addEventListener('keyup', handleKeyUp2, false);

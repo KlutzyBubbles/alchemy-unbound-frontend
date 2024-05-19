@@ -1,5 +1,5 @@
 import { app, BrowserWindow, crashReporter, Menu, net, protocol, shell } from 'electron';
-import { createDatabase } from './main/libs/database';
+import { createDatabase } from './main/libs/database/recipeStore';
 import debug from 'electron-debug';
 import steamworks from '@ai-zen/steamworks.js';
 import { register } from './main/register';
@@ -10,7 +10,10 @@ import log from 'electron-log/main';
 import util from 'util';
 import { saveStats } from './main/libs/stats';
 import { saveSettings } from './main/libs/settings';
-import { timeoutPromise } from './common/utils';
+import { hasProp, timeoutPromise } from './common/utils';
+import minimist from 'minimist';
+import { setEndpoint, setEndpointVersion } from './main/libs/server';
+import { createLangDatabase } from './main/libs/database/languageStore';
 
 log.transports.file.resolvePathFn = (variables) => {
     const filename = variables.fileName ?? 'current.log';
@@ -24,6 +27,27 @@ log.transports.file.level = 'info';
 log.transports.console.level = 'debug';
 log.initialize();
 log.info('Initialized logger main');
+const argv = minimist(process.argv);
+
+if (hasProp(argv, 'server')) {
+    const server = argv.server;
+    if (['release', 'development', 'prerelease'].includes(server)) {
+        log.info('Setting endpoint version', server);
+        setEndpointVersion(server);
+    } else {
+        log.warn('Invalid server arg recieved, valid options: release, development, prerelease', server);
+    }
+}
+
+if (hasProp(argv, 'endpoint')) {
+    const endpoint = argv.endpoint;
+    if (endpoint !== '' && (endpoint as string).toLocaleLowerCase().startsWith('http')) {
+        log.info('Setting endpoint', endpoint);
+        setEndpoint(endpoint);
+    } else {
+        log.warn('Invalid endpoint arg recieved, make sure it starts with http');
+    }
+}
 
 try {
     if (process.type === 'browser') {
@@ -62,8 +86,10 @@ let mainWindow: BrowserWindow | undefined = undefined;
 const createWindow = (): void => {
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        height: 720,
-        width: 1280,
+        // height: 720,
+        // width: 1280,
+        height: 1080,
+        width: 1920,
         webPreferences: {
             preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
             devTools: !app.isPackaged
@@ -106,6 +132,7 @@ app.on('ready', createWindow);
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
     log.error('Saving thinggiieiei');
+    //cancelWebAuthTicket();
     console.log('saving staefts');
     saveStats().then(() => {
         console.log('Saved stats');
@@ -124,6 +151,7 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
     log.error('Saving things');
+    //cancelWebAuthTicket();
     console.log('saving stats');
     timeoutPromise(saveStats(), 10000).then(() => {
         console.log('Saved stats');
@@ -135,6 +163,7 @@ app.on('will-quit', () => {
     }).catch((e) => {
         log.error('Failed to save settings', e);
     });
+    app.quit();
     app.quit();
     return;
 });
@@ -156,6 +185,7 @@ app
         protocol.handle('image', (request) => {
             return net.fetch('file://' + path.join(__dirname, 'images', request.url.slice('image://'.length)));
         });
+        await createLangDatabase();
         await createDatabase();
         register();
         await installExtension(REACT_DEVELOPER_TOOLS);

@@ -5,7 +5,7 @@ import logger from 'electron-log/main';
 import { DEFAULT_HINT, DEFAULT_MAX_HINTS, Hint } from '../../common/hints';
 import { Compressed, compress, decompress } from 'compress-json';
 import { HINT_DLC, Recipe } from '../../common/types';
-import { data, traverseAndFill } from './database';
+import { data, traverseAndFill } from './database/recipeStore';
 
 const HINT_VERISON = 1;
 

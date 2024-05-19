@@ -1,13 +1,14 @@
-import { BasicElement, LATEST_SERVER_VERSION, Languages, Recipe, RecipeRow } from '../../common/types';
+import { BasicElement, LATEST_SERVER_VERSION, Languages, Recipe, RecipeRow } from '../../../common/types';
 import { promises as fs } from 'fs';
 import { Compressed, compress, decompress } from 'compress-json';
-import { getFolder } from './steam';
-import { verifyFolder } from '../utils';
-import { languages } from '../../common/settings';
-import baseData from '../../base.json';
+import { getFolder } from '../steam';
+import { verifyFolder } from '../../utils';
+import { languages } from '../../../common/settings';
+import baseData from '../../../base.json';
 // import baseData from '../../allDiscovered.json';
 import logger from 'electron-log/main';
-import { addHintPoint, resetHint } from './hints';
+import { addHintPoint, resetHint } from '../hints';
+import { saveToFile } from './helpers';
 
 const DATABASE_VERISON = 2;
 
@@ -30,10 +31,6 @@ export function setServerVersion(version: number) {
     serverVersion = version;
 }
 
-async function saveDatabaseToFile(filename: string, fullpath = false) {
-    await fs.writeFile(fullpath ? filename : getFolder() + filename, JSON.stringify(getDatabaseSaveFormat()), 'utf-8');
-}
-
 export function getDatabaseSaveFormat() {
     return {
         version: DATABASE_VERISON,
@@ -44,7 +41,7 @@ export function getDatabaseSaveFormat() {
 
 export async function save(): Promise<void> {
     await verifyFolder();
-    await saveDatabaseToFile('db.json');
+    await saveToFile('db.json', getDatabaseSaveFormat());
 }
 
 export async function setDataRaw(newData: RecipeRow[]) {
@@ -110,7 +107,7 @@ export async function loadDatabaseV2(loaded: Compressed): Promise<RecipeRow[]> {
     if (backup) {
         const holdData = data;
         data = tempData;
-        await saveDatabaseToFile(`db_itemchange_${Math.floor((new Date()).getTime() / 1000)}.backup`);
+        await saveToFile(`db_itemchange_${Math.floor((new Date()).getTime() / 1000)}.backup`, getDatabaseSaveFormat());
         data = holdData;
     }
     return newData;
@@ -187,7 +184,7 @@ export async function createDatabase(): Promise<void> {
 
 export async function resetAndBackup(prefix = 'db_backup_'): Promise<void> {
     await verifyFolder();
-    await saveDatabaseToFile(`${prefix}${Math.floor((new Date()).getTime() / 1000)}.backup`);
+    await saveToFile(`${prefix}${Math.floor((new Date()).getTime() / 1000)}.backup`, getDatabaseSaveFormat());
     data = structuredClone(baseData) as RecipeRow[];
     loadedVersion = DATABASE_VERISON;
     serverVersion = LATEST_SERVER_VERSION;

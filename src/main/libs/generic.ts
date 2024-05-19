@@ -2,7 +2,7 @@ import { app } from 'electron';
 import * as appInfo from '../../../package.json';
 import { SystemVersion, AppVersions, FileVersions } from '../../common/types';
 import { getHintVersion } from './hints';
-import { getDatabaseVersion } from './database';
+import { getDatabaseVersion } from './database/recipeStore';
 import { getSettingsVersion } from './settings';
 
 export function getAppVersions(): AppVersions {

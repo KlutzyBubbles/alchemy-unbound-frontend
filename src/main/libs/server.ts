@@ -1,9 +1,9 @@
 import logger from 'electron-log/main';
-import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse } from '../../common/types';
-import { getPlaceholderOrder, getRecipe, insertRecipeRow, serverVersion, setDiscovered, traverseAndFill } from './database';
+import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse, PurchaseOutput, PurchaseSuccess } from '../../common/types';
+import { getPlaceholderOrder, getRecipe, insertRecipeRow, serverVersion, setDiscovered, traverseAndFill } from './database/recipeStore';
 import { getAppVersion, isPackaged } from './generic';
 import { getSettings } from './settings';
-import { getSteamGameLanguage, getWebAuthTicket } from './steam';
+import { getSteamGameLanguage, getSteamworksClient, getWebAuthTicket } from './steam';
 import fetch, { HeadersInit, Response } from 'electron-fetch';
 
 export type RequestErrorResult = {
@@ -13,12 +13,50 @@ export type RequestErrorResult = {
 
 const TIMEOUT = 30000;
 
+type EndpointVersion = 'development' | 'prerelease' | 'release'
+
+const ENDPOINT_VERSIONS = ['development', 'prerelease', 'release', 'custom'];
+
+const ENDPOINTS = {
+    development: 'http://localhost:5001',
+    prerelease: 'https://alchemy-unbound-prerelease-b687af701d77.herokuapp.com',
+    release: 'https://api.alchemyunbound.net'
+};
+
+let endpointVersion: EndpointVersion | 'custom' = 'custom'; // 'release';
+
 let endpoint = 'http://localhost:5001';
-// let endpoint = 'https://api.alchemyunbound.net';
-// let endpoint = 'https://alchemy-unbound-prerelease-b687af701d77.herokuapp.com';
+// endpoint = 'https://api.alchemyunbound.net';
+// endpoint = 'https://alchemy-unbound-prerelease-b687af701d77.herokuapp.com';
 if (isPackaged()) {
     // Production
     endpoint = 'https://api.alchemyunbound.net';
+}
+
+export function setEndpointVersion(version: EndpointVersion | 'custom') {
+    if (ENDPOINT_VERSIONS.includes(version.toLocaleLowerCase())) {
+        endpointVersion = version;
+        return;
+    }
+    logger.warn('Invalid endpoint version, setting to release', version);
+    endpointVersion = 'release';
+}
+
+export function setEndpoint(newEndpoint: string) {
+    endpointVersion = 'custom';
+    endpoint = newEndpoint;
+}
+
+function getEndpointUri() {
+    try {
+        if (endpointVersion === 'custom') {
+            return endpoint;
+        }
+        return ENDPOINTS[endpointVersion];
+    } catch (error) {
+        logger.error('Failed getting endpoint, reverting to release', error);
+        return ENDPOINTS.release;
+    }
 }
 
 let token: TokenHolder | undefined = undefined;
@@ -36,7 +74,10 @@ export function getVersion(): number {
 }
 
 export function getEndpoint(): string {
-    return endpoint;
+    if (endpointVersion === 'custom') {
+        return endpoint;
+    }
+    return endpointVersion;
 }
 
 async function refreshToken(): Promise<TokenHolderResponse> {
@@ -47,8 +88,8 @@ async function refreshToken(): Promise<TokenHolderResponse> {
         if (token.expiryDate < ((new Date()).getTime() + 600000) / 1000) {
             let response: Response | undefined = undefined;
             try {
-                logger.debug('token request url', `${endpoint}/session/v${serverVersion}?version=${getAppVersion()}`, token.token);
-                response = await fetch(`${endpoint}/session/v${serverVersion}?version=${getAppVersion()}`, {
+                logger.debug('token request url', `${getEndpointUri()}/session/v${serverVersion}?version=${getAppVersion()}`, token.token);
+                response = await fetch(`${getEndpointUri()}/session/v${serverVersion}?version=${getAppVersion()}`, {
                     method: 'GET',
                     headers: new Headers({
                         'Authorization': `Bearer ${token.token}`, 
@@ -99,12 +140,202 @@ async function refreshToken(): Promise<TokenHolderResponse> {
     }
 }
 
+export async function initTransaction(item: string): Promise<PurchaseOutput | undefined> {
+    if (!(await getSettings(false)).offline) {
+        return new Promise<PurchaseOutput>((resolve, reject) => {
+            (async () => {
+                let tokenResponse: TokenHolderResponse | undefined = undefined;
+                try {
+                    tokenResponse = await getToken();
+                } catch (e) {
+                    logger.error('Failed to get token response', e);
+                }
+                if (tokenResponse === undefined) {
+                    // Cant initiate transaction without steam token
+                    logger.error('Cannot find token response');
+                    return {
+                        type: 'error',
+                        result: {
+                            code: ServerErrorCode.NO_TOKEN,
+                            deprecated: false,
+                            responseCode: 400
+                        }
+                    };
+                }
+                const client = getSteamworksClient();
+                new Promise<PurchaseOutput>((resolve, reject) => {
+                    logger.log('inside pormise');
+                    client.callback.register(client.callback.SteamCallback.MicroTxnAuthorizationResponse, (value) => {
+                        console.log('value', value);
+                        if (!value.authorized) {
+                            return resolve({
+                                type: 'error',
+                                result: {
+                                    code: ServerErrorCode.STEAM_ERROR,
+                                    deprecated: false,
+                                    responseCode: 0
+                                }
+                            });
+                        }
+                        (async() => {
+                            let tokenResponse: TokenHolderResponse | undefined = undefined;
+                            try {
+                                tokenResponse = await getToken();
+                            } catch (e) {
+                                logger.error('Failed to get token response', e);
+                            }
+                            if (tokenResponse === undefined) {
+                                // Cant initiate transaction without steam token
+                                logger.error('Cannot find token response');
+                                return {
+                                    type: 'error',
+                                    result: {
+                                        code: ServerErrorCode.NO_TOKEN,
+                                        deprecated: false,
+                                        responseCode: 400
+                                    }
+                                };
+                            }
+                            const url = `${getEndpointUri()}/purchase/finalize/v2/?version=${getAppVersion()}&orderid=${value.order_id}`;
+                            let hasDeprecated = false;
+                            const headers: HeadersInit = {
+                                'Content-Type': 'application/json'
+                            };
+                            hasDeprecated = tokenResponse.deprecated;
+                            if (tokenResponse.tokenHolder !== undefined) {
+                                headers.Authorization = `Bearer ${tokenResponse.tokenHolder.token}`;
+                            }
+                            try {
+                                logger.debug('purchase finalize url', url, headers.Authorization);
+                                const response = await fetch(url, {
+                                    method: 'GET',
+                                    headers: headers,
+                                    timeout: TIMEOUT
+                                });
+                                if (response.ok) {
+                                    const body: PurchaseSuccess = (await response.json()) as PurchaseSuccess;
+                                    logger.debug('purchase finalize response body', body);
+                                    if (body.success) {
+                                        logger.log('inside success');
+                                        return {
+                                            type: 'success',
+                                            result: body
+                                        };
+                                    } else {
+                                        return {
+                                            type: 'error',
+                                            result: {
+                                                code: ServerErrorCode.QUERY_INVALID,
+                                                deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
+                                                responseCode: 500
+                                            }
+                                        };
+                                    }
+                                } else {
+                                    const json = (await response.json()) as RequestErrorResult;
+                                    if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
+                                        throw('Unknown issue with input parameters');
+                                    }
+                                    if (json.code === undefined) {
+                                        throw('Unknown error occurred');
+                                    }
+                                    return {
+                                        type: 'error',
+                                        result: {
+                                            responseCode: response.status,
+                                            deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
+                                            code: json.code
+                                        }
+                                    };
+                                }
+                            } catch(e) {
+                                logger.error('Failed to make api request', e);
+                                throw(e);
+                            }
+                        })().then((result) => resolve(result as PurchaseOutput)).catch((error) => reject(error));
+                    });
+                }).then((result) => resolve(result as PurchaseOutput)).catch((error) => reject(error));
+                const url = `${getEndpointUri()}/purchase/v2?version=${getAppVersion()}&item=${item}`;
+                let hasDeprecated = false;
+                const headers: HeadersInit = {
+                    'Content-Type': 'application/json'
+                };
+                hasDeprecated = tokenResponse.deprecated;
+                if (tokenResponse.tokenHolder !== undefined) {
+                    headers.Authorization = `Bearer ${tokenResponse.tokenHolder.token}`;
+                }
+                try {
+                    logger.debug('purchase url', url, headers.Authorization);
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: headers,
+                        timeout: TIMEOUT
+                    });
+                    if (response.ok) {
+                        const body: PurchaseSuccess = (await response.json()) as PurchaseSuccess;
+                        logger.debug('purchase response body', body);
+                        if (!body.success) {
+                        //     return {
+                        //         type: 'success',
+                        //         result: body
+                        //     };
+                        // } else {
+                            return {
+                                type: 'error',
+                                result: {
+                                    code: ServerErrorCode.QUERY_INVALID,
+                                    deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
+                                    responseCode: 500
+                                }
+                            };
+                        }
+                        logger.log('first success');
+                        const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+                        await delay(10 * 60 * 60 * 1000);
+                        logger.log('after delayt');
+                        return {
+                            type: 'error',
+                            result: {
+                                responseCode: ServerErrorCode.QUERY_UNDEFINED,
+                                deprecated: false,
+                                code: -1
+                            }
+                        };
+                    } else {
+                        const json = (await response.json()) as RequestErrorResult;
+                        if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
+                            throw('Unknown issue with input parameters');
+                        }
+                        if (json.code === undefined) {
+                            throw('Unknown error occurred');
+                        }
+                        return {
+                            type: 'error',
+                            result: {
+                                responseCode: response.status,
+                                deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
+                                code: json.code
+                            }
+                        };
+                    }
+                } catch(e) {
+                    logger.error('Failed to make api request', e);
+                    throw(e);
+                }
+            })().then((result) => resolve(result as PurchaseOutput)).catch((error) => reject(error));
+        });
+    } else {
+        logger.log('undefineeed');
+        return undefined;
+    }
+}
+
 async function createToken(): Promise<TokenHolderResponse> {
     const ticket = await getWebAuthTicket();
-    logger.debug('trying to get token', `${endpoint}/session/v${serverVersion}?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}`);
+    logger.debug('trying to get token', `${getEndpointUri()}/session/v${serverVersion}?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}`);
     let response: Response | undefined = undefined;
     try {
-        response = await fetch(`${endpoint}/session/v${serverVersion}?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}&steamLanguage=${getSteamGameLanguage()}`, {
+        response = await fetch(`${getEndpointUri()}/session/v${serverVersion}?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}&steamLanguage=${getSteamGameLanguage()}`, {
             method: 'POST',
             timeout: TIMEOUT
         });
@@ -137,7 +368,10 @@ async function createToken(): Promise<TokenHolderResponse> {
             throw('Issue with steam ticket');
         } else if (json.code === ServerErrorCode.STEAM_SERVERS_DOWN) {
             throw('Steam servers are down');
+        } else if (json.code === ServerErrorCode.STEAM_ERROR) {
+            throw('Unknown steam auth error');
         }
+        logger.error('Unknown code ', json.code);
         throw('Unknown error');
     }
 }
@@ -177,7 +411,7 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
             } catch (e) {
                 logger.error('Failed to get token response', e);
             }
-            const url = `${endpoint}/api/v${serverVersion}?version=${getAppVersion()}&a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
+            const url = `${getEndpointUri()}/api/v${serverVersion}?version=${getAppVersion()}&a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
             let hasDeprecated = false;
             const headers: HeadersInit = {
                 'Content-Type': 'application/json'
@@ -240,8 +474,6 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                                     b: b,
                                     result: body.result,
                                     discovered: 1,
-                                    display: body.display,
-                                    emoji: body.emoji,
                                     depth: body.depth,
                                     first: body.first ? 1 : 0,
                                     who_discovered: body.who_discovered,
@@ -317,7 +549,7 @@ export async function submitIdea(a: string, b: string, result: string): Promise<
         } catch (e) {
             logger.error('Failed to get token response', e);
         }
-        const url = `${endpoint}/idea/v1?version=${getAppVersion()}&a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}&result=${encodeURIComponent(result)}`;
+        const url = `${getEndpointUri()}/idea/v1?version=${getAppVersion()}&a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}&result=${encodeURIComponent(result)}`;
         let hasDeprecated = false;
         const headers: HeadersInit = {
             'Content-Type': 'application/json'

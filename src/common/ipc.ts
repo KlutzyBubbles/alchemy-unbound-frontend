@@ -14,7 +14,9 @@ export enum ServerChannel {
     IDEA = 'server:idea',
     GET_TOKEN = 'server:getToken',
     GET_VERSION = 'server:getVersion',
-    GET_ENDPOINT = 'server:getEndpoint'
+    GET_ENDPOINT = 'server:getEndpoint',
+    INIT_TRANSACTION = 'server:initTransaction',
+    FINALIZE_TRANSACTION = 'serverfinalizeTransaction'
 }
 
 export enum ErrorChannel {

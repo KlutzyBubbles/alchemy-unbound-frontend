@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { Recipe } from '../../common/types';
-import { deleteRecipe, getAllRecipes, getRecipe, getRecipesFor, hasAllRecipes, hasAtleastRecipe, insertRecipe, save } from '../../main/libs/database';
+import { deleteRecipe, getAllRecipes, getRecipe, getRecipesFor, hasAllRecipes, hasAtleastRecipe, insertRecipe, save } from '../../main/libs/database/recipeStore';
 import { RecipeChannel } from '../../common/ipc';
 
 export const RecipeAPIName = 'RecipeAPI';

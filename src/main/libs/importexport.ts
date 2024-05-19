@@ -3,7 +3,7 @@ import logger from 'electron-log/main';
 import { dialog } from 'electron';
 import { hasProp } from '../../common/utils';
 import { getHintSaveFormat, loadHintV1, setHintRaw } from './hints';
-import { getDatabaseSaveFormat, loadDatabaseV1, loadDatabaseV2, setDataRaw, setServerVersion } from './database';
+import { databaseV1toV2, databaseV2toV3, fillWithBase, getDatabaseSaveFormat, setDataRaw, setServerVersion } from './database/recipeStore';
 import { LATEST_SERVER_VERSION } from '../../common/types';
 
 const EXPORT_VERSION = 1;
@@ -81,17 +81,38 @@ export async function importFile(): Promise<boolean> {
             throw new Error('Database server version isnt supported');
         }
         setServerVersion(tempServerVersion);
-        if (database.version === 1) {
+        let workingVersion = database.version;
+        const v1db = database.data;
+        let v2db = database.data;
+        let v3db = database.data;
+        logger.info('rawDb', database);
+        if (workingVersion === 1) {
             try {
-                await setDataRaw(loadDatabaseV1(database.data));
+                logger.info('Found v1, migrating...');
+                v2db = databaseV1toV2(v1db);
+                workingVersion = 2;
             } catch (e) {
-                throw new Error('Failed loading the database from version');
+                throw new Error('Failed loading the database from version 1');
             }
-        } else if (database.version === 2) {
+        }
+        if (workingVersion === 2) {
             try {
-                await setDataRaw(await loadDatabaseV2(database.data));
+                logger.info('Found v2, migrating...');
+                logger.info('v2db', v2db);
+                v3db = await databaseV2toV3(v2db);
+                logger.info('v3db', v3db);
+                workingVersion = 3;
             } catch (e) {
-                throw new Error('Failed loading the database from version');
+                throw new Error('Failed loading the database from version 2');
+            }
+        }
+        if (workingVersion === 3) {
+            try {
+                logger.info('Found v3, importing...');
+                logger.info(v3db);
+                await setDataRaw(await fillWithBase(v3db));
+            } catch (e) {
+                throw new Error('Failed loading the database from version 3');
             }
         } else {
             logger.error(`Unknown imported database version '${database.version}'`);

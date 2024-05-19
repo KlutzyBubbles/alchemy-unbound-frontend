@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { Fragment, useContext, useRef, useState } from 'react';
 
-import { IoCloudDownloadOutline, IoCloudOfflineOutline, IoConstructOutline, IoSpeedometerOutline, IoTrashOutline } from 'react-icons/io5';
+import { IoBandageOutline, IoCloudDownloadOutline, IoCloudOfflineOutline, IoConstructOutline, IoSpeedometerOutline, IoTrashOutline } from 'react-icons/io5';
 //import { useAnimation } from 'framer-motion';
 import { ModalOption } from '../Container';
 import { SettingsContext } from '../providers/SettingsProvider';
@@ -28,7 +28,7 @@ export const MainButtons: FC<MainButtonProps> = ({
     rateLimited
 }) => {
     const { settings } = useContext(SettingsContext);
-    const { isLegacy } = useContext(InfoContext);
+    const { isLegacy, isProduction } = useContext(InfoContext);
     const [showDeprecatedTooltip, setShowDeprecatedTooltip] = useState<boolean>(false);
     const [showRateTooltip, setShowRateTooltip] = useState<boolean>(false);
     const [showLegacyTooltip, setShowLegacyTooltip] = useState<boolean>(false);
@@ -66,14 +66,17 @@ export const MainButtons: FC<MainButtonProps> = ({
   
     // const settingsControls = useAnimation();
 
-    // const devClick = () => {
-    //     devButton();
-    // };
+    const devClick = () => {
+        openModal('store');
+    };
 
     return (
         <div className='footer mt-auto z-mainButtons'>
             <div className='btn btn-clear float-start mb-2 fs-1 d-flex p-2' onClick={clearAll}><IoTrashOutline /></div>
             <HintButton refreshProp={refreshHint} />
+            {isProduction ? (<Fragment/>) : (
+                <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={devClick}><IoBandageOutline /></div>
+            )}
             {settings.offline ?
                 (<div className='btn btn-offline float-end mb-2 fs-1 d-flex p-2' onClick={() => openModal('settings')}><IoCloudOfflineOutline /></div>) :
                 deprecated ? (<Fragment>

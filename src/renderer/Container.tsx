@@ -13,6 +13,7 @@ import { LoadingContext } from './providers/LoadingProvider';
 import { IdeaModal } from './modals/IdeaModal';
 import { SideMenu } from './dragndrop/SideMenu';
 import { StatsModal } from './modals/StatsModal';
+import { StoreModal } from './modals/StoreModal';
 
 export type ModalOption = 'settings' | 'info' | 'idea' | 'stats' | 'store' | 'none';
 
@@ -85,6 +86,7 @@ export const ContentContainer: FC = () => {
                     <SettingsModal show={currentModal === 'settings'} handleHide={handleModalClose} />
                     <InfoModal show={currentModal === 'info'} handleHide={handleModalClose} />
                     <StatsModal show={currentModal === 'stats'} handleHide={handleModalClose} />
+                    <StoreModal show={currentModal === 'store'} handleHide={handleModalClose} />
                     <IdeaModal show={currentModal === 'idea'} handleHide={handleModalClose} />
                 </Container>
             </div>
