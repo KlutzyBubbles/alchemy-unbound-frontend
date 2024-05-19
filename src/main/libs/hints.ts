@@ -3,7 +3,7 @@ import { getFolder, isDlcInstalled } from './steam';
 import { verifyFolder } from '../utils';
 import logger from 'electron-log/main';
 import { DEFAULT_HINT, DEFAULT_MAX_HINTS, Hint } from '../../common/hints';
-import { Compressed, compress, decompress } from 'compress-json';
+import { Compressed, compress, decompress, trimUndefinedRecursively } from 'compress-json';
 import { HINT_DLC, Recipe } from '../../common/types';
 import { data, traverseAndFill } from './database/recipeStore';
 
@@ -57,9 +57,11 @@ async function saveHintToFile(filename: string, fullpath = false) {
 export function getHintSaveFormat() {
     logger.debug('getHintSaveFormat()');
     if (hint.hint !== undefined) {
+        const temp = structuredClone(hint);
+        trimUndefinedRecursively(temp);
         return {
             version: HINT_VERISON,
-            hint: compress(hint)
+            hint: compress(temp)
         };
     } else {
         return {

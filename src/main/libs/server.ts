@@ -1,5 +1,5 @@
 import logger from 'electron-log/main';
-import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse, PurchaseOutput, PurchaseSuccess } from '../../common/types';
+import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse, PurchaseOutput, PurchaseSuccess, ValidateOutput, ValidateSuccess } from '../../common/types';
 import { getPlaceholderOrder, getRecipe, insertRecipeRow, serverVersion, setDiscovered, traverseAndFill } from './database/recipeStore';
 import { getAppVersion, isPackaged } from './generic';
 import { getSettings } from './settings';
@@ -617,6 +617,101 @@ export async function submitIdea(a: string, b: string, result: string): Promise<
             throw(e);
         }
     } else {
+        return undefined;
+    }
+}
+
+export async function validateItems(items: string[]): Promise<ValidateOutput | undefined> {
+    if (!(await getSettings(false)).offline) {
+        if (items.length > 100) {
+            return {
+                type: 'error',
+                result: {
+                    code: ServerErrorCode.QUERY_INVALID,
+                    deprecated: false,
+                    responseCode: 400
+                }
+            };
+        }
+        let tokenResponse: TokenHolderResponse | undefined = undefined;
+        try {
+            tokenResponse = await getToken();
+        } catch (e) {
+            logger.error('Failed to get token response', e);
+        }
+        if (tokenResponse === undefined) {
+            // Cant initiate transaction without steam token
+            logger.error('Cannot find token response');
+            return {
+                type: 'error',
+                result: {
+                    code: ServerErrorCode.NO_TOKEN,
+                    deprecated: false,
+                    responseCode: 400
+                }
+            };
+        }
+        const url = `${getEndpointUri()}/validate/v2?version=${getAppVersion()}`;
+        let hasDeprecated = false;
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json'
+        };
+        hasDeprecated = tokenResponse.deprecated;
+        if (tokenResponse.tokenHolder !== undefined) {
+            headers.Authorization = `Bearer ${tokenResponse.tokenHolder.token}`;
+        }
+        try {
+            logger.debug('validate url', url, headers.Authorization);
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                timeout: TIMEOUT,
+                body: JSON.stringify({
+                    items: items,
+                    includeLanguage: 'true'
+                })
+            });
+            if (response.ok) {
+                const body: ValidateSuccess = (await response.json()) as ValidateSuccess;
+                logger.debug('validate response body', body);
+                if (body.success) {
+                    return {
+                        type: 'success',
+                        result: body
+                    };
+                } else {
+                    return {
+                        type: 'error',
+                        result: {
+                            code: ServerErrorCode.QUERY_INVALID,
+                            deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
+                            responseCode: 500
+                        }
+                    };
+                }
+            } else {
+                const json = (await response.json()) as RequestErrorResult;
+                if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
+                    throw('Unknown issue with input parameters');
+                }
+                if (json.code === undefined) {
+                    throw('Unknown error occurred');
+                }
+                return {
+                    type: 'error',
+                    result: {
+                        responseCode: response.status,
+                        deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
+                        code: json.code
+                    }
+                };
+            }
+        } catch(e) {
+            logger.error('Failed to make api request', e);
+            throw(e);
+        }
+    } else {
+        logger.log('undefineeed');
         return undefined;
     }
 }

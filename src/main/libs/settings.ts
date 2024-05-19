@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import { getFolder, getSteamGameLanguage } from './steam';
-import { dirExists } from '../utils';
+import { verifyFolder } from '../utils';
 import { DEFAULT_SETTINGS, RawSettings, Settings } from '../../common/settings';
 import logger from 'electron-log/main';
 
@@ -16,9 +16,7 @@ export function getSettingsVersion(): number {
 
 export async function saveSettings(): Promise<void> {
     try {
-        if (!(await dirExists(getFolder()))) {
-            await fs.mkdir(getFolder(), { recursive: true });
-        }
+        await verifyFolder();
         await fs.writeFile(getFolder() + 'settings.json', JSON.stringify({
             version: SETTINGS_VERISON,
             settings: settings

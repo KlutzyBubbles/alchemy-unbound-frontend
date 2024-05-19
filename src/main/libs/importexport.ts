@@ -3,8 +3,9 @@ import logger from 'electron-log/main';
 import { dialog } from 'electron';
 import { hasProp } from '../../common/utils';
 import { getHintSaveFormat, loadHintV1, setHintRaw } from './hints';
-import { databaseV1toV2, databaseV2toV3, fillWithBase, getDatabaseSaveFormat, setDataRaw, setServerVersion } from './database/recipeStore';
+import { checkLanguages, databaseV1toV2, databaseV2toV3, databaseV3toV4, fillWithBase, getDatabaseSaveFormat, noFill, setDataRaw, setDatabaseInfo, setServerVersion } from './database/recipeStore';
 import { LATEST_SERVER_VERSION } from '../../common/types';
+import { DatabaseData } from 'src/common/types/saveFormat';
 
 const EXPORT_VERSION = 1;
 
@@ -81,10 +82,20 @@ export async function importFile(): Promise<boolean> {
             throw new Error('Database server version isnt supported');
         }
         setServerVersion(tempServerVersion);
+        let foundInfo: DatabaseData = {
+            type: 'base'
+        };
+        if (raw.info !== undefined) {
+            foundInfo = {
+                type: raw.info.base ?? 'base',
+                expiry: raw.info.expiry
+            };
+        }
         let workingVersion = database.version;
         const v1db = database.data;
         let v2db = database.data;
         let v3db = database.data;
+        let v4db = database.data;
         logger.info('rawDb', database);
         if (workingVersion === 1) {
             try {
@@ -108,10 +119,26 @@ export async function importFile(): Promise<boolean> {
         }
         if (workingVersion === 3) {
             try {
-                logger.info('Found v3, importing...');
-                logger.info(v3db);
-                await setDataRaw(await fillWithBase(v3db));
+                logger.info('Found v3, migrating...');
+                logger.info('v3db', v3db);
+                v4db = await databaseV3toV4(v3db);
+                logger.info('v4db', v4db);
+                workingVersion = 4;
             } catch (e) {
+                throw new Error('Failed loading the database from version 3');
+            }
+        }
+        if (workingVersion === 4) {
+            try {
+                logger.info('Found v4, importing...');
+                logger.info(v4db);
+                setDatabaseInfo(foundInfo);
+                if (foundInfo.type === 'base') {
+                    await setDataRaw(await checkLanguages(await fillWithBase(v4db)));
+                }
+                await setDataRaw(await checkLanguages(await noFill(v4db)));
+            } catch (e) {
+                logger.error('Database import error', e);
                 throw new Error('Failed loading the database from version 3');
             }
         } else {
@@ -170,6 +197,7 @@ export async function exportDatabase(): Promise<boolean> {
         }), 'utf-8');
         return true;
     } catch (e) {
+        logger.error('Database export error', e);
         throw new Error('Failed to save database file');
     }
 }

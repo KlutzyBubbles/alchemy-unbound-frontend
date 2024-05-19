@@ -111,6 +111,24 @@ export type PurchaseOutput = {
     result: ServerError
 }
 
+export type ValidateOutput = {
+    type: 'success',
+    result: ValidateSuccess
+} | {
+    type: 'error',
+    result: ServerError
+}
+
+export type ValidateSuccess = {
+    success: boolean,
+    items: string[],
+    languages: (Languages & {
+        emoji: string,
+        tokens: number,
+        name: string
+    })[]
+}
+
 export type PurchaseSuccess = {
     success: boolean,
     softError: boolean

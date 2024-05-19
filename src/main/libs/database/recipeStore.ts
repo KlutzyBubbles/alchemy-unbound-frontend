@@ -1,6 +1,6 @@
 import { BasicElement, LATEST_SERVER_VERSION, Languages, Recipe, RecipeRow } from '../../../common/types';
 import { promises as fs } from 'fs';
-import { Compressed, compress, decompress } from 'compress-json';
+import { Compressed, compress, decompress, trimUndefinedRecursively } from 'compress-json';
 import { getFolder } from '../steam';
 import { verifyFolder } from '../../utils';
 import { languages } from '../../../common/settings';
@@ -9,13 +9,18 @@ import baseData from '../../../base.json';
 import logger from 'electron-log/main';
 import { addHintPoint, resetHint } from '../hints';
 import { saveToFile } from './helpers';
-import { RecipeRecord } from '../../../common/types/saveFormat';
-import { getLanguage, insertLanguage } from './languageStore';
+import { DatabaseData, FileVersionError, RecipeRecord } from '../../../common/types/saveFormat';
+import { getLanguage, getLanguageKeys, insertLanguage } from './languageStore';
+import { getWorkingDatabase } from './workingName';
+import { validateItems } from '../server';
 
-const DATABASE_VERISON = 3;
+const DATABASE_VERISON = 4;
 
 export let data: RecipeRecord[] = [];
 export let serverVersion: number = 1;
+let info: DatabaseData = {
+    type: 'base'
+};
 let loadedVersion: number = -2;
 let databaseOrder = 0;
 
@@ -33,17 +38,24 @@ export function setServerVersion(version: number) {
     serverVersion = version;
 }
 
+export function setDatabaseInfo(newInfo: DatabaseData) {
+    info = newInfo;
+}
+
 export function getDatabaseSaveFormat() {
+    const temp = structuredClone(data);
+    trimUndefinedRecursively(temp);
     return {
         version: DATABASE_VERISON,
-        data: compress(data.filter((item) => item.discovered)),
-        server: serverVersion
+        data: compress(temp.filter((item) => item !== undefined && item.discovered)),
+        server: serverVersion,
+        info: info
     };
 }
 
 export async function save(): Promise<void> {
-    await verifyFolder();
-    await saveToFile('db.json', getDatabaseSaveFormat());
+    await verifyFolder('database');
+    await saveToFile(`database/${await getWorkingDatabase()}.json`, getDatabaseSaveFormat());
 }
 
 export async function setDataRaw(newData: RecipeRecord[]) {
@@ -57,11 +69,8 @@ export function databaseV1toV2(loaded: Record<string, unknown>[]): Compressed {
 
 export async function databaseV2toV3(loaded: Compressed): Promise<Compressed> {
     const tempData = structuredClone(decompress(loaded) as RecipeRow[]);
-    logger.info('v2tov3', tempData);
     const v3Data: RecipeRecord[] = [];
-    logger.info('v2tov3222', v3Data);
     for (const row of tempData) {
-        logger.info('looping', row);
         try {
             await insertLanguage(row.result, {
                 ...row.display,
@@ -83,13 +92,50 @@ export async function databaseV2toV3(loaded: Compressed): Promise<Compressed> {
             logger.error(`Failed inserting language for ${row.result}`, error);
         }
     }
-    logger.info('v2tov3after', v3Data);
     let compressed = undefined;
     try {
         compressed = compress(v3Data);
-        logger.info('v2tov3aftercompressed', compressed);
     } catch (error) {
         logger.error('Failed compressing', error);
+    }
+    if (compressed === undefined) {
+        throw new Error('Compressed output is undefined');
+    }
+    return compressed;
+}
+
+export async function databaseV3toV4(loaded: Compressed): Promise<Compressed> {
+    // v4 Only changed outer elements, not the data itself.
+    const tempData = structuredClone(decompress(loaded) as RecipeRecord[]);
+    const v4Data: RecipeRecord[] = [];
+    for (const row of tempData) {
+        try {
+            v4Data.push({
+                order: row.order,
+                a: row.a,
+                b: row.b,
+                discovered: row.discovered,
+                result: row.result,
+                depth: row.depth,
+                first: row.first,
+                who_discovered: row.who_discovered,
+                hint_ignore: row.hint_ignore ?? false,
+                has_language: row.has_language ?? false,
+                valid_language: row.valid_language ?? true,
+                base: row.base,
+            });
+        } catch (error) {
+            logger.error(`Failed inserting language for ${row.result}`, error);
+        }
+    }
+    let compressed = undefined;
+    try {
+        compressed = compress(v4Data);
+    } catch (error) {
+        logger.error('Failed compressing', error);
+    }
+    if (compressed === undefined) {
+        throw new Error('Compressed output is undefined');
     }
     return compressed;
 }
@@ -148,15 +194,107 @@ export async function fillWithBase(loaded: Compressed): Promise<RecipeRecord[]> 
     if (backup) {
         const holdData = data;
         data = tempData;
-        await saveToFile(`db_itemchange_${Math.floor((new Date()).getTime() / 1000)}.backup`, getDatabaseSaveFormat());
+        await saveToFile(`${await getWorkingDatabase()}_itemchange_${Math.floor((new Date()).getTime() / 1000)}.backup`, getDatabaseSaveFormat());
         data = holdData;
     }
     return newData;
 }
 
+export async function noFill(loaded: Compressed): Promise<RecipeRecord[]> {
+    const tempData = structuredClone(decompress(loaded) as RecipeRecord[]);
+    return tempData;
+}
+
+export async function checkLanguages(recipes: RecipeRecord[]): Promise<RecipeRecord[]> {
+    const tempData = structuredClone(recipes);
+    logger.info('tempData', tempData.length);
+    let needToCheck: string[] = [];
+    const languages = await getLanguageKeys();
+    for (const recipe of tempData) {
+        if (needToCheck.includes(recipe.result)) {
+            recipe.has_language = false;
+            continue;
+        }
+        if (!languages.includes(recipe.result)) {
+            recipe.has_language = false;
+            needToCheck.push(recipe.result);
+        } else {
+            recipe.has_language = true;
+            recipe.valid_language = true;
+        }
+    }
+    needToCheck = [...new Set(needToCheck)];
+    const validated: string[] = [];
+    const notExists: string[] = [];
+    for (const chunk of chunkArray(needToCheck, 100)) {
+        try {
+            const validatedResponse = await validateItems(chunk);
+            if (validatedResponse === undefined) {
+                continue;
+            } else if (validatedResponse.type === 'error') {
+                continue;
+            } else {
+                for (const lang of validatedResponse.result.languages) {
+                    await insertLanguage(lang.name, lang, true);
+                    validated.push(lang.name);
+                }
+                for (const item of chunk) {
+                    if (!validatedResponse.result.items.includes(item)) {
+                        notExists.push(item);
+                    }
+                }
+            }
+        } catch (error) {
+            logger.error('Error validating items', error);
+            continue;
+        }
+    }
+    for (const recipe of tempData) {
+        if (validated.includes(recipe.result)) {
+            recipe.has_language = true;
+            recipe.valid_language = true;
+        } else if (notExists.includes(recipe.result)) {
+            recipe.has_language = false;
+            recipe.valid_language = false;
+        } else {
+            recipe.has_language = false;
+            recipe.valid_language = true;
+        }
+    }
+    logger.info('tempDataafter', tempData.length);
+    return tempData;
+}
+
+function chunkArray(array: string[], chunkSize: number): string[][] {
+    return Array.from(
+        { length: Math.ceil(array.length / chunkSize) },
+        (_, index) => array.slice(index * chunkSize, (index + 1) * chunkSize)   
+    );
+}
+
 async function loadData(): Promise<RecipeRecord[]> {
     try {
-        const raw = JSON.parse(await fs.readFile(getFolder() + 'db.json', 'utf-8'));
+        //`${getFolder()}database/${await getWorkingDatabase()}.json`
+        const newPath = `${getFolder()}database/${await getWorkingDatabase()}.json`;
+        const oldPath = getFolder() + await getWorkingDatabase() + '.json';
+        let raw = undefined;
+        try {
+            raw = JSON.parse(await fs.readFile(newPath, 'utf-8'));
+        } catch (e) {
+            loadedVersion = FileVersionError.ERROR;
+            serverVersion = LATEST_SERVER_VERSION;
+            if (e.code === 'ENOENT') {
+                logger.info('No database file found, trying old location');
+                raw = JSON.parse(await fs.readFile(oldPath, 'utf-8'));
+                await verifyFolder('database');
+                await fs.rename(oldPath, newPath);
+            } else {
+                throw e;
+            }
+        }
+        if (raw === undefined) {
+            throw new Error('Raw turned out to be undefined');
+        }
         serverVersion = raw.server;
         if (serverVersion === undefined) {
             serverVersion = 1;
@@ -169,6 +307,16 @@ async function loadData(): Promise<RecipeRecord[]> {
         logger.info('raw', raw);
         let workingVersion = raw.version;
         let workingData = raw.data;
+        let foundInfo: DatabaseData = {
+            type: 'base'
+        };
+        if (raw.info !== undefined) {
+            foundInfo = {
+                type: raw.info.base ?? 'base',
+                expiry: raw.info.expiry
+            };
+        }
+        info = foundInfo;
         if (workingVersion === 1) {
             logger.info('Found v1, migrating...');
             workingData = databaseV1toV2(workingData);
@@ -180,17 +328,24 @@ async function loadData(): Promise<RecipeRecord[]> {
             workingVersion = 3;
         }
         if (workingVersion === 3) {
+            logger.info('Found v3, migrating...');
+            workingData = await databaseV3toV4(workingData);
+            workingVersion = 4;
+        }
+        if (workingVersion === 4) {
             logger.info('Found v3, loading...');
-            logger.info(workingData);
-            return await fillWithBase(workingData);
+            if (info.type === 'base') {
+                return await checkLanguages(await fillWithBase(workingData));
+            }
+            return await checkLanguages(await noFill(workingData));
         } else {
-            loadedVersion = -1;
+            loadedVersion = FileVersionError.UNKOWN_VERSION;
             serverVersion = LATEST_SERVER_VERSION;
             logger.error(`Failed to load database because of unknown version '${raw.version}', has this been altered?`);
             throw(Error(`Failed to load database because of unknown version '${raw.version}', has this been altered?`));
         }
     } catch (e) {
-        loadedVersion = -2;
+        loadedVersion = FileVersionError.ERROR;
         serverVersion = LATEST_SERVER_VERSION;
         if (e.code === 'ENOENT') {
             logger.info('No database file found, returning blank data');
@@ -223,7 +378,7 @@ export async function createDatabase(): Promise<void> {
         // RELEASE --------------------------
         data = await loadData();
     } catch(e) {
-        loadedVersion = -2;
+        loadedVersion = FileVersionError.ERROR;
         serverVersion = LATEST_SERVER_VERSION;
         logger.error(`Failed to load database '${e.message}'`);
     }
@@ -235,8 +390,8 @@ export async function createDatabase(): Promise<void> {
 }
 
 export async function resetAndBackup(prefix = 'db_backup_'): Promise<void> {
-    await verifyFolder();
-    await saveToFile(`${prefix}${Math.floor((new Date()).getTime() / 1000)}.backup`, getDatabaseSaveFormat());
+    await verifyFolder('backup');
+    await saveToFile(`backup/${prefix}${Math.floor((new Date()).getTime() / 1000)}.backup`, getDatabaseSaveFormat());
     data = structuredClone(baseData) as RecipeRecord[];
     loadedVersion = DATABASE_VERISON;
     serverVersion = LATEST_SERVER_VERSION;
@@ -360,7 +515,10 @@ export async function getRecipesFor(result: string): Promise<Recipe[]> {
 export async function getAllRecipes(): Promise<Recipe[]> {
     const formatted = [];
     for (const recipe of data) {
-        formatted.push(traverseAndFill(recipe));
+        const temp = traverseAndFill(recipe);
+        if (temp !== undefined) {
+            formatted.push(temp);
+        }
     }
     return formatted;
 }

@@ -23,8 +23,12 @@ export async function fileExists(path: string): Promise<boolean> {
     }
 }
 
-export async function verifyFolder(): Promise<void> {
-    if (!(await dirExists(getFolder()))) {
-        await fs.mkdir(getFolder(), { recursive: true });
+export async function verifyFolder(subFolder?: string): Promise<void> {
+    let folder = getFolder();
+    if (subFolder !== undefined) {
+        folder += `${subFolder}/`;
+    }
+    if (!(await dirExists(folder))) {
+        await fs.mkdir(folder, { recursive: true });
     }
 }
