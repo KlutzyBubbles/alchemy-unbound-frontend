@@ -1,18 +1,21 @@
-export type BackgroundType = 'blank' | 'line' | 'bubble' // | 'particles' | 'rain'
+export type BackgroundType = 'blank' | 'line' | 'bubble' | 'themeSand' // | 'particles' | 'rain'
 
 export const BackgroundTypeList: BackgroundType[] = [
     'blank',
     'line',
-    'bubble'
+    'bubble',
+    'themeSand'
 ];
 
-export type ThemeType = 'dark' | 'light' | 'supporter' //| 'purple' // | 'github' | 'steam' | 'discord'
+export type ThemeType = 'dark' | 'light' | 'supporter' | 'themePurple' | 'themeOrange' | 'themeSand'//| 'purple' // | 'github' | 'steam' | 'discord'
 
 export const ThemeTypeList: ThemeType[] = [
     'dark',
     'light',
     'supporter',
-    // 'purple'
+    'themePurple',
+    'themeSand',
+    'themeOrange'
 ];
 
 export type LeftRight = 'left' | 'right'

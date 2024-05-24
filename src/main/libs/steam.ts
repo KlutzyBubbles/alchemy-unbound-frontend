@@ -81,6 +81,10 @@ export async function getWebAuthTicket(): Promise<auth.Ticket> {
     return await getSteamworksClient().auth.getSessionTicketWithSteamId(getSteamIdRaw().steamId64);
 }
 
+export async function getUsername(): Promise<string> {
+    return await getSteamworksClient().localplayer.getName();
+}
+
 // export async function getWebAuthTicket(): Promise<auth.Ticket> {
 //     if (steamTicket === undefined) {
 //         steamTicket = await getSteamworksClient().auth.getSessionTicketWithSteamId(getSteamIdRaw().steamId64);

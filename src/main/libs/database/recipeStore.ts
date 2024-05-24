@@ -38,6 +38,10 @@ export function setServerVersion(version: number) {
     serverVersion = version;
 }
 
+export function getDatabaseInfo() {
+    return info;
+}
+
 export function setDatabaseInfo(newInfo: DatabaseData) {
     info = newInfo;
 }

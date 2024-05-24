@@ -1,10 +1,12 @@
 import logger from 'electron-log/main';
-import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse, PurchaseOutput, PurchaseSuccess, ValidateOutput, ValidateSuccess } from '../../common/types';
+import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse, PurchaseOutput, PurchaseSuccess, ValidateOutput, UserOutput, RedeemSuccess, GenericSuccess, GenericOutput } from '../../common/types';
 import { getPlaceholderOrder, getRecipe, insertRecipeRow, serverVersion, setDiscovered, traverseAndFill } from './database/recipeStore';
 import { getAppVersion, isPackaged } from './generic';
 import { getSettings } from './settings';
 import { getSteamGameLanguage, getSteamworksClient, getWebAuthTicket } from './steam';
 import fetch, { HeadersInit, Response } from 'electron-fetch';
+import { TxnItems } from '../../common/server';
+import { addTheme, removeTheme } from './info';
 
 export type RequestErrorResult = {
   code: number,
@@ -81,6 +83,7 @@ export function getEndpoint(): string {
 }
 
 async function refreshToken(): Promise<TokenHolderResponse> {
+    logger.silly('refreshToken');
     if (token === undefined) {
         return await createToken();
     } else {
@@ -88,8 +91,9 @@ async function refreshToken(): Promise<TokenHolderResponse> {
         if (token.expiryDate < ((new Date()).getTime() + 600000) / 1000) {
             let response: Response | undefined = undefined;
             try {
-                logger.debug('token request url', `${getEndpointUri()}/session/v${serverVersion}?version=${getAppVersion()}`, token.token);
-                response = await fetch(`${getEndpointUri()}/session/v${serverVersion}?version=${getAppVersion()}`, {
+                const url = `${getEndpointUri()}/v${serverVersion}/session?version=${getAppVersion()}`;
+                logger.debug('token request url', url, token.token);
+                response = await fetch(url, {
                     method: 'GET',
                     headers: new Headers({
                         'Authorization': `Bearer ${token.token}`, 
@@ -128,6 +132,8 @@ async function refreshToken(): Promise<TokenHolderResponse> {
                     throw('Steam servers are down');
                 } else if (json.code === ServerErrorCode.STEAM_ERROR) {
                     throw('Issue validating ticket');
+                } else if (json.code === ServerErrorCode.TOKEN_EXPIRED) {
+                    return await createToken();
                 }
                 throw(`Unknown error: ${json.code}`);
             }
@@ -140,202 +146,14 @@ async function refreshToken(): Promise<TokenHolderResponse> {
     }
 }
 
-export async function initTransaction(item: string): Promise<PurchaseOutput | undefined> {
-    if (!(await getSettings(false)).offline) {
-        return new Promise<PurchaseOutput>((resolve, reject) => {
-            (async () => {
-                let tokenResponse: TokenHolderResponse | undefined = undefined;
-                try {
-                    tokenResponse = await getToken();
-                } catch (e) {
-                    logger.error('Failed to get token response', e);
-                }
-                if (tokenResponse === undefined) {
-                    // Cant initiate transaction without steam token
-                    logger.error('Cannot find token response');
-                    return {
-                        type: 'error',
-                        result: {
-                            code: ServerErrorCode.NO_TOKEN,
-                            deprecated: false,
-                            responseCode: 400
-                        }
-                    };
-                }
-                const client = getSteamworksClient();
-                new Promise<PurchaseOutput>((resolve, reject) => {
-                    logger.log('inside pormise');
-                    client.callback.register(client.callback.SteamCallback.MicroTxnAuthorizationResponse, (value) => {
-                        console.log('value', value);
-                        if (!value.authorized) {
-                            return resolve({
-                                type: 'error',
-                                result: {
-                                    code: ServerErrorCode.STEAM_ERROR,
-                                    deprecated: false,
-                                    responseCode: 0
-                                }
-                            });
-                        }
-                        (async() => {
-                            let tokenResponse: TokenHolderResponse | undefined = undefined;
-                            try {
-                                tokenResponse = await getToken();
-                            } catch (e) {
-                                logger.error('Failed to get token response', e);
-                            }
-                            if (tokenResponse === undefined) {
-                                // Cant initiate transaction without steam token
-                                logger.error('Cannot find token response');
-                                return {
-                                    type: 'error',
-                                    result: {
-                                        code: ServerErrorCode.NO_TOKEN,
-                                        deprecated: false,
-                                        responseCode: 400
-                                    }
-                                };
-                            }
-                            const url = `${getEndpointUri()}/purchase/finalize/v2/?version=${getAppVersion()}&orderid=${value.order_id}`;
-                            let hasDeprecated = false;
-                            const headers: HeadersInit = {
-                                'Content-Type': 'application/json'
-                            };
-                            hasDeprecated = tokenResponse.deprecated;
-                            if (tokenResponse.tokenHolder !== undefined) {
-                                headers.Authorization = `Bearer ${tokenResponse.tokenHolder.token}`;
-                            }
-                            try {
-                                logger.debug('purchase finalize url', url, headers.Authorization);
-                                const response = await fetch(url, {
-                                    method: 'GET',
-                                    headers: headers,
-                                    timeout: TIMEOUT
-                                });
-                                if (response.ok) {
-                                    const body: PurchaseSuccess = (await response.json()) as PurchaseSuccess;
-                                    logger.debug('purchase finalize response body', body);
-                                    if (body.success) {
-                                        logger.log('inside success');
-                                        return {
-                                            type: 'success',
-                                            result: body
-                                        };
-                                    } else {
-                                        return {
-                                            type: 'error',
-                                            result: {
-                                                code: ServerErrorCode.QUERY_INVALID,
-                                                deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
-                                                responseCode: 500
-                                            }
-                                        };
-                                    }
-                                } else {
-                                    const json = (await response.json()) as RequestErrorResult;
-                                    if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
-                                        throw('Unknown issue with input parameters');
-                                    }
-                                    if (json.code === undefined) {
-                                        throw('Unknown error occurred');
-                                    }
-                                    return {
-                                        type: 'error',
-                                        result: {
-                                            responseCode: response.status,
-                                            deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
-                                            code: json.code
-                                        }
-                                    };
-                                }
-                            } catch(e) {
-                                logger.error('Failed to make api request', e);
-                                throw(e);
-                            }
-                        })().then((result) => resolve(result as PurchaseOutput)).catch((error) => reject(error));
-                    });
-                }).then((result) => resolve(result as PurchaseOutput)).catch((error) => reject(error));
-                const url = `${getEndpointUri()}/purchase/v2?version=${getAppVersion()}&item=${item}`;
-                let hasDeprecated = false;
-                const headers: HeadersInit = {
-                    'Content-Type': 'application/json'
-                };
-                hasDeprecated = tokenResponse.deprecated;
-                if (tokenResponse.tokenHolder !== undefined) {
-                    headers.Authorization = `Bearer ${tokenResponse.tokenHolder.token}`;
-                }
-                try {
-                    logger.debug('purchase url', url, headers.Authorization);
-                    const response = await fetch(url, {
-                        method: 'GET',
-                        headers: headers,
-                        timeout: TIMEOUT
-                    });
-                    if (response.ok) {
-                        const body: PurchaseSuccess = (await response.json()) as PurchaseSuccess;
-                        logger.debug('purchase response body', body);
-                        if (!body.success) {
-                        //     return {
-                        //         type: 'success',
-                        //         result: body
-                        //     };
-                        // } else {
-                            return {
-                                type: 'error',
-                                result: {
-                                    code: ServerErrorCode.QUERY_INVALID,
-                                    deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
-                                    responseCode: 500
-                                }
-                            };
-                        }
-                        logger.log('first success');
-                        const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
-                        await delay(10 * 60 * 60 * 1000);
-                        logger.log('after delayt');
-                        return {
-                            type: 'error',
-                            result: {
-                                responseCode: ServerErrorCode.QUERY_UNDEFINED,
-                                deprecated: false,
-                                code: -1
-                            }
-                        };
-                    } else {
-                        const json = (await response.json()) as RequestErrorResult;
-                        if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
-                            throw('Unknown issue with input parameters');
-                        }
-                        if (json.code === undefined) {
-                            throw('Unknown error occurred');
-                        }
-                        return {
-                            type: 'error',
-                            result: {
-                                responseCode: response.status,
-                                deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
-                                code: json.code
-                            }
-                        };
-                    }
-                } catch(e) {
-                    logger.error('Failed to make api request', e);
-                    throw(e);
-                }
-            })().then((result) => resolve(result as PurchaseOutput)).catch((error) => reject(error));
-        });
-    } else {
-        logger.log('undefineeed');
-        return undefined;
-    }
-}
-
 async function createToken(): Promise<TokenHolderResponse> {
+    logger.silly('createToken');
     const ticket = await getWebAuthTicket();
-    logger.debug('trying to get token', `${getEndpointUri()}/session/v${serverVersion}?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}`);
     let response: Response | undefined = undefined;
     try {
-        response = await fetch(`${getEndpointUri()}/session/v${serverVersion}?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}&steamLanguage=${getSteamGameLanguage()}`, {
+        const url = `${getEndpointUri()}/v${serverVersion}/session?version=${getAppVersion()}&steamToken=${ticket.getBytes().toString('hex')}&steamLanguage=${getSteamGameLanguage()}`;
+        logger.debug('trying to get token', url);
+        response = await fetch(url, {
             method: 'POST',
             timeout: TIMEOUT
         });
@@ -376,8 +194,175 @@ async function createToken(): Promise<TokenHolderResponse> {
     }
 }
 
+export async function redeemItem(item: string): Promise<GenericOutput> {
+    logger.silly('redeemItem', item);
+    if (!Object.keys(TxnItems).includes(item)) {
+        logger.error('Cannot find item in txn items', item);
+        return {
+            type: 'error',
+            result: {
+                code: ServerErrorCode.ITEM_UNKNOWN,
+                deprecated: false,
+                responseCode: 400
+            }
+        };
+    }
+    if (TxnItems[item].singleUse) {
+        const result = await apiRequest(
+            'PATCH',
+            '/v2/purchase',
+            {
+                item
+            },
+            undefined,
+            true
+        );
+        if (result.type === 'success') {
+            const body: RedeemSuccess = result.result as RedeemSuccess;
+            if (body.success) {
+                return result;
+            } else {
+                return {
+                    type: 'error',
+                    result: {
+                        code: ServerErrorCode.QUERY_INVALID,
+                        deprecated: false,
+                        responseCode: 500
+                    }
+                };
+            }
+        } else {
+            return result;
+        }
+    }
+}
+
+export async function checkAndRedeem(item: string) {
+    logger.silly('checkAndRedeem', item);
+    const result = await apiRequest(
+        'GET',
+        '/v2/purchase',
+        {
+            item
+        },
+        undefined,
+        true
+    );
+    if (result.type === 'success') {
+        const body: RedeemSuccess = result.result as RedeemSuccess;
+        if (body.success) {
+            logger.log('inside success');
+            if (!body.redeemed) {
+                const redeem = await redeemItem(item);
+                if (redeem.type === 'error') {
+                    return redeem;
+                }
+            }
+            return {
+                type: 'success',
+                result: {
+                    success: true,
+                    softError: false
+                }
+            };
+        } else {
+            return undefined;
+        }
+    } else {
+        return result;
+    }
+}
+
+export async function initTransaction(item: string): Promise<PurchaseOutput> {
+    logger.silly('initTransaction', item);
+    if (!Object.keys(TxnItems).includes(item)) {
+        logger.error('Cannot find item in txn items', item);
+        return {
+            type: 'error',
+            result: {
+                code: ServerErrorCode.ITEM_UNKNOWN,
+                deprecated: false,
+                responseCode: 400
+            }
+        };
+    }
+    return new Promise<PurchaseOutput>((resolve, reject) => {
+        (async () => {
+            if (TxnItems[item].singleUse) {
+                const check = await checkAndRedeem(item);
+                if (check !== undefined) {
+                    return check;
+                }
+            }
+            const client = getSteamworksClient();
+            new Promise<PurchaseOutput>((resolve, reject) => {
+                logger.log('inside pormise');
+                client.callback.register(client.callback.SteamCallback.MicroTxnAuthorizationResponse, (value) => {
+                    console.log('value', value);
+                    if (!value.authorized) {
+                        return resolve({
+                            type: 'error',
+                            result: {
+                                code: ServerErrorCode.STEAM_ERROR,
+                                deprecated: false,
+                                responseCode: 0
+                            }
+                        });
+                    }
+                    (async() => {
+                        return await apiRequest(
+                            'GET',
+                            '/v2/purchase/finalize',
+                            {
+                                orderid: parseInt(`${value.order_id}`)
+                            },
+                            undefined,
+                            true
+                        );
+                    })().then((result) => resolve(result as PurchaseOutput)).catch((error) => reject(error));
+                });
+            }).then((result) => resolve(result as PurchaseOutput)).catch((error) => reject(error));
+            const result = await apiRequest(
+                'POST',
+                '/v2/purchase',
+                {
+                    item
+                },
+                undefined,
+                true
+            );
+            if (result.type === 'success') {
+                const body: PurchaseSuccess = result.result as PurchaseSuccess;
+                if (!body.success) {
+                    return {
+                        type: 'error',
+                        result: {
+                            code: ServerErrorCode.QUERY_INVALID,
+                            deprecated: false,
+                            responseCode: 500
+                        }
+                    };
+                }
+                const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+                await delay(10 * 60 * 60 * 1000);
+                return {
+                    type: 'error',
+                    result: {
+                        responseCode: ServerErrorCode.QUERY_UNDEFINED,
+                        deprecated: false,
+                        code: -1
+                    }
+                };
+            } else {
+                return result;
+            }
+        })().then((result) => resolve(result as PurchaseOutput)).catch((error) => reject(error));
+    });
+}
+
 // Returns undefined if in offline mode.
 export async function combine(a: string, b: string): Promise<CombineOutput | undefined> {
+    logger.silly('combine', a, b);
     let exists: Recipe | undefined = undefined;
     try {
         exists = await getRecipe(a, b);
@@ -404,244 +389,145 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
             }
         };
     } else {
-        if (!(await getSettings(false)).offline) {
-            let tokenResponse: TokenHolderResponse | undefined = undefined;
+        if ((await getSettings(false)).offline) {
+            return undefined;
+        }
+        const result = await apiRequest(
+            'GET',
+            `/v${serverVersion}/api`,
+            {
+                a,
+                b
+            },
+            undefined,
+            false
+        );
+        if (result.type === 'success') {
+            const body: Recipe = result.result as unknown as Recipe;
+            newDiscovery = true;
+            firstDiscovery = body.first ? true : false;
             try {
-                tokenResponse = await getToken();
-            } catch (e) {
-                logger.error('Failed to get token response', e);
-            }
-            const url = `${getEndpointUri()}/api/v${serverVersion}?version=${getAppVersion()}&a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
-            let hasDeprecated = false;
-            const headers: HeadersInit = {
-                'Content-Type': 'application/json'
-            };
-            if (tokenResponse !== undefined) {
-                hasDeprecated = tokenResponse.deprecated;
-                if (tokenResponse.tokenHolder !== undefined) {
-                    headers.Authorization = `Bearer ${tokenResponse.tokenHolder.token}`;
-                }
-            }
-            try {
-                logger.debug('combine url', url, headers.Authorization);
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: headers,
-                    timeout: TIMEOUT
+                const recipeRow = await insertRecipeRow({
+                    a: a,
+                    b: b,
+                    result: body.result,
+                    discovered: 1,
+                    display: body.display,
+                    emoji: body.emoji,
+                    depth: body.depth,
+                    first: body.first ? 1 : 0,
+                    who_discovered: body.who_discovered,
+                    base: body.base ? 1 : 0
                 });
-                if (response.ok) {
-                    const body: Recipe = (await response.json()) as Recipe;
-                    logger.debug('combine response body', body);
-                    newDiscovery = true;
-                    firstDiscovery = body.first ? true : false;
-                    try {
-                        const recipeRow = await insertRecipeRow({
+                return {
+                    type: 'success',
+                    result: {
+                        responseCode: 200,
+                        deprecated: false,
+                        hintAdded: false,
+                        newDiscovery,
+                        firstDiscovery,
+                        recipe: traverseAndFill(recipeRow)
+                    }
+                };
+            } catch(e) {
+                logger.error('Failed to insert recipe', e);
+                return {
+                    type: 'success',
+                    result: {
+                        responseCode: 200,
+                        deprecated: false,
+                        hintAdded: false,
+                        newDiscovery,
+                        firstDiscovery,
+                        recipe: traverseAndFill({
+                            order: getPlaceholderOrder(),
                             a: a,
                             b: b,
                             result: body.result,
                             discovered: 1,
-                            display: body.display,
-                            emoji: body.emoji,
                             depth: body.depth,
                             first: body.first ? 1 : 0,
                             who_discovered: body.who_discovered,
                             base: body.base ? 1 : 0
-                        });
-                        return {
-                            type: 'success',
-                            result: {
-                                responseCode: response.status,
-                                deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
-                                hintAdded: false,
-                                newDiscovery,
-                                firstDiscovery,
-                                recipe: traverseAndFill(recipeRow)
-                            }
-                        };
-                    } catch(e) {
-                        logger.error('Failed to insert recipe', e);
-                        return {
-                            type: 'success',
-                            result: {
-                                responseCode: response.status,
-                                deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
-                                hintAdded: false,
-                                newDiscovery,
-                                firstDiscovery,
-                                recipe: traverseAndFill({
-                                    order: getPlaceholderOrder(),
-                                    a: a,
-                                    b: b,
-                                    result: body.result,
-                                    discovered: 1,
-                                    depth: body.depth,
-                                    first: body.first ? 1 : 0,
-                                    who_discovered: body.who_discovered,
-                                    base: body.base ? 1 : 0
-                                })
-                            }
-                        };
+                        })
                     }
-                } else {
-                    const json = (await response.json()) as RequestErrorResult;
-                    if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
-                        throw('Unknown issue with input a/b');
-                    } else if (json.code === ServerErrorCode.AB_NOT_KNOWN) {
-                        // TODO Need to add server method to rectify this
-                        throw('Items are not known, have these been synced with the server?');
-                    }
-                    if (json.code === undefined) {
-                        throw('Unknown error occurred');
-                    }
-                    return {
-                        type: 'error',
-                        result: {
-                            responseCode: response.status,
-                            deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
-                            code: json.code
-                        }
-                    };
-                }
-            } catch(e) {
-                logger.error('Failed to make api request', e);
-                throw(e);
+                };
             }
         } else {
-            return undefined;
-        }
-    }
-}
-
-export async function submitIdea(a: string, b: string, result: string): Promise<CombineOutput | undefined> {
-    if (!(await getSettings(false)).offline) {
-        const recipe: Recipe = {
-            order: 0,
-            a: {
-                name: a,
-                display: undefined,
-                emoji: '❓',
-                depth: 0,
-                first: 0,
-                who_discovered: '',
-                base: 0
-            },
-            b: {
-                name: b,
-                display: undefined,
-                emoji: '❓',
-                depth: 0,
-                first: 0,
-                who_discovered: '',
-                base: 0
-            },
-            discovered: 0,
-            result: result,
-            display: undefined,
-            emoji: '❓',
-            depth: 0,
-            first: 0,
-            who_discovered: '',
-            base: 0
-        };
-        let tokenResponse: TokenHolderResponse | undefined = undefined;
-        try {
-            tokenResponse = await getToken();
-        } catch (e) {
-            logger.error('Failed to get token response', e);
-        }
-        const url = `${getEndpointUri()}/idea/v1?version=${getAppVersion()}&a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}&result=${encodeURIComponent(result)}`;
-        let hasDeprecated = false;
-        const headers: HeadersInit = {
-            'Content-Type': 'application/json'
-        };
-        if (tokenResponse !== undefined) {
-            hasDeprecated = tokenResponse.deprecated;
-            if (tokenResponse.tokenHolder !== undefined) {
-                headers.Authorization = `Bearer ${tokenResponse.tokenHolder.token}`;
-            }
-        }
-        try {
-            logger.debug('idea url', url, headers.Authorization);
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: headers,
-                timeout: TIMEOUT
-            });
-            if (response.ok) {
-                const body: Recipe = (await response.json()) as Recipe;
-                logger.debug('combine response body', body);
-                return {
-                    type: 'success',
-                    result: {
-                        responseCode: response.status,
-                        deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
-                        hintAdded: false,
-                        newDiscovery: false,
-                        firstDiscovery: false,
-                        recipe: recipe
-                    }
-                };
+            if (result.result.code === ServerErrorCode.AB_NOT_KNOWN) {
+                throw('Items are not known, have these been synced with the server?');
             } else {
-                const json = (await response.json()) as RequestErrorResult;
-                if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
-                    throw('Unknown issue with input a/b/result');
-                } else if (json.code === ServerErrorCode.MAX_DEPTH) {
-                    // TODO Need to add server method to rectify this
-                    logger.debug('Idea already exists');
-                    return {
-                        type: 'success',
-                        result: {
-                            responseCode: response.status,
-                            deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
-                            hintAdded: false,
-                            newDiscovery: false,
-                            firstDiscovery: false,
-                            recipe: recipe
-                        }
-                    };
-                }
-                if (json.code === undefined) {
-                    throw('Unknown error occurred');
-                }
-                return {
-                    type: 'error',
-                    result: {
-                        responseCode: response.status,
-                        deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
-                        code: json.code
-                    }
-                };
+                return result;
             }
-        } catch(e) {
-            logger.error('Failed to make api request', e);
-            throw(e);
         }
-    } else {
-        return undefined;
     }
 }
 
-export async function validateItems(items: string[]): Promise<ValidateOutput | undefined> {
-    if (!(await getSettings(false)).offline) {
-        if (items.length > 100) {
-            return {
-                type: 'error',
-                result: {
-                    code: ServerErrorCode.QUERY_INVALID,
-                    deprecated: false,
-                    responseCode: 400
-                }
-            };
-        }
-        let tokenResponse: TokenHolderResponse | undefined = undefined;
-        try {
-            tokenResponse = await getToken();
-        } catch (e) {
-            logger.error('Failed to get token response', e);
-        }
-        if (tokenResponse === undefined) {
-            // Cant initiate transaction without steam token
-            logger.error('Cannot find token response');
+export async function validateItems(items: string[]): Promise<ValidateOutput> {
+    logger.silly('validateItems', items);
+    if (items.length > 100) {
+        return {
+            type: 'error',
+            result: {
+                code: ServerErrorCode.QUERY_INVALID,
+                deprecated: false,
+                responseCode: 400
+            }
+        };
+    }
+    return await apiRequest(
+        'POST',
+        `/v${serverVersion}/validate`,
+        undefined,
+        {
+            items: items,
+            includeLanguage: 'true'
+        },
+        false
+    ) as ValidateOutput;
+}
+
+export async function getUserDetails(): Promise<UserOutput> {
+    logger.silly('getUserDetails');
+    return await apiRequest(
+        'GET',
+        '/v2/session/user',
+        undefined,
+        undefined,
+        false
+    ) as UserOutput;
+}
+
+export async function checkDLC(): Promise<UserOutput> {
+    logger.silly('getUserDetails');
+    return await apiRequest(
+        'GET',
+        '/v2/session/dlc',
+        undefined,
+        undefined,
+        false
+    ) as UserOutput;
+}
+
+async function apiRequest(
+    method: string,
+    path: string,
+    queryParams?: Record<string, string | number | boolean>,
+    body?: Record<string, unknown>,
+    tokenRequired: boolean = false
+): Promise<GenericOutput> {
+    logger.debug('apiRequest', method, path, queryParams, body, tokenRequired);
+    logger.warn('wapiRequest', method, path, queryParams, body, tokenRequired);
+    let tokenResponse: TokenHolderResponse | undefined = undefined;
+    try {
+        tokenResponse = await getToken();
+    } catch (e) {
+        logger.error('Failed to get token response', e);
+    }
+    if (tokenResponse === undefined) {
+        logger.error('Cannot find token response');
+        if (tokenRequired) {
             return {
                 type: 'error',
                 result: {
@@ -651,67 +537,83 @@ export async function validateItems(items: string[]): Promise<ValidateOutput | u
                 }
             };
         }
-        const url = `${getEndpointUri()}/validate/v2?version=${getAppVersion()}`;
-        let hasDeprecated = false;
-        const headers: HeadersInit = {
-            'Content-Type': 'application/json'
-        };
-        hasDeprecated = tokenResponse.deprecated;
-        if (tokenResponse.tokenHolder !== undefined) {
-            headers.Authorization = `Bearer ${tokenResponse.tokenHolder.token}`;
+    }
+    let url = `${getEndpointUri()}${path}?version=${getAppVersion()}`;
+    if (queryParams !== undefined) {
+        for (const param of Object.keys(queryParams)) {
+            url += `&${param}=${encodeURIComponent(queryParams[param])}`;
         }
-        try {
-            logger.debug('validate url', url, headers.Authorization);
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: headers,
-                timeout: TIMEOUT,
-                body: JSON.stringify({
-                    items: items,
-                    includeLanguage: 'true'
-                })
-            });
-            if (response.ok) {
-                const body: ValidateSuccess = (await response.json()) as ValidateSuccess;
-                logger.debug('validate response body', body);
-                if (body.success) {
-                    return {
-                        type: 'success',
-                        result: body
-                    };
-                } else {
-                    return {
-                        type: 'error',
-                        result: {
-                            code: ServerErrorCode.QUERY_INVALID,
-                            deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
-                            responseCode: 500
-                        }
-                    };
-                }
-            } else {
-                const json = (await response.json()) as RequestErrorResult;
-                if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
-                    throw('Unknown issue with input parameters');
-                }
-                if (json.code === undefined) {
-                    throw('Unknown error occurred');
-                }
-                return {
-                    type: 'error',
-                    result: {
-                        responseCode: response.status,
-                        deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
-                        code: json.code
-                    }
-                };
+    }
+    const hasDeprecated = tokenResponse === undefined ? false : tokenResponse.deprecated;
+    const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+    };
+    if (tokenResponse !== undefined && tokenResponse.tokenHolder !== undefined) {
+        headers.Authorization = `Bearer ${tokenResponse.tokenHolder.token}`;
+    }
+    try {
+        logger.debug('Final URL', url, headers.Authorization);
+        const response = await fetch(url, {
+            method: method,
+            headers: headers,
+            timeout: TIMEOUT,
+            body: body === undefined ? undefined : JSON.stringify(body)
+        });
+        if (response.ok) {
+            const body: GenericSuccess = (await response.json()) as GenericSuccess;
+            logger.debug('Response body', body);
+            logger.warn('wResponse body', body);
+            return {
+                type: 'success',
+                result: body
+            };
+        } else {
+            logger.warn('Error making request', response.status, response.body);
+            const json = (await response.json()) as RequestErrorResult;
+            if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
+                throw('Unknown issue with input parameters');
             }
-        } catch(e) {
-            logger.error('Failed to make api request', e);
-            throw(e);
+            if (json.code === undefined) {
+                throw('Unknown error occurred');
+            }
+            return {
+                type: 'error',
+                result: {
+                    responseCode: response.status,
+                    deprecated: hasDeprecated ? true : response.headers.has('Api-Deprecated'),
+                    code: json.code
+                }
+            };
         }
-    } else {
-        logger.log('undefineeed');
-        return undefined;
+    } catch(e) {
+        logger.error('Failed to make api request', e);
+        throw(e);
+    }
+}
+
+export async function restorePurchases() {
+    logger.silly('restorePurchases');
+    for (const theme of ['themeOrange', 'themePurple', 'themeSand']) {
+        try {
+            const result = await checkAndRedeem(theme);
+            if (result === undefined) {
+                logger.info('Removing theme', theme);
+                await removeTheme(theme);
+            } else {
+                if (result.type === 'success') {
+                    if (!result.result.success) {
+                        logger.info('Removing theme', theme);
+                        await removeTheme(theme);
+                    } else {
+                        logger.info('Adding theme', theme);
+                        await addTheme(theme);
+                    }
+                } else {
+                    logger.error('Unable to get purchase, leaving alone', theme);
+                }
+            }
+        } catch (error) {
+            logger.error('Unable to check purchases, leaving alone', theme, error);
+        }
     }
 }

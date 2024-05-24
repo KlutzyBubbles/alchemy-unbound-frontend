@@ -1,4 +1,5 @@
 import { Language } from '../settings';
+import { DatabaseData } from './saveFormat';
 
 export type Languages = {
     [key in Language]: string;
@@ -81,7 +82,9 @@ export type FileVersions = {
     database: number,
     hint: number,
     stats: number,
-    settings: number
+    settings: number,
+    databaseInfo: DatabaseData,
+    databaseName: string
 }
 
 export type TokenHolder = {
@@ -119,8 +122,49 @@ export type ValidateOutput = {
     result: ServerError
 }
 
-export type ValidateSuccess = {
-    success: boolean,
+export type UserOutput = {
+    type: 'success',
+    result: UserSuccess
+} | {
+    type: 'error',
+    result: ServerError
+}
+
+export type GenericOutput = {
+    type: 'success',
+    result: GenericSuccess
+} | {
+    type: 'error',
+    result: ServerError
+}
+
+export type GenericLoopable = {
+    [key: string]: GenericLoopable | unknown
+}
+
+export type GenericSuccess = {
+    success: boolean
+    [key: string]: GenericLoopable | unknown
+}
+
+export type Success = {
+    success: boolean
+}
+
+export type UserSuccess = Success & {
+    user: {
+        firstDiscoveries: number,
+        combines: number,
+        generations: number,
+        credits: number,
+        highestDepth: number,
+        supporter: boolean,
+        generateBanned: boolean,
+        apiBanned: boolean
+    }
+}
+
+export type ValidateSuccess = Success & {
     items: string[],
     languages: (Languages & {
         emoji: string,
@@ -129,9 +173,12 @@ export type ValidateSuccess = {
     })[]
 }
 
-export type PurchaseSuccess = {
-    success: boolean,
+export type PurchaseSuccess = Success & {
     softError: boolean
+}
+
+export type RedeemSuccess = Success & {
+    redeemed: boolean
 }
 
 export type CombineSuccess = {

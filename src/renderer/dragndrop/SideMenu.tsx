@@ -1,5 +1,5 @@
 import { FC, useContext, useEffect, useRef, useState } from 'react';
-import { IoAlertCircleOutline, IoCheckmarkOutline, IoDownloadOutline, IoExitOutline, IoPulseOutline, IoSaveOutline, IoSettingsOutline, IoStatsChartOutline } from 'react-icons/io5';
+import { IoAlertCircleOutline, IoCartOutline, IoCheckmarkOutline, IoDownloadOutline, IoExitOutline, IoPulseOutline, IoSaveOutline, IoSettingsOutline, IoStatsChartOutline } from 'react-icons/io5';
 import { motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../Container';
 import { BsGithub, BsDiscord } from 'react-icons/bs';
@@ -187,22 +187,11 @@ export const SideMenu: FC<SideMenuProps> = ({
         closeCanvas();
         openModal('stats');
     };
-    
-    /*
-                    <li className="nav-item btn btn-no-radius btn-left-hover"
-                        onMouseEnter={onMouseOver}
-                        onClick={() => openModal('store')}>
-                        <div className="nav-link d-flex">
-                            <div className='mx-auto pt-half'>
-                                <h2 className='m-0'>{getFromStore('menu.store', settings.language)}</h2>
-                            </div>
-                            <div
-                                className='float-end fs-2 d-flex p-2'>
-                                <IoCartOutline />
-                            </div>
-                        </div>
-                    </li>
-    */
+
+    const storeClick = () => {
+        closeCanvas();
+        openModal('store');
+    };
 
     return (
         <div className="offcanvas offcanvas-start side-menu" tabIndex={-1} id="sideMenu" aria-labelledby="sideMenuLabel">
@@ -239,6 +228,19 @@ export const SideMenu: FC<SideMenuProps> = ({
                             <div
                                 className='float-end fs-2 d-flex p-2'>
                                 <IoStatsChartOutline />
+                            </div>
+                        </div>
+                    </li>
+                    <li className="nav-item btn btn-no-radius btn-left-hover"
+                        onMouseEnter={onMouseOver}
+                        onClick={storeClick}>
+                        <div className="nav-link d-flex">
+                            <div className='mx-auto pt-half'>
+                                <h2 className='m-0'>{getFromStore('menu.store', settings.language)}</h2>
+                            </div>
+                            <div
+                                className='float-end fs-2 d-flex p-2'>
+                                <IoCartOutline />
                             </div>
                         </div>
                     </li>

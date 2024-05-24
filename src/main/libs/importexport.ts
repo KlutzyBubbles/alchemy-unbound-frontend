@@ -5,7 +5,7 @@ import { hasProp } from '../../common/utils';
 import { getHintSaveFormat, loadHintV1, setHintRaw } from './hints';
 import { checkLanguages, databaseV1toV2, databaseV2toV3, databaseV3toV4, fillWithBase, getDatabaseSaveFormat, noFill, setDataRaw, setDatabaseInfo, setServerVersion } from './database/recipeStore';
 import { LATEST_SERVER_VERSION } from '../../common/types';
-import { DatabaseData } from 'src/common/types/saveFormat';
+import { DatabaseData } from '../../common/types/saveFormat';
 
 const EXPORT_VERSION = 1;
 

@@ -53,7 +53,7 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '支持者',
         koreana: '지지자'
     },
-    purple: {
+    themePurple: {
         english: 'Purple',
         schinese: '紫色',
         russian: 'Фиолетовый',
@@ -69,5 +69,39 @@ export const LanguageStore: LanguageStoreRecurring = {
         portuguese: 'Roxo',
         tchinese: '紫色',
         koreana: '보라색'
+    },
+    themeSand: {
+        english: 'Sand',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
+    },
+    themeOrange: {
+        english: 'Orange',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
     },
 };

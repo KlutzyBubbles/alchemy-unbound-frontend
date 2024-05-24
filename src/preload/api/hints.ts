@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { HintChannel } from '../../common/ipc';
-import { addHintPoint, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint } from '../../main/libs/hints';
+import { addHintPoint, fillHints, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint } from '../../main/libs/hints';
 
 export const HintAPIName = 'HintAPI';
 
@@ -13,6 +13,7 @@ export interface IHintAPI {
     getHintsLeft: typeof getHintsLeft,
     resetHint: typeof resetHint,
     hintComplete: typeof hintComplete,
+    fillHints: typeof fillHints
 }
 
 contextBridge.exposeInMainWorld(HintAPIName, {
@@ -24,4 +25,5 @@ contextBridge.exposeInMainWorld(HintAPIName, {
     getHintsLeft: () => ipcRenderer.invoke(HintChannel.GET_LEFT),
     resetHint: () => ipcRenderer.invoke(HintChannel.RESET),
     hintComplete: () => ipcRenderer.invoke(HintChannel.COMPLETE),
+    fillHints: () => ipcRenderer.invoke(HintChannel.FILL),
 });

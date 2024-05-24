@@ -1,18 +1,20 @@
 import { ipcMain } from 'electron';
 import { ErrorEntryAdd, Recipe } from '../common/types';
 import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor, hasAllRecipes, hasAtleastRecipe } from './libs/database/recipeStore';
-import { combine, getEndpoint, getToken, getVersion, initTransaction, submitIdea } from './libs/server';
-import { DisplayChannel, ErrorChannel, GenericChannel, HintChannel, ImportExportChannel, RecipeChannel, ServerChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
+import { checkDLC, combine, getEndpoint, getToken, getUserDetails, getVersion, initTransaction, restorePurchases } from './libs/server';
+import { DisplayChannel, ErrorChannel, GenericChannel, HintChannel, ImportExportChannel, InfoChannel, RecipeChannel, ServerChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
 import { Settings } from '../common/settings';
 import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './libs/settings';
 import { getAppVersions, isPackaged, getSystemInformation, quit, getFileVersions } from './libs/generic';
-import { getCurrentDisplay, getDisplays, moveToDisplay, setFullscreen } from './libs/display';
-import { activateAchievement, getSteamGameLanguage, getSteamId, isAchievementActivated, isDlcInstalled } from './libs/steam';
+import { getCurrentDisplay, getDisplays, isFullscreen, moveToDisplay, setFullscreen } from './libs/display';
+import { activateAchievement, getSteamGameLanguage, getSteamId, getUsername, isAchievementActivated, isDlcInstalled } from './libs/steam';
 import { getStats, loadStats, saveStats, setStat, setStats } from './libs/stats';
 import { Stats } from '../common/stats';
-import { addHintPoint, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint } from './libs/hints';
+import { addHintPoint, fillHints, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint } from './libs/hints';
 import { exportDatabase, importFile } from './libs/importexport';
 import { getErrors, registerError } from './libs/error';
+import { Info } from '../common/info';
+import { addTheme, getInfo, loadInfo, removeTheme, saveInfo, setInfo, setInfoKey } from './libs/info';
 
 
 export function register() {
@@ -49,9 +51,6 @@ export function register() {
     ipcMain.handle(ServerChannel.GET_TOKEN, async () => {
         return getToken();
     });
-    ipcMain.handle(ServerChannel.IDEA, async (_, a: string, b: string, result: string) => {
-        return submitIdea(a, b, result);
-    });
     ipcMain.handle(ServerChannel.GET_VERSION, async () => {
         return getVersion();
     });
@@ -60,6 +59,15 @@ export function register() {
     });
     ipcMain.handle(ServerChannel.INIT_TRANSACTION, async (_, item: string) => {
         return initTransaction(item);
+    });
+    ipcMain.handle(ServerChannel.GET_USER_INFO, async () => {
+        return getUserDetails();
+    });
+    ipcMain.handle(ServerChannel.CHECK_DLC, async () => {
+        return checkDLC();
+    });
+    ipcMain.handle(ServerChannel.RESTORE_PURCHASES, async () => {
+        return restorePurchases();
     });
 
     // Error handlers
@@ -104,6 +112,29 @@ export function register() {
         return saveStats();
     });
 
+    // Info handlers
+    ipcMain.handle(InfoChannel.SET_VALUE, async (_, key: keyof Info, value: Info[keyof Info]) => {
+        return setInfoKey(key, value);
+    });
+    ipcMain.handle(InfoChannel.GET, async () => {
+        return getInfo();
+    });
+    ipcMain.handle(InfoChannel.SET, async (_, info: Info) => {
+        return setInfo(info);
+    });
+    ipcMain.handle(InfoChannel.LOAD, async () => {
+        return loadInfo();
+    });
+    ipcMain.handle(InfoChannel.SAVE, async () => {
+        return saveInfo();
+    });
+    ipcMain.handle(InfoChannel.ADD_THEME, async (_, theme: string) => {
+        return addTheme(theme);
+    });
+    ipcMain.handle(InfoChannel.REMOVE_THEME, async (_, theme: string) => {
+        return removeTheme(theme);
+    });
+
     // Generic handlers
     ipcMain.handle(GenericChannel.GET_VERSIONS, async () => {
         return getAppVersions();
@@ -134,6 +165,9 @@ export function register() {
     ipcMain.handle(DisplayChannel.SET_FULLSCREEN, async (_, fullscreen: boolean) => {
         return setFullscreen(fullscreen);
     });
+    ipcMain.handle(DisplayChannel.GET_FULLSCREEN, async () => {
+        return isFullscreen();
+    });
 
     // Steam handlers
     ipcMain.handle(SteamChannel.ACTIVATE_ACHIEVEMENT, async (_, achievement: string) => {
@@ -150,6 +184,9 @@ export function register() {
     });
     ipcMain.handle(SteamChannel.GET_LANGUAGE, async () => {
         return getSteamGameLanguage();
+    });
+    ipcMain.handle(SteamChannel.GET_NAME, async () => {
+        return getUsername();
     });
     
     // Hint handlers
@@ -176,6 +213,9 @@ export function register() {
     });
     ipcMain.handle(HintChannel.COMPLETE, async () => {
         return hintComplete();
+    });
+    ipcMain.handle(HintChannel.FILL, async () => {
+        return fillHints();
     });
 
     // Import Export Handlers

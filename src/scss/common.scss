@@ -36,6 +36,14 @@
     background: $side-color;
 }
 
+.bg-purple {
+    background-color: #c929f1;
+}
+
+.bg-orange {
+    background-color: coral;
+}
+
 // @font-face {
 //     font-family: 'Custom Emoji';
 //     src: url('./TwitterColorEmoji-SVGinOT.ttf');
@@ -44,6 +52,106 @@
 // .emoji {
 //     font-family: 'Custom Emoji';
 // }
+
+/*
+$theme-bg: #55030c;
+$theme-fg: #f48c06;
+$theme-fg-darkened: #e85d04;
+
+$body-bg:                   $theme-bg !default;
+$body-color:                $theme-fg !default;
+
+$body-secondary-color:      rgba($body-color, .75) !default;
+$body-secondary-bg:         $theme-fg !default;
+
+$body-tertiary-color:       rgba($body-color, .5) !default;
+$body-tertiary-bg:          $gray-100 !default;
+$body-emphasis-color:       $body-color !default;
+
+$alt-bg: #4a030a;
+$alt-fg: $theme-fg;
+*/
+
+.theme-orange {
+    background-color: #4a030a;
+
+    .card-body {
+        color: #f48c06;
+    }
+
+    .btn-element {
+        @include button-variant(#370617, // Background
+            #f48c06, // Border
+            #f48c06, // Color
+            #f48c06, // Hover Background
+            #f48c06, // Hover Border
+            #370617, // Hover Color
+            #370617); // Active Background
+        border-radius: $btn-border-radius;
+    
+        .btn-holder {
+            background-color: #370617;
+        }
+    
+        &:hover > .btn-holder:first-child {
+            background-color: #f48c06;
+        }
+    }
+}
+
+.theme-purple {
+    background-color: #3c096c;
+
+    .card-body {
+        color: #c77dff;
+    }
+
+    .btn-element {
+        @include button-variant(#240046, // Background
+            #c77dff, // Border
+            #c77dff, // Color
+            #c77dff, // Hover Background
+            #c77dff, // Hover Border
+            #240046, // Hover Color
+            #240046); // Active Background
+        border-radius: $btn-border-radius;
+    
+        .btn-holder {
+            background-color: #240046;
+        }
+    
+        &:hover > .btn-holder:first-child {
+            background-color: #c77dff;
+        }
+    }
+}
+
+.theme-sand {
+    background-color: #e8d8b8;
+
+    .card-body {
+        color: #363126;
+    }
+
+    .btn-element {
+        @include button-variant(#d9be89, // Background
+            #4D4637, // Border
+            #4D4637, // Color
+            #4D4637, // Hover Background
+            #4D4637, // Hover Border
+            #d9be89, // Hover Color
+            #d9be89); // Active Background
+        border-radius: $btn-border-radius;
+    
+        .btn-holder {
+            background-color: #d9be89;
+        }
+    
+        &:hover > .btn-holder:first-child {
+            background-color: #4D4637;
+        }
+    }
+}
 
 .btn-element {
     @include button-variant($side-element-bg, // Background

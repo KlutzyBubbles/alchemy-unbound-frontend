@@ -52,9 +52,9 @@ $dark:          $gray-900 !default;
 $min-contrast-ratio:   1.5 !default;
 
 // Body
-$theme-bg: #240046;
-$theme-fg: #c77dff;
-$theme-fg-darkened: #5a189a;
+$theme-bg: #e8d8b8;
+$theme-fg: #4D4637;
+$theme-fg-darkened: #363126;
 
 $body-bg:                   $theme-bg !default;
 $body-color:                $theme-fg !default;
@@ -66,12 +66,12 @@ $body-tertiary-color:       rgba($body-color, .5) !default;
 $body-tertiary-bg:          $gray-100 !default;
 $body-emphasis-color:       $body-color !default;
 
-$alt-bg: #3c096c;
+$alt-bg: $theme-bg;
 $alt-fg: $theme-fg;
 
 $side-bg:                           $alt-bg;
 $side-color:                        $theme-fg;
-$side-element-bg:                   #240046;
+$side-element-bg:                   #d9be89;
 $side-element-color:                $side-color;
 $side-element-border-color:         $side-color;
 $side-element-bg-hover:             $side-color;
@@ -79,12 +79,12 @@ $side-element-color-hover:          $side-element-bg;
 $side-element-border-color-hover:   $side-color;
 $side-button-bg:                    $alt-bg;
 $side-button-color:                 $side-color;
-$side-button-bg-hover:              #240046;
+$side-button-bg-hover:              #d9be89;
 $side-button-color-hover:           $side-color;
 
 $main-bg:                                   $theme-bg;
 $main-color:                                $theme-fg;
-$main-element-bg:                           #240046;
+$main-element-bg:                           #d9be89;
 $main-element-color:                        $main-color;
 $main-element-border-color:                 $main-color;
 $main-element-bg-hover:                     $main-color;

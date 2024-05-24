@@ -11,6 +11,7 @@ import { UpdateContext } from '../providers/UpdateProvider';
 import { InfoContext } from '../providers/InfoProvider';
 import { KEY_VALUES_TO_LEAVE } from '../types';
 import * as bootstrap from 'bootstrap';
+import { DEFAULT_INFO, Info } from '../../common/info';
 
 export interface SettingsModalProps {
   show: boolean
@@ -38,6 +39,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
     const [lockKeybind, setLockKeybind] = useState<string>(settings?.keybinds.lock ?? DEFAULT_SETTINGS.keybinds.lock);
     const [copyKeybind, setCopyKeybind] = useState<string>(settings?.keybinds.copy ?? DEFAULT_SETTINGS.keybinds.copy);
     const [removeKeybind, setRemoveKeybind] = useState<string>(settings?.keybinds.remove ?? DEFAULT_SETTINGS.keybinds.remove);
+    const [info, setInfo] = useState<Info>(DEFAULT_INFO);
     const { setShouldUpdate } = useContext(UpdateContext);
     const { hasSupporterTheme } = useContext(InfoContext);
 
@@ -51,6 +53,18 @@ export const SettingsModal: FC<SettingsModalProps> = ({
             }
         })();
     }, []);
+
+    useEffect(() => {
+        (async () => {
+            if (show) {
+                try {
+                    setInfo(await window.InfoAPI.getInfo());
+                } catch (e) {
+                    logger.error('Failed to load info', e);
+                }
+            }
+        })();
+    }, [show]);
 
     useEffect(() => {
         (async() => {
@@ -247,7 +261,9 @@ export const SettingsModal: FC<SettingsModalProps> = ({
             </ConfirmModal>
             <Modal show={show} onHide={handleHideInside} centered size="xl" data-bs-theme={theme}>
                 <Modal.Header closeButton data-bs-theme={theme}>
-                    <Modal.Title>{getFromStore('settings.title', settings.language)}</Modal.Title>
+                    <Modal.Title>
+                        <h2 className='mb-0 ms-2'>{getFromStore('menu.options', settings.language)}</h2>
+                    </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -291,6 +307,9 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                             if (item === 'supporter') {
                                                 return hasSupporterTheme;
                                             } else {
+                                                if (item !== 'light' && item !== 'dark') {
+                                                    return info.themesUnlocked.includes(item);
+                                                }
                                                 return true;
                                             }
                                         }).map((type) => {
@@ -321,7 +340,12 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                             <div className='col-6 col-md- col-lg-9'>
                                 <div className="btn-group" role="group">
                                     {
-                                        BackgroundTypeList.map((type) => {
+                                        BackgroundTypeList.filter((item) => {
+                                            if (item !== 'blank' && item !== 'line' && item !== 'bubble') {
+                                                return info.themesUnlocked.includes(item);
+                                            }
+                                            return true;
+                                        }).map((type) => {
                                             return (
                                                 <Fragment 
                                                     key={`${type}Background`}>
@@ -457,10 +481,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="danger" onClick={() => window.GenericAPI.quit()} className='me-auto'>
-                        {getFromStore('settings.buttons.quit', settings.language)}
-                    </Button>
-                    <Button variant={advanced ? 'primary' : 'outline-primary'} onClick={handleAdvanced}>
+                    <Button variant={advanced ? 'primary' : 'outline-primary'} onClick={handleAdvanced} className='me-auto'>
                         {getFromStore('settings.buttons.advanced', settings.language)}
                     </Button>
                     <Button variant="primary" onClick={handleHideInside}>

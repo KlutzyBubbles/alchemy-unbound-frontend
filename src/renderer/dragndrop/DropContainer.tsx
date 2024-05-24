@@ -24,10 +24,12 @@ import { IoMenuOutline } from 'react-icons/io5';
 
 export interface ContainerProps {
   openModal: (option: ModalOption) => void
+  refreshValues: number
 }
 
 export const DropContainer: FC<ContainerProps> = ({
-    openModal
+    openModal,
+    refreshValues
 }) => {
     const [elements, setElements] = useState<RecipeElement[]>([]);
     const [copyHeld, setCopyHeld] = useState<boolean>(false);
@@ -41,7 +43,7 @@ export const DropContainer: FC<ContainerProps> = ({
     const [refreshHint, setRefreshHint] = useState<number>(0);
     const currentHover = useRef<string>(undefined);
     const speedTimerRef = useRef<NodeJS.Timeout>(undefined);
-    const { settings } = useContext(SettingsContext);
+    const { settings, setSettings } = useContext(SettingsContext);
     const [boxes, setBoxes] = useState<{
         [key: string]: Box
     }>({});
@@ -65,6 +67,12 @@ export const DropContainer: FC<ContainerProps> = ({
             document.removeEventListener('keyup', handleKeyUp2, false);
         };
     }, []);
+
+    useEffect(() => {
+        setRefreshHint((value) => {
+            return value + 1;
+        });
+    }, [refreshValues]);
 
     useEffect(() => {
         if (rateLimited) {
@@ -666,7 +674,7 @@ export const DropContainer: FC<ContainerProps> = ({
         }
     };
 
-    const handleKeyUp2: EventListenerOrEventListenerObject = (e) => {
+    const handleKeyUp2: EventListenerOrEventListenerObject = async (e) => {
         console.log('keyup', e);
         const event = e as KeyboardEvent;
         if (event.key === settings.keybinds.copy) {
@@ -674,6 +682,18 @@ export const DropContainer: FC<ContainerProps> = ({
         }
         if (event.key === settings.keybinds.remove) {
             setRemoveHeld(false);
+        }
+        if (event.key === 'F11') {
+            try {
+                const isFullscreen = await window.DisplayAPI.isFullscreen();
+                window.DisplayAPI.setFullscreen(!isFullscreen);
+                setSettings({
+                    ...settings,
+                    fullscreen: !isFullscreen
+                });
+            } catch (e) {
+                logger.error('Failed to change fullscreen', e);
+            }
         }
     };
 

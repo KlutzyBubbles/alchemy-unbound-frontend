@@ -1,6 +1,7 @@
 import { Languages } from '../../common/types';
 import { LanguageStore as SettingsLanguageStore } from './sections/settings';
 import { LanguageStore as InfoLanguageStore } from './sections/info';
+import { LanguageStore as StoreLanguageStore } from './sections/store';
 import { LanguageStore as DialogLanguageStore } from './sections/dialog';
 import { LanguageStore as SideLanguageStore } from './sections/side';
 import { LanguageStore as ErrorsLanguageStore } from './sections/errors';
@@ -16,6 +17,7 @@ export const LanguageStore: LanguageStoreRecurring = {
     info: InfoLanguageStore,
     dialog: DialogLanguageStore,
     side: SideLanguageStore,
+    store: StoreLanguageStore,
     errors: ErrorsLanguageStore,
     idea: IdeaLanguageStore,
     menu: MenuLanguageStore,

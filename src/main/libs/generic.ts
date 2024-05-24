@@ -2,8 +2,9 @@ import { app } from 'electron';
 import * as appInfo from '../../../package.json';
 import { SystemVersion, AppVersions, FileVersions } from '../../common/types';
 import { getHintVersion } from './hints';
-import { getDatabaseVersion } from './database/recipeStore';
+import { getDatabaseInfo, getDatabaseVersion } from './database/recipeStore';
 import { getSettingsVersion } from './settings';
+import { getWorkingDatabase } from './database/workingName';
 
 export function getAppVersions(): AppVersions {
     return {
@@ -14,12 +15,14 @@ export function getAppVersions(): AppVersions {
     };
 }
 
-export function getFileVersions(): FileVersions {
+export async function getFileVersions(): Promise<FileVersions> {
     return {
         database: getDatabaseVersion(),
         hint: getHintVersion(),
         stats: -1,
-        settings: getSettingsVersion()
+        settings: getSettingsVersion(),
+        databaseInfo: getDatabaseInfo(),
+        databaseName: await getWorkingDatabase()
     };
 }
 

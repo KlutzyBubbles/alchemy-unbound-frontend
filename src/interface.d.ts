@@ -9,6 +9,7 @@ import { HintAPIName, IHintAPI } from './preload/api/hints';
 import { IImportExportAPI, ImportExportAPIName } from './preload/api/importexport';
 import { IServerAPI, ServerAPIName } from './preload/api/server';
 import { ErrorAPIName, IErrorAPI } from './preload/api/error';
+import { IInfoAPI, InfoAPIName } from './preload/api/info';
 
 declare module 'react' {
     interface CSSProperties {
@@ -23,6 +24,7 @@ declare global {
         [GenericAPIName]: IGenericAPI
         [DisplayAPIName]: IDisplayAPI
         [SteamAPIName]: ISteamAPI
+        [InfoAPIName]: IInfoAPI
         [StatsAPIName]: IStatsAPI
         [HintAPIName]: IHintAPI
         [ImportExportAPIName]: IImportExportAPI

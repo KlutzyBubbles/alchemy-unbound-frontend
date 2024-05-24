@@ -53,4 +53,21 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '泡泡',
         koreana: '거품'
     },
+    themeSand: {
+        english: 'Beach Balls',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
+    },
 };

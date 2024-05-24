@@ -3,6 +3,7 @@ import './api/recipe';
 import './api/generic';
 import './api/display';
 import './api/steam';
+import './api/info';
 import './api/stats';
 import './api/hints';
 import './api/importexport';

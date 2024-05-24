@@ -10,12 +10,11 @@ import options from './particles';
 import { SettingsContext } from './providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { LoadingContext } from './providers/LoadingProvider';
-import { IdeaModal } from './modals/IdeaModal';
 import { SideMenu } from './dragndrop/SideMenu';
 import { StatsModal } from './modals/StatsModal';
-import { StoreModal } from './modals/StoreModal';
+import { StoreModal } from './modals/store/StoreModal';
 
-export type ModalOption = 'settings' | 'info' | 'idea' | 'stats' | 'store' | 'none';
+export type ModalOption = 'settings' | 'info' | 'stats' | 'store' | 'none';
 
 export const ContentContainer: FC = () => {
     const { settings } = useContext(SettingsContext);
@@ -23,6 +22,7 @@ export const ContentContainer: FC = () => {
     const [currentModal, setCurrentModal] = useState<ModalOption>('none');
     const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.theme, settings.fps));
     const [particleReady, setParticleReady] = useState<boolean>(false);
+    const [refreshValues, setRefreshValues] = useState<number>(0);
 
     useEffect(() => {
         (async() => {
@@ -56,6 +56,12 @@ export const ContentContainer: FC = () => {
         setCurrentModal('none');
     };
 
+    const refreshValuesFunc = () => {
+        setRefreshValues((value) => {
+            return value + 1;
+        });
+    };
+
     const openModal = (option: ModalOption) => setCurrentModal(option);
 
     if (loading) {
@@ -80,14 +86,16 @@ export const ContentContainer: FC = () => {
                             id="backgroundParticles"
                             options={currentParticles}
                         /> : <Fragment/>}
-                        <DropContainer openModal={openModal}/>
+                        <DropContainer refreshValues={refreshValues} openModal={openModal}/>
                     </Row>
                     <SideMenu openModal={openModal} />
                     <SettingsModal show={currentModal === 'settings'} handleHide={handleModalClose} />
                     <InfoModal show={currentModal === 'info'} handleHide={handleModalClose} />
                     <StatsModal show={currentModal === 'stats'} handleHide={handleModalClose} />
-                    <StoreModal show={currentModal === 'store'} handleHide={handleModalClose} />
-                    <IdeaModal show={currentModal === 'idea'} handleHide={handleModalClose} />
+                    <StoreModal
+                        show={currentModal === 'store'}
+                        handleHide={handleModalClose}
+                        refreshValues={refreshValuesFunc}/>
                 </Container>
             </div>
         );

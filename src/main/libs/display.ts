@@ -34,3 +34,13 @@ export function setFullscreen(fullscreen: boolean) {
         });
     }
 }
+
+export function isFullscreen() {
+    const windows = BrowserWindow.getAllWindows();
+    const fullscreen = BrowserWindow.getFocusedWindow()?.fullScreen;
+    logger.debug('isFullscreen', windows.length, fullscreen);
+    if (fullscreen === undefined && windows.length > 0) {
+        return windows[0].fullScreen ?? false;
+    }
+    return fullscreen;
+}

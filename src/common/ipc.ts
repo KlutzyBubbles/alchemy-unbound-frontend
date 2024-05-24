@@ -11,12 +11,14 @@ export enum RecipeChannel {
 
 export enum ServerChannel {
     COMBINE = 'server:combine',
-    IDEA = 'server:idea',
     GET_TOKEN = 'server:getToken',
     GET_VERSION = 'server:getVersion',
     GET_ENDPOINT = 'server:getEndpoint',
     INIT_TRANSACTION = 'server:initTransaction',
-    FINALIZE_TRANSACTION = 'serverfinalizeTransaction'
+    FINALIZE_TRANSACTION = 'server:finalizeTransaction',
+    GET_USER_INFO = 'server:getUserInfo',
+    CHECK_DLC = 'server:checkDLC',
+    RESTORE_PURCHASES = 'server:restore'
 }
 
 export enum ErrorChannel {
@@ -47,6 +49,7 @@ export enum HintChannel {
     GET_LEFT = 'hint:getLeft',
     RESET = 'hint:reset',
     COMPLETE = 'hint:complete',
+    FILL = 'hint:fill',
 }
 
 export enum StatsChannel {
@@ -55,6 +58,16 @@ export enum StatsChannel {
     SET_VALUE = 'stats:setStat',
     GET = 'stats:get',
     SAVE = 'stats:save'
+}
+
+export enum InfoChannel {
+    LOAD = 'info:load',
+    SET = 'info:set',
+    SET_VALUE = 'info:setInfoKey',
+    GET = 'info:get',
+    SAVE = 'info:save',
+    ADD_THEME = 'info:addTheme',
+    REMOVE_THEME = 'info:removeTheme'
 }
 
 export enum GenericChannel {
@@ -70,6 +83,7 @@ export enum DisplayChannel {
     GET_DISPLAY = 'display:getCurrent',
     SET_DISPLAY = 'display:set',
     SET_FULLSCREEN = 'display:fullscreen',
+    GET_FULLSCREEN = 'display:isFullscreen'
 }
 
 export enum SteamChannel {
@@ -78,4 +92,5 @@ export enum SteamChannel {
     GET_ID = 'steam:getId',
     GET_LANGUAGE = 'steam:getLanguage',
     CHECK_DLC = 'steam:isDlcInstaled',
+    GET_NAME = 'steam:getName'
 }

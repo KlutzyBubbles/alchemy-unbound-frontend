@@ -47,6 +47,26 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
                     logger.error('Failed to load production check', e);
                 }
                 try {
+                    const result = await window.ServerAPI.getUserDetails();
+                    if (result.type === 'error') {
+                        logger.error('Failed to load user check', result.result);
+                    } else {
+                        logger.info('User found from load', result);
+                        if (hasSupporterTheme !== result.result.user.supporter) {
+                            const newResult = await window.ServerAPI.checkDLC();
+                            if (newResult.type === 'error') {
+                                logger.error('Failed to load dlc check', newResult.result);
+                            } else {
+                                logger.info('User found from dlc check', newResult);
+                                hasSupporterTheme = result.result.user.supporter;
+                                setHasSupporterTheme(hasSupporterTheme);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    logger.error('Failed to load user', e);
+                }
+                try {
                     const settings = await window.SettingsAPI.getSettings(true);
                     if (settings === undefined || settings === null) {
                         throw new Error('getSettings returned undefined');

@@ -168,6 +168,15 @@ export async function addHintPoint(amount = 1) {
     await saveHint();
 }
 
+export async function fillHints() {
+    logger.debug('fillHints()');
+    if (!loaded) {
+        await loadHint();
+    }
+    hint.hintsLeft = maxHints;
+    await saveHint();
+}
+
 // export async function setMaxHints(maxHints: number) {
 //     if (!loaded) {
 //         await loadHint();

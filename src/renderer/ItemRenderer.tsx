@@ -19,6 +19,7 @@ export type ItemRendererProps = {
     currentOffset?: XYCoord
     top?: number
     left?: number
+    theme?: string
     onHoverEnd?: (event: MouseEvent) => void
     onHoverStart?: (event: MouseEvent) => void
     onContextMenu?: MouseEventHandler<HTMLDivElement>
@@ -99,6 +100,7 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
         children,
         top,
         left,
+        theme,
         onHoverStart,
         onHoverEnd,
         onContextMenu,
@@ -173,6 +175,7 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
             className={`${type}-element btn btn-element p-0
             ${dragging ? '' : type === ItemTypes.SIDE_ELEMENT ? 'mt-2 ms-2' : ''}
             element
+            ${theme !== undefined ? '' : `theme-${theme}`}
             ${locked ? 'locked' : ''}
             ${firstDiscovered && !base ? 'holo' : ''}
             ${base ? 'foil' : 'generated'}
