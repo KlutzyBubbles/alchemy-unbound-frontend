@@ -3,14 +3,14 @@ import { promises as fs } from 'fs';
 import { Compressed, compress, decompress, trimUndefinedRecursively } from 'compress-json';
 import { getFolder } from '../steam';
 import { verifyFolder } from '../../utils';
-import { languages } from '../../../common/settings';
+import { Language, languages } from '../../../common/settings';
 import baseData from '../../../base.json';
 // import baseData from '../../allDiscovered.json';
 import logger from 'electron-log/main';
 import { addHintPoint, resetHint } from '../hints';
 import { saveToFile } from './helpers';
-import { DatabaseData, FileVersionError, RecipeRecord } from '../../../common/types/saveFormat';
-import { getLanguage, getLanguageKeys, insertLanguage } from './languageStore';
+import { DatabaseData, FileVersionError, RecipeRecord, RecipeRecordV3 } from '../../../common/types/saveFormat';
+import { getKeyByLanguage, getLanguage, getLanguageKeys, insertLanguage } from './languageStore';
 import { getWorkingDatabase } from './workingName';
 import { validateItems } from '../server';
 
@@ -47,8 +47,10 @@ export function setDatabaseInfo(newInfo: DatabaseData) {
 }
 
 export function getDatabaseSaveFormat() {
-    const temp = structuredClone(data);
+    let temp = structuredClone(data);
     trimUndefinedRecursively(temp);
+    const baseItems = ['air', 'water', 'earth', 'fire', 'time', 'life'];
+    temp = temp.filter((item) => !baseItems.includes(item.result));
     return {
         version: DATABASE_VERISON,
         data: compress(temp.filter((item) => item !== undefined && item.discovered)),
@@ -73,7 +75,7 @@ export function databaseV1toV2(loaded: Record<string, unknown>[]): Compressed {
 
 export async function databaseV2toV3(loaded: Compressed): Promise<Compressed> {
     const tempData = structuredClone(decompress(loaded) as RecipeRow[]);
-    const v3Data: RecipeRecord[] = [];
+    const v3Data: RecipeRecordV3[] = [];
     for (const row of tempData) {
         try {
             await insertLanguage(row.result, {
@@ -127,6 +129,7 @@ export async function databaseV3toV4(loaded: Compressed): Promise<Compressed> {
                 has_language: row.has_language ?? false,
                 valid_language: row.valid_language ?? true,
                 base: row.base,
+                custom: 0
             });
         } catch (error) {
             logger.error(`Failed inserting language for ${row.result}`, error);
@@ -145,8 +148,14 @@ export async function databaseV3toV4(loaded: Compressed): Promise<Compressed> {
 }
 
 export async function fillWithBase(loaded: Compressed): Promise<RecipeRecord[]> {
+    logger.silly('fillWithBase()');
     const tempData = structuredClone(decompress(loaded) as RecipeRecord[]);
-    const baseClone: RecipeRecord[] = structuredClone(baseData);
+    const baseClone: RecipeRecord[] = structuredClone(baseData).map((item) => {
+        // if (hasProp(item, 'custom')) {
+        //     return item;
+        // }
+        return { ...item, custom: 0 };
+    });
     const newData: RecipeRecord[] = [];
     let backup = false;
     for (const baseItem of baseClone) {
@@ -205,11 +214,13 @@ export async function fillWithBase(loaded: Compressed): Promise<RecipeRecord[]> 
 }
 
 export async function noFill(loaded: Compressed): Promise<RecipeRecord[]> {
+    logger.silly('noFill()');
     const tempData = structuredClone(decompress(loaded) as RecipeRecord[]);
     return tempData;
 }
 
 export async function checkLanguages(recipes: RecipeRecord[]): Promise<RecipeRecord[]> {
+    logger.silly('checkLanguages()', recipes.length);
     const tempData = structuredClone(recipes);
     logger.info('tempData', tempData.length);
     let needToCheck: string[] = [];
@@ -276,7 +287,8 @@ function chunkArray(array: string[], chunkSize: number): string[][] {
     );
 }
 
-async function loadData(): Promise<RecipeRecord[]> {
+async function loadData(override?: DatabaseData): Promise<RecipeRecord[]> {
+    logger.silly('loadData()');
     try {
         //`${getFolder()}database/${await getWorkingDatabase()}.json`
         const newPath = `${getFolder()}database/${await getWorkingDatabase()}.json`;
@@ -321,6 +333,7 @@ async function loadData(): Promise<RecipeRecord[]> {
             };
         }
         info = foundInfo;
+        const workingInfo = override === undefined ? foundInfo : override;
         if (workingVersion === 1) {
             logger.info('Found v1, migrating...');
             workingData = databaseV1toV2(workingData);
@@ -337,11 +350,11 @@ async function loadData(): Promise<RecipeRecord[]> {
             workingVersion = 4;
         }
         if (workingVersion === 4) {
-            logger.info('Found v3, loading...');
-            if (info.type === 'base') {
-                return await checkLanguages(await fillWithBase(workingData));
+            logger.info('Found v4, loading...');
+            if (workingInfo.type !== 'base') {
+                return await checkLanguages(await noFill(workingData));
             }
-            return await checkLanguages(await noFill(workingData));
+            return await checkLanguages(await fillWithBase(workingData));
         } else {
             loadedVersion = FileVersionError.UNKOWN_VERSION;
             serverVersion = LATEST_SERVER_VERSION;
@@ -361,7 +374,8 @@ async function loadData(): Promise<RecipeRecord[]> {
     }
 }
 
-export async function createDatabase(): Promise<void> {
+export async function createDatabase(override?: DatabaseData): Promise<void> {
+    logger.silly('createDatabase()');
     try {
         // RELEASE --------------------------
         await verifyFolder();
@@ -380,14 +394,22 @@ export async function createDatabase(): Promise<void> {
             }
         }
         // RELEASE --------------------------
-        data = await loadData();
+        data = await loadData(override);
     } catch(e) {
         loadedVersion = FileVersionError.ERROR;
         serverVersion = LATEST_SERVER_VERSION;
         logger.error(`Failed to load database '${e.message}'`);
     }
     if (data.length === 0) {
-        data = structuredClone(baseData) as RecipeRecord[];
+        logger.silly('Type check', override, info);
+        const infoVar = override === undefined ? info : override;
+        if (infoVar.type === 'custom') {
+            logger.silly('Type custom');
+            data = [];
+        } else {
+            logger.silly('Type other');
+            data = structuredClone(baseData) as RecipeRecord[];
+        }
         await save();
     }
     setDatabaseOrder();
@@ -396,7 +418,25 @@ export async function createDatabase(): Promise<void> {
 export async function resetAndBackup(prefix = 'db_backup_'): Promise<void> {
     await verifyFolder('backup');
     await saveToFile(`backup/${prefix}${Math.floor((new Date()).getTime() / 1000)}.backup`, getDatabaseSaveFormat());
-    data = structuredClone(baseData) as RecipeRecord[];
+    if (info.type === 'custom') {
+        data = [];
+    } else {
+        data = structuredClone(baseData) as RecipeRecord[];
+    }
+    loadedVersion = DATABASE_VERISON;
+    serverVersion = LATEST_SERVER_VERSION;
+    await save();
+    setDatabaseOrder();
+    await resetHint();
+}
+
+export async function reset(): Promise<void> {
+    logger.silly('reset()', info, data.length);
+    if (info.type === 'custom') {
+        data = [];
+    } else {
+        data = structuredClone(baseData) as RecipeRecord[];
+    }
     loadedVersion = DATABASE_VERISON;
     serverVersion = LATEST_SERVER_VERSION;
     await save();
@@ -430,6 +470,7 @@ export async function insertRecipeRow(recipe: Omit<RecipeRow, 'order'>): Promise
         who_discovered: recipe.who_discovered,
         hint_ignore: recipe.hint_ignore,
         base: recipe.base,
+        custom: recipe.custom
     };
     data.push(recipeRow);
     databaseOrder++;
@@ -453,6 +494,7 @@ export async function insertRecipe(recipe: Omit<Recipe, 'order'>): Promise<Recip
         who_discovered: recipe.who_discovered,
         hint_ignore: false,
         base: recipe.base,
+        custom: recipe.custom
     };
     data.push(recipeRow);
     databaseOrder++;
@@ -509,6 +551,19 @@ export async function getRecipe(a: string, b: string): Promise<Recipe | undefine
 
 export async function getRecipesFor(result: string): Promise<Recipe[]> {
     const recipes = data.filter((value) => value.result === result);
+    const formatted = [];
+    for (const recipe of recipes) {
+        formatted.push(traverseAndFill(recipe));
+    }
+    return formatted;
+}
+
+export async function getRecipesForLanguage(result: string, language: Language): Promise<Recipe[]> {
+    const langItem = await getKeyByLanguage(result, language);
+    if (langItem === undefined) {
+        return [];
+    }
+    const recipes = data.filter((value) => value.result === langItem);
     const formatted = [];
     for (const recipe of recipes) {
         formatted.push(traverseAndFill(recipe));

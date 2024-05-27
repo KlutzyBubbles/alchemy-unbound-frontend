@@ -1,8 +1,7 @@
 import { Container, Row } from 'react-bootstrap';
 import { DropContainer } from './dragndrop/DropContainer';
-import { FC, Fragment, useContext, useEffect, useState } from 'react';
+import { FC, Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { SettingsModal } from './modals/SettingsModal';
-import { InfoModal } from './modals/InfoModal';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
 import type { IOptions, RecursivePartial } from '@tsparticles/engine';
@@ -10,11 +9,12 @@ import options from './particles';
 import { SettingsContext } from './providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { LoadingContext } from './providers/LoadingProvider';
-import { SideMenu } from './dragndrop/SideMenu';
+import { SideMenu } from './dragndrop/Menu/SideMenu';
 import { StatsModal } from './modals/StatsModal';
 import { StoreModal } from './modals/store/StoreModal';
+import { ItemModal } from './modals/CustomItemModal';
 
-export type ModalOption = 'settings' | 'info' | 'stats' | 'store' | 'none';
+export type ModalOption = 'settings' | 'info' | 'stats' | 'store' | 'addItem' | 'none';
 
 export const ContentContainer: FC = () => {
     const { settings } = useContext(SettingsContext);
@@ -23,6 +23,7 @@ export const ContentContainer: FC = () => {
     const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.theme, settings.fps));
     const [particleReady, setParticleReady] = useState<boolean>(false);
     const [refreshValues, setRefreshValues] = useState<number>(0);
+    const modalCallback = useRef(undefined);
 
     useEffect(() => {
         (async() => {
@@ -53,6 +54,10 @@ export const ContentContainer: FC = () => {
                 logger.error('Close settings saving failed', e);
             }
         }
+        if (modalCallback.current !== undefined) {
+            modalCallback.current();
+            modalCallback.current = undefined;
+        }
         setCurrentModal('none');
     };
 
@@ -62,7 +67,10 @@ export const ContentContainer: FC = () => {
         });
     };
 
-    const openModal = (option: ModalOption) => setCurrentModal(option);
+    const openModal = (option: ModalOption, onClose?: () => void) => {
+        modalCallback.current = onClose;
+        setCurrentModal(option);
+    };
 
     if (loading) {
         return (
@@ -90,8 +98,11 @@ export const ContentContainer: FC = () => {
                     </Row>
                     <SideMenu openModal={openModal} />
                     <SettingsModal show={currentModal === 'settings'} handleHide={handleModalClose} />
-                    <InfoModal show={currentModal === 'info'} handleHide={handleModalClose} />
                     <StatsModal show={currentModal === 'stats'} handleHide={handleModalClose} />
+                    <ItemModal
+                        show={currentModal === 'addItem'}
+                        handleHide={handleModalClose}
+                        refreshValues={refreshValuesFunc} />
                     <StoreModal
                         show={currentModal === 'store'}
                         handleHide={handleModalClose}

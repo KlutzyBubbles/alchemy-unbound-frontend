@@ -2,14 +2,14 @@ import type { FC } from 'react';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { Tooltip } from 'react-bootstrap';
 
-import { Recipe } from '../../common/types';
-import { ItemTypes } from '../types';
-import { mockElement } from '../utils';
-import { ItemRenderer } from '../ItemRenderer';
-import { getFromStore, getPlaceholderLanguage } from '../language';
-import { DEFAULT_HINT, DEFAULT_MAX_HINTS } from '../../common/hints';
+import { Recipe } from '../../../common/types';
+import { ItemTypes } from '../../types';
+import { mockElement } from '../../utils';
+import { ItemRenderer } from '../../ItemRenderer';
+import { getFromStore, getPlaceholderLanguage } from '../../language';
+import { DEFAULT_HINT, DEFAULT_MAX_HINTS } from '../../../common/hints';
 import logger from 'electron-log/renderer';
-import { SettingsContext } from '../providers/SettingsProvider';
+import { SettingsContext } from '../../providers/SettingsProvider';
 import { Overlay } from 'react-bootstrap';
 import { IoHelpOutline } from 'react-icons/io5';
 

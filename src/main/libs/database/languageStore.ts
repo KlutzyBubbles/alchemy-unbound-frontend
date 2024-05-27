@@ -7,6 +7,7 @@ import logger from 'electron-log/main';
 import { LanguageRecord, LanguageRecords } from '../../../common/types/saveFormat';
 import { saveToFile } from './helpers';
 import { hasProp } from '../../../common/utils';
+import { Language } from 'src/common/settings';
 
 const LANG_DATABASE_VERISON = 1;
 
@@ -87,6 +88,17 @@ export async function insertLanguage(key: string, language: LanguageRecord, over
     } else {
         data[key] = language;
     }
+}
+
+export async function getKeyByLanguage(result: string, language: Language): Promise<string | undefined> {
+    let found: string | undefined = undefined;
+    for (const key of Object.keys(data)) {
+        if (data[key][language].toLocaleLowerCase() === result.toLocaleLowerCase()) {
+            found = key;
+            break;
+        }
+    }
+    return found;
 }
 
 export function getLanguage(key: string): LanguageRecord | undefined {

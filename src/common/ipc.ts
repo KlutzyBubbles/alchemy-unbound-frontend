@@ -11,6 +11,7 @@ export enum RecipeChannel {
 
 export enum ServerChannel {
     COMBINE = 'server:combine',
+    ADD_ITEM = 'server:addItem',
     GET_TOKEN = 'server:getToken',
     GET_VERSION = 'server:getVersion',
     GET_ENDPOINT = 'server:getEndpoint',
@@ -24,6 +25,10 @@ export enum ServerChannel {
 export enum ErrorChannel {
     REGISTER = 'error:register',
     GET_ALL = 'error:getAll'
+}
+
+export enum ProfileChannel {
+    SWITCH = 'profile:switch'
 }
 
 export enum ImportExportChannel {

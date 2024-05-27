@@ -10,6 +10,7 @@ import { IImportExportAPI, ImportExportAPIName } from './preload/api/importexpor
 import { IServerAPI, ServerAPIName } from './preload/api/server';
 import { ErrorAPIName, IErrorAPI } from './preload/api/error';
 import { IInfoAPI, InfoAPIName } from './preload/api/info';
+import { IProfileAPI, ProfileAPIName } from './preload/api/profile';
 
 declare module 'react' {
     interface CSSProperties {
@@ -30,6 +31,7 @@ declare global {
         [ImportExportAPIName]: IImportExportAPI
         [ServerAPIName]: IServerAPI
         [ErrorAPIName]: IErrorAPI
+        [ProfileAPIName]: IProfileAPI
     }
 }
 declare module 'vanta/dist/vanta.birds.min';

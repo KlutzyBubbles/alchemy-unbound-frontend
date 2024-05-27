@@ -95,6 +95,7 @@ export function mockElement(recipe: Recipe | BasicElement): RecipeElement {
                     order: 0,
                     result: recipe.name,
                     discovered: 1,
+                    custom: 0,
                     a: {
                         name: '',
                         display: unknowns as Languages,
@@ -148,4 +149,11 @@ export function getBaseFirst(recipes: Recipe[], steamId: string): BaseFirst {
         base,
         first
     };
+}
+
+export function capitalize(string: string, preserve: boolean = false) {
+    if (!preserve) {
+        string = string.toLowerCase();
+    }
+    return string.charAt(0).toUpperCase() + string.substring(1);
 }

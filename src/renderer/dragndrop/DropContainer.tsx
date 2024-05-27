@@ -18,12 +18,12 @@ import { UpdateContext } from '../providers/UpdateProvider';
 import { hasProp } from '../../common/utils';
 import { LoadingContext } from '../providers/LoadingProvider';
 import { itemRecipeCheck, unlockCheck } from '../utils/achievements';
-import { MainButtons } from './MainButtons';
+import { BottomButton } from './MainButtons/BottomButtons';
 import { SettingsContext } from '../providers/SettingsProvider';
-import { IoMenuOutline } from 'react-icons/io5';
+import { TopButtons } from './MainButtons/TopButtons';
 
 export interface ContainerProps {
-  openModal: (option: ModalOption) => void
+  openModal: (option: ModalOption, onClose?: () => void) => void
   refreshValues: number
 }
 
@@ -41,6 +41,7 @@ export const DropContainer: FC<ContainerProps> = ({
     const mainElement = useRef<HTMLDivElement>();
     const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
     const [refreshHint, setRefreshHint] = useState<number>(0);
+    const [creditsLeft, setCreditsLeft] = useState<number>(0);
     const currentHover = useRef<string>(undefined);
     const speedTimerRef = useRef<NodeJS.Timeout>(undefined);
     const { settings, setSettings } = useContext(SettingsContext);
@@ -72,6 +73,21 @@ export const DropContainer: FC<ContainerProps> = ({
         setRefreshHint((value) => {
             return value + 1;
         });
+        (async () => {
+            try {
+                const result = await window.ServerAPI.getUserDetails();
+                if (result.type === 'error') {
+                    setCreditsLeft(-1);
+                    logger.error('Failed to load user check', result.result);
+                } else {
+                    logger.info('Setting user from details', result);
+                    setCreditsLeft(result.result.user.credits);
+                }
+            } catch (e) {
+                setCreditsLeft(-1);
+                logger.error('Failed to load user', e);
+            }
+        })();
     }, [refreshValues]);
 
     useEffect(() => {
@@ -88,6 +104,19 @@ export const DropContainer: FC<ContainerProps> = ({
         (async () => {
             if (shouldUpdate) {
                 await refreshRecipes();
+                try {
+                    const result = await window.ServerAPI.getUserDetails();
+                    if (result.type === 'error') {
+                        setCreditsLeft(-1);
+                        logger.error('Failed to load user check', result.result);
+                    } else {
+                        logger.silly('Setting user from details', result);
+                        setCreditsLeft(result.result.user.credits);
+                    }
+                } catch (e) {
+                    setCreditsLeft(-1);
+                    logger.error('Failed to load user', e);
+                }
                 setBoxes(() => { return {}; });
                 setShouldUpdate(false);
                 setLoading(true);
@@ -160,10 +189,6 @@ export const DropContainer: FC<ContainerProps> = ({
         }
     };
 
-    const devButton = () => {
-        logger.warn('This is a dev button and shouldnt be visible');
-    };
-
     const backendCombine = async (aName: string, bName: string): Promise<{
         newDiscovery: boolean,
         firstDiscovery: boolean,
@@ -230,6 +255,10 @@ export const DropContainer: FC<ContainerProps> = ({
                 }
             } else {
                 const combined = combinedResult.result;
+                setCreditsLeft((credits) => {
+                    credits += combined.creditAdjust;
+                    return credits;
+                });
                 if (combinedResult === undefined) {
                     logger.debug('Combine failed in offline mode (two)');
                 } else {
@@ -701,10 +730,6 @@ export const DropContainer: FC<ContainerProps> = ({
         setBoxes({});
     };
 
-    const openMenu = () => {
-        console.log('openMenu');
-    };
-
     const elementControls = useAnimation();
 
     return (
@@ -721,10 +746,9 @@ export const DropContainer: FC<ContainerProps> = ({
                     tabIndex={0}
                 >
                     <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
-                        <div
-                            className='btn btn-no-outline float-start mb-2 fs-1 d-flex p-2 position-fixed z-mainButtons'
-                            onClick={openMenu}
-                            data-bs-toggle="offcanvas" data-bs-target="#sideMenu"><IoMenuOutline /></div>
+                        <TopButtons
+                            openModal={openModal}
+                            credits={creditsLeft}/>
                         <AnimatePresence>
                             {boxes === undefined ? (<Fragment/>) : Object.keys(boxes).filter((v) => v !== undefined).map((key) => {
                                 const { left, top, element, combining, newCombining, loading, error, newDiscovery, firstDiscovery, locked } = boxes[key];
@@ -764,20 +788,21 @@ export const DropContainer: FC<ContainerProps> = ({
                             })}
                         </AnimatePresence>
                         <CustomDragLayer/>
-                        <MainButtons
+                        <BottomButton
                             clearAll={clearAll}
                             openModal={openModal}
                             refreshHint={refreshHint}
                             deprecated={deprecated}
-                            rateLimited={rateLimited}
-                            devButton={devButton}/>
+                            rateLimited={rateLimited}/>
                     </div>
                 </div>
                 <SideContainer
                     elements={elements}
                     removeBox={removeBox}
                     moveBox={moveBox}
-                    addBox={addBoxRandomLocation}/>
+                    addBox={addBoxRandomLocation}
+                    refreshRecipes={refreshRecipes}
+                    openModal={openModal}/>
             </Split>
         </Fragment>
     );

@@ -22,13 +22,18 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
     children
 }) => {
     const { setSettings } = useContext(SettingsContext);
-    const { setIsProduction, setHasSupporterTheme, setIsLegacy } = useContext(InfoContext);
+    const { setIsProduction, setHasSupporterTheme, setIsLegacy, setFileVersions } = useContext(InfoContext);
     const [loading, setLoading] = useState<boolean>(true);
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout>(undefined);
 
     useEffect(() => {
         (async () => {
             if (loading) {
+                try {
+                    setFileVersions(await window.GenericAPI.getFileVersions());
+                } catch (e) {
+                    logger.error('Failed to load file versions', e);
+                }
                 try {
                     setIsLegacy((await window.ServerAPI.getVersion()) === 1);
                 } catch (e) {

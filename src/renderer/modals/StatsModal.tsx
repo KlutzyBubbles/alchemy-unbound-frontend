@@ -1,6 +1,6 @@
 import { useState, type FC, useEffect, useContext, Fragment } from 'react';
 import { Collapse, Modal, Table } from 'react-bootstrap';
-import { AppVersions, ErrorEntry, FileVersions, LATEST_SERVER_VERSION, SystemVersion, UserSuccess } from '../../common/types';
+import { AppVersions, DEFAULT_FILE_VERSIONS, ErrorEntry, FileVersions, LATEST_SERVER_VERSION, SystemVersion, UserSuccess } from '../../common/types';
 import { SettingsContext } from '../providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
@@ -22,16 +22,7 @@ export const StatsModal: FC<StatsModalProps> = ({
     const { settings } = useContext(SettingsContext);
     const { hasSupporterTheme, isLegacy, isProduction } = useContext(InfoContext);
     const [appVersions, setAppVersions] = useState<AppVersions>({ node: '', electron: '', chrome: '', app: ''});
-    const [fileVersions, setFileVersions] = useState<FileVersions>({
-        database: -3,
-        hint: -3,
-        stats: -3,
-        settings: -3,
-        databaseName: 'unknown',
-        databaseInfo: {
-            type: 'base'
-        }
-    });
+    const [fileVersions, setFileVersions] = useState<FileVersions>(DEFAULT_FILE_VERSIONS);
     const [systemInformation, setSystemInformation] = useState<SystemVersion>({ arch: '', platform: '', version: '' });
     const [serverVersion, setServerVersion] = useState<number>(LATEST_SERVER_VERSION);
     const [serverEndpoint, setServerEndpoint] = useState<string>('UNKNONW');

@@ -9,3 +9,4 @@ import './api/hints';
 import './api/importexport';
 import './api/server';
 import './api/error';
+import './api/profile';

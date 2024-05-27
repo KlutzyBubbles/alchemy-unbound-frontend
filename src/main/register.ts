@@ -1,9 +1,9 @@
 import { ipcMain } from 'electron';
 import { ErrorEntryAdd, Recipe } from '../common/types';
 import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor, hasAllRecipes, hasAtleastRecipe } from './libs/database/recipeStore';
-import { checkDLC, combine, getEndpoint, getToken, getUserDetails, getVersion, initTransaction, restorePurchases } from './libs/server';
-import { DisplayChannel, ErrorChannel, GenericChannel, HintChannel, ImportExportChannel, InfoChannel, RecipeChannel, ServerChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
-import { Settings } from '../common/settings';
+import { addItem, checkDLC, combine, getEndpoint, getToken, getUserDetails, getVersion, initTransaction, restorePurchases } from './libs/server';
+import { DisplayChannel, ErrorChannel, GenericChannel, HintChannel, ImportExportChannel, InfoChannel, ProfileChannel, RecipeChannel, ServerChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
+import { Language, Settings } from '../common/settings';
 import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './libs/settings';
 import { getAppVersions, isPackaged, getSystemInformation, quit, getFileVersions } from './libs/generic';
 import { getCurrentDisplay, getDisplays, isFullscreen, moveToDisplay, setFullscreen } from './libs/display';
@@ -15,6 +15,8 @@ import { exportDatabase, importFile } from './libs/importexport';
 import { getErrors, registerError } from './libs/error';
 import { Info } from '../common/info';
 import { addTheme, getInfo, loadInfo, removeTheme, saveInfo, setInfo, setInfoKey } from './libs/info';
+import { DatabaseData } from 'src/common/types/saveFormat';
+import { switchProfile } from './libs/database/profiles';
 
 
 export function register() {
@@ -69,6 +71,9 @@ export function register() {
     ipcMain.handle(ServerChannel.RESTORE_PURCHASES, async () => {
         return restorePurchases();
     });
+    ipcMain.handle(ServerChannel.ADD_ITEM, async (_, item: string, language: Language) => {
+        return addItem(item, language);
+    });
 
     // Error handlers
     ipcMain.handle(ErrorChannel.REGISTER, async (_, error: ErrorEntryAdd) => {
@@ -76,6 +81,11 @@ export function register() {
     });
     ipcMain.handle(ErrorChannel.GET_ALL, async () => {
         return getErrors();
+    });
+
+    // Profile handlers
+    ipcMain.handle(ProfileChannel.SWITCH, async (_, profile: string, info: DatabaseData) => {
+        return switchProfile(profile, info);
     });
 
     // Settings handlers

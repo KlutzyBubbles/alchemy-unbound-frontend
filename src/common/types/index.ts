@@ -15,6 +15,23 @@ export type BasicElement = {
     base: number;
 }
 
+export type APIRecipe = {
+    order: number;
+    a: BasicElement;
+    b: BasicElement;
+    discovered: number;
+    result: string;
+    display: Languages;
+    emoji: string;
+    depth: number;
+    first: number;
+    who_discovered: string;
+    base: number;
+    custom: number;
+    credits: number;
+    creditAdjust: number;
+}
+
 export type Recipe = {
     order: number;
     a: BasicElement;
@@ -27,6 +44,7 @@ export type Recipe = {
     first: number;
     who_discovered: string;
     base: number;
+    custom: number;
 }
 
 export type RecipeRow = {
@@ -42,6 +60,7 @@ export type RecipeRow = {
     who_discovered: string;
     hint_ignore?: boolean;
     base: number;
+    custom: number;
 }
 
 export type RecipeElement = {
@@ -86,6 +105,17 @@ export type FileVersions = {
     databaseInfo: DatabaseData,
     databaseName: string
 }
+
+export const DEFAULT_FILE_VERSIONS: FileVersions = {
+    database: -3,
+    hint: -3,
+    stats: -3,
+    settings: -3,
+    databaseName: 'unknown',
+    databaseInfo: {
+        type: 'base'
+    }
+};
 
 export type TokenHolder = {
     token: string,
@@ -187,6 +217,7 @@ export type CombineSuccess = {
     hintAdded: boolean,
     newDiscovery: boolean,
     firstDiscovery: boolean,
+    creditAdjust: number,
     recipe: Recipe
 }
 
@@ -237,7 +268,7 @@ export const ErrorCodeToString: {
     1001: 'unknownError'
 };
 
-export type ErrorType = 'combine' | 'token' | 'idea';
+export type ErrorType = 'combine' | 'token' | 'item';
 
 export type ErrorEntry = {
     a?: string,

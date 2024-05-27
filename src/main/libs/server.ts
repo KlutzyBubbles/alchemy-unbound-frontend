@@ -1,12 +1,13 @@
 import logger from 'electron-log/main';
-import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse, PurchaseOutput, PurchaseSuccess, ValidateOutput, UserOutput, RedeemSuccess, GenericSuccess, GenericOutput } from '../../common/types';
-import { getPlaceholderOrder, getRecipe, insertRecipeRow, serverVersion, setDiscovered, traverseAndFill } from './database/recipeStore';
+import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse, PurchaseOutput, PurchaseSuccess, ValidateOutput, UserOutput, RedeemSuccess, GenericSuccess, GenericOutput, APIRecipe } from '../../common/types';
+import { getDatabaseInfo, getPlaceholderOrder, getRecipe, getRecipesForLanguage, insertRecipeRow, serverVersion, setDiscovered, traverseAndFill } from './database/recipeStore';
 import { getAppVersion, isPackaged } from './generic';
 import { getSettings } from './settings';
 import { getSteamGameLanguage, getSteamworksClient, getWebAuthTicket } from './steam';
 import fetch, { HeadersInit, Response } from 'electron-fetch';
 import { TxnItems } from '../../common/server';
 import { addTheme, removeTheme } from './info';
+import { Language } from 'src/common/settings';
 
 export type RequestErrorResult = {
   code: number,
@@ -385,16 +386,21 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                 hintAdded,
                 newDiscovery,
                 firstDiscovery,
-                recipe: exists
+                recipe: exists,
+                creditAdjust: 0
             }
         };
     } else {
-        if ((await getSettings(false)).offline) {
+        if (getDatabaseInfo().type !== 'custom') {
+            throw new Error('Database isnt in custom mode');
+        }
+        const isCustom = getDatabaseInfo().type === 'custom';
+        if (!isCustom && (await getSettings(false)).offline) {
             return undefined;
         }
         const result = await apiRequest(
             'GET',
-            `/v${serverVersion}/api`,
+            `/v${isCustom ? '2' : serverVersion}/${isCustom ? 'custom' : 'api'}`,
             {
                 a,
                 b
@@ -403,7 +409,7 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
             false
         );
         if (result.type === 'success') {
-            const body: Recipe = result.result as unknown as Recipe;
+            const body: APIRecipe = result.result as unknown as APIRecipe;
             newDiscovery = true;
             firstDiscovery = body.first ? true : false;
             try {
@@ -417,7 +423,8 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                     depth: body.depth,
                     first: body.first ? 1 : 0,
                     who_discovered: body.who_discovered,
-                    base: body.base ? 1 : 0
+                    base: body.base ? 1 : 0,
+                    custom: body.custom ? 1 : 0
                 });
                 return {
                     type: 'success',
@@ -427,7 +434,8 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                         hintAdded: false,
                         newDiscovery,
                         firstDiscovery,
-                        recipe: traverseAndFill(recipeRow)
+                        recipe: traverseAndFill(recipeRow),
+                        creditAdjust: body.creditAdjust
                     }
                 };
             } catch(e) {
@@ -449,8 +457,10 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                             depth: body.depth,
                             first: body.first ? 1 : 0,
                             who_discovered: body.who_discovered,
-                            base: body.base ? 1 : 0
-                        })
+                            base: body.base ? 1 : 0,
+                            custom: body.custom ? 1 : 0
+                        }),
+                        creditAdjust: body.creditAdjust
                     }
                 };
             }
@@ -459,6 +469,109 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                 throw('Items are not known, have these been synced with the server?');
             } else {
                 return result;
+            }
+        }
+    }
+}
+
+// Returns undefined if in offline mode.
+export async function addItem(result: string, language: Language): Promise<CombineOutput | undefined> {
+    logger.silly('addItem', result, language);
+    if (getDatabaseInfo().type !== 'custom') {
+        throw new Error('Database isnt in custom mode');
+    }
+    let exists: Recipe[] = [];
+    try {
+        exists = await getRecipesForLanguage(result, language);
+    } catch(e) {
+        logger.error('Cannot get recipe', e);
+        exists = [];
+    }
+    if (exists.length > 0) {
+        exists = exists.sort((a, b) => a.depth - b.depth);
+        return {
+            type: 'success',
+            result: {
+                responseCode: 200,
+                deprecated: false,
+                hintAdded: false,
+                newDiscovery: false,
+                firstDiscovery: false,
+                creditAdjust: 0,
+                recipe: exists[0]
+            }
+        };
+    } else {
+        const apiResult = await apiRequest(
+            'PUT',
+            '/v2/custom',
+            {
+                result,
+                language
+            },
+            undefined,
+            true
+        );
+        if (apiResult.type === 'success') {
+            const body: APIRecipe = apiResult.result as unknown as APIRecipe;
+            
+            try {
+                const recipeRow = await insertRecipeRow({
+                    a: '',
+                    b: '',
+                    result: body.result,
+                    discovered: 1,
+                    display: body.display,
+                    emoji: body.emoji,
+                    depth: body.depth,
+                    first: body.first ? 1 : 0,
+                    who_discovered: body.who_discovered,
+                    base: body.base ? 1 : 0,
+                    custom: body.custom ? 1 : 0
+                });
+                return {
+                    type: 'success',
+                    result: {
+                        responseCode: 200,
+                        deprecated: false,
+                        hintAdded: false,
+                        newDiscovery: false,
+                        firstDiscovery: false,
+                        recipe: traverseAndFill(recipeRow),
+                        creditAdjust: body.creditAdjust
+                    }
+                };
+            } catch(e) {
+                logger.error('Failed to insert recipe', e);
+                return {
+                    type: 'success',
+                    result: {
+                        responseCode: 200,
+                        deprecated: false,
+                        hintAdded: false,
+                        newDiscovery: false,
+                        firstDiscovery: false,
+                        recipe: traverseAndFill({
+                            order: getPlaceholderOrder(),
+                            a: '',
+                            b: '',
+                            result: body.result,
+                            discovered: 1,
+                            depth: body.depth,
+                            first: body.first ? 1 : 0,
+                            who_discovered: body.who_discovered,
+                            base: body.base ? 1 : 0,
+                            custom: body.custom ? 1 : 0
+                        }),
+                        creditAdjust: body.creditAdjust
+                    }
+                };
+            }
+        } else {
+            if (apiResult.result.code === ServerErrorCode.AB_NOT_KNOWN) {
+                throw('Items are not known, have these been synced with the server?');
+            } else {
+                return apiResult;
             }
         }
     }

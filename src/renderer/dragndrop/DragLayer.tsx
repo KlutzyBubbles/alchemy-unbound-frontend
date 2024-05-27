@@ -53,7 +53,7 @@ export const CustomDragLayer: FC<Record<string, never>> = () => {
     }
 
     return (
-        <div style={layerStyles} className='h-100 w-100 z-dragLayer'>
+        <div style={layerStyles} className='h-100 w-100 position-fixed z-dragLayer'>
             {renderItem()}
         </div>
     );

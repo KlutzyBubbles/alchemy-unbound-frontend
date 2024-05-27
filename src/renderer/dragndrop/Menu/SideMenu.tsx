@@ -1,17 +1,17 @@
 import { FC, useContext, useEffect, useRef, useState } from 'react';
-import { IoAlertCircleOutline, IoCartOutline, IoCheckmarkOutline, IoDownloadOutline, IoExitOutline, IoPulseOutline, IoSaveOutline, IoSettingsOutline, IoStatsChartOutline } from 'react-icons/io5';
+import { IoAlertCircleOutline, IoCartOutline, IoCheckmarkOutline, IoDownloadOutline, IoExitOutline, IoPulseOutline, IoSaveOutline, IoSettingsOutline, IoStatsChartOutline, IoSwapHorizontalOutline } from 'react-icons/io5';
 import { motion, useAnimation } from 'framer-motion';
-import { ModalOption } from '../Container';
+import { ModalOption } from '../../Container';
 import { BsGithub, BsDiscord } from 'react-icons/bs';
-import { getFromStore, getObjectFromStore, getPlaceholderLanguage } from '../language';
-import { ItemRenderer } from '../ItemRenderer';
-import { ItemTypes } from '../types';
-import { mockElement } from '../utils';
-import { SoundContext } from '../providers/SoundProvider';
-import { SettingsContext } from '../providers/SettingsProvider';
+import { getFromStore } from '../../language';
+import { SoundContext } from '../../providers/SoundProvider';
+import { SettingsContext } from '../../providers/SettingsProvider';
 import logger from 'electron-log/renderer';
-import { UpdateContext } from '../providers/UpdateProvider';
+import { UpdateContext } from '../../providers/UpdateProvider';
 import * as bootstrap from 'bootstrap';
+import { DatabaseType } from 'src/common/types/saveFormat';
+import { MenuModalItem } from './MenuModalItem';
+import { Recipe } from './Recipe';
 
 export interface SideMenuProps {
     openModal: (option: ModalOption) => void
@@ -183,14 +183,17 @@ export const SideMenu: FC<SideMenuProps> = ({
         openModal('settings');
     };
 
-    const statsClick = () => {
+    const switchClick = async () => {
         closeCanvas();
-        openModal('stats');
-    };
-
-    const storeClick = () => {
-        closeCanvas();
-        openModal('store');
+        const versions = await window.GenericAPI.getFileVersions();
+        let newType: DatabaseType = 'base';
+        let newDb = 'db';
+        if (versions.databaseInfo.type === 'base') {
+            newType = 'custom';
+            newDb = 'custom';
+        }
+        await window.ProfileAPI.switchProfile(newDb, { type: newType });
+        setShouldUpdate(true);
     };
 
     return (
@@ -218,33 +221,28 @@ export const SideMenu: FC<SideMenuProps> = ({
                             </motion.div>
                         </div>
                     </li>
-                    <li className="nav-item btn btn-no-radius btn-left-hover"
-                        onMouseEnter={onMouseOver}
-                        onClick={statsClick}>
-                        <div className="nav-link d-flex">
-                            <div className='mx-auto pt-half'>
-                                <h2 className='m-0'>{getFromStore('menu.statistics', settings.language)}</h2>
-                            </div>
-                            <div
-                                className='float-end fs-2 d-flex p-2'>
-                                <IoStatsChartOutline />
-                            </div>
-                        </div>
-                    </li>
-                    <li className="nav-item btn btn-no-radius btn-left-hover"
-                        onMouseEnter={onMouseOver}
-                        onClick={storeClick}>
-                        <div className="nav-link d-flex">
-                            <div className='mx-auto pt-half'>
-                                <h2 className='m-0'>{getFromStore('menu.store', settings.language)}</h2>
-                            </div>
-                            <div
-                                className='float-end fs-2 d-flex p-2'>
-                                <IoCartOutline />
-                            </div>
-                        </div>
-                    </li>
+                    <MenuModalItem
+                        openModal={openModal}
+                        itemId='stats'
+                        icon={<IoStatsChartOutline />}/>
+                    <MenuModalItem
+                        openModal={openModal}
+                        itemId='store'
+                        icon={<IoCartOutline />}/>
                     <div className='my-3'/>
+                    <li className="nav-item btn btn-no-radius btn-left-hover"
+                        onMouseEnter={onMouseOver}
+                        onClick={switchClick}>
+                        <div className="nav-link d-flex">
+                            <div className='mx-auto pt-half'>
+                                <h2 className='m-0'>{getFromStore('menu.switch', settings.language)}</h2>
+                            </div>
+                            <div
+                                className='float-end fs-2 d-flex p-2'>
+                                <IoSwapHorizontalOutline />
+                            </div>
+                        </div>
+                    </li>
                     <li className="nav-item btn btn-no-radius btn-left-hover"
                         onMouseEnter={onMouseOver}
                         onClick={exportFile}>
@@ -269,87 +267,38 @@ export const SideMenu: FC<SideMenuProps> = ({
             </div>
             <div className='footer mt-auto'>
                 <div className='row'>
-                    <div className='col-12 d-flex mt-2 mx-2 justify-content-center'>
-                        <ItemRenderer
-                            element={mockElement({
+                    <Recipe
+                        className='col-12 d-flex mt-2 mx-2 justify-content-center'
+                        recipe={{
+                            a: {
                                 name: 'game',
-                                display: getObjectFromStore('info.game', 'Game'),
-                                emoji: '🎮',
-                                depth: 0,
-                                first: 0,
-                                who_discovered: '',
-                                base: 1
-                            })}
-                            type={ItemTypes.RECIPE_ELEMENT}
-                            dragging={false}/>
-                        <span className='fs-3'>+</span>
-                        <ItemRenderer
-                            element={mockElement({
+                                emoji: '🎮'
+                            },
+                            b: {
                                 name: 'hacker',
-                                display: getObjectFromStore('info.hacker', 'Hacker'),
-                                emoji: '👨‍💻',
-                                depth: 0,
-                                first: 0,
-                                who_discovered: '',
-                                base: 1
-                            })}
-                            type={ItemTypes.RECIPE_ELEMENT}
-                            dragging={false}/>
-                        <span className='fs-3'>=</span>
-                        <ItemRenderer
-                            element={mockElement({
+                                emoji: '👨‍💻'
+                            },
+                            result: {
                                 name: 'klutzybubbles',
-                                display: getPlaceholderLanguage('KlutzyBubbles'),
-                                emoji: '🤹',
-                                depth: 0,
-                                first: 0,
-                                who_discovered: '',
-                                base: 1
-                            })}
-                            type={ItemTypes.RECIPE_ELEMENT}
-                            dragging={false}/>
-                        <div className='clearfix'></div>
-                    </div>
-                    <div className='col-12 d-flex mt-2 mx-2 justify-content-center'>
-                        <ItemRenderer
-                            element={mockElement({
+                                emoji: '🤹'
+                            }
+                        }}/>
+                    <Recipe
+                        className='col-12 d-flex mt-2 mx-2 justify-content-center'
+                        recipe={{
+                            a: {
                                 name: 'game',
-                                display: getObjectFromStore('info.game', 'Game'),
-                                emoji: '🎮',
-                                depth: 0,
-                                first: 0,
-                                who_discovered: '',
-                                base: 1
-                            })}
-                            type={ItemTypes.RECIPE_ELEMENT}
-                            dragging={false}/>
-                        <span className='fs-3'>+</span>
-                        <ItemRenderer
-                            element={mockElement({
+                                emoji: '🎮'
+                            },
+                            b: {
                                 name: 'art',
-                                display: getObjectFromStore('info.art', 'Art'),
-                                emoji: '🎨',
-                                depth: 0,
-                                first: 0,
-                                who_discovered: '',
-                                base: 1
-                            })}
-                            type={ItemTypes.RECIPE_ELEMENT}
-                            dragging={false}/>
-                        <span className='fs-3'>=</span>
-                        <ItemRenderer
-                            element={mockElement({
+                                emoji: '🎨'
+                            },
+                            result: {
                                 name: 'piney',
-                                display: getPlaceholderLanguage('Piney'),
-                                emoji: '🌲',
-                                depth: 0,
-                                first: 0,
-                                who_discovered: '',
-                                base: 1
-                            })}
-                            type={ItemTypes.RECIPE_ELEMENT}
-                            dragging={false}/>
-                    </div>
+                                emoji: '🌲'
+                            }
+                        }}/>
                 </div>
                 <div
                     className='btn btn-sm btn-danger float-start my-3 ms-3 fs-2 d-flex p-2 me-2'

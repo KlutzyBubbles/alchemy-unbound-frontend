@@ -8,7 +8,7 @@ export type LanguageRecords = {
     [key: string]: LanguageRecord
 }
 
-export type RecipeRecord = {
+export type RecipeRecordV3 = {
     order: number;
     a: string;
     b: string;
@@ -23,8 +23,14 @@ export type RecipeRecord = {
     base: number;
 }
 
+export type RecipeRecord = RecipeRecordV3 & {
+    custom: number;
+}
+
+export type DatabaseType = 'base' | 'daily' | 'weekly' | 'custom'
+
 export type DatabaseData = {
-    type: 'base' | 'daily' | 'weekly' | 'custom',
+    type: DatabaseType,
     expiry?: Date,
 }
 

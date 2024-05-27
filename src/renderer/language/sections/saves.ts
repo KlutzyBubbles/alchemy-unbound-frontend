@@ -1,8 +1,8 @@
 import { LanguageStoreRecurring } from '../store';
 
 export const LanguageStore: LanguageStoreRecurring = {
-    options: {
-        english: 'Options',
+    base: {
+        english: 'Standard Mode',
         schinese: '',
         russian: '',
         spanish: '',
@@ -18,8 +18,8 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '',
         koreana: ''
     },
-    stats: {
-        english: 'Statistics',
+    daily: {
+        english: 'Daily Mode',
         schinese: '',
         russian: '',
         spanish: '',
@@ -35,8 +35,8 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '',
         koreana: ''
     },
-    store: {
-        english: 'Store',
+    weekly: {
+        english: 'Weekly Mode',
         schinese: '',
         russian: '',
         spanish: '',
@@ -52,8 +52,8 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '',
         koreana: ''
     },
-    switch: {
-        english: 'Switch Mode',
+    custom: {
+        english: 'Custom Mode',
         schinese: '',
         russian: '',
         spanish: '',

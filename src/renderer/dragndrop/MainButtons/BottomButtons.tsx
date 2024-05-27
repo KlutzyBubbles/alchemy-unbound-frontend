@@ -2,26 +2,25 @@ import type { FC } from 'react';
 import { Fragment, useContext, useRef, useState } from 'react';
 
 import { IoBandageOutline, IoCloudDownloadOutline, IoCloudOfflineOutline, IoConstructOutline, IoSpeedometerOutline, IoTrashOutline } from 'react-icons/io5';
-//import { useAnimation } from 'framer-motion';
-import { ModalOption } from '../Container';
-import { SettingsContext } from '../providers/SettingsProvider';
+import { ModalOption } from '../../Container';
+import { SettingsContext } from '../../providers/SettingsProvider';
 import { HintButton } from './HintButton';
 import { Overlay, Tooltip } from 'react-bootstrap';
-import { getFromStore } from '../language';
-import { InfoContext } from '../providers/InfoProvider';
+import { getFromStore } from '../../language';
+import { InfoContext } from '../../providers/InfoProvider';
+import logger from 'electron-log/renderer';
+import { LanguageStore } from '../../language/store';
 
-export interface MainButtonProps {
+export interface BottomButtonProps {
     openModal: (option: ModalOption) => void
-    devButton: () => void
     clearAll: () => void
     refreshHint: number,
     deprecated: boolean,
     rateLimited: boolean
 }
 
-export const MainButtons: FC<MainButtonProps> = ({
+export const BottomButton: FC<BottomButtonProps> = ({
     openModal,
-    // devButton,
     clearAll,
     refreshHint,
     deprecated,
@@ -36,38 +35,10 @@ export const MainButtons: FC<MainButtonProps> = ({
     const rateLimitedRef = useRef(undefined);
     const legacyRef = useRef(undefined);
 
-    // const onSettingsMouseEnter = () => {
-    //     settingsControls.start('start');
-    // };
-
-    // const onSettingsMouseLeave = () => {
-    //     settingsControls.start('reset');
-    // };
-
-    // const settingsVariants = {
-    //     start: () => ({
-    //         rotate: [0, 90],
-    //         transition: {
-    //             duration: 0.2,
-    //             repeat: 0,
-    //             ease: 'easeInOut',
-    //             repeatDelay: 0.5
-    //         }
-    //     }),
-    //     reset: {
-    //         rotate: [90, 0],
-    //         transition: {
-    //             duration: 0.2,
-    //             repeat: 0,
-    //             ease: 'easeInOut'
-    //         }
-    //     }
-    // };
-  
-    // const settingsControls = useAnimation();
-
     const devClick = () => {
-        openModal('store');
+        // openModal('store');
+        logger.warn('This is a dev button and shouldnt be visible');
+        logger.warn(LanguageStore);
     };
 
     return (
@@ -127,22 +98,3 @@ export const MainButtons: FC<MainButtonProps> = ({
         </div>
     );
 };
-
-// <a href="https://ko-fi.com/klutzybubbles" target="_blank" className='btn btn-sm btn-heart float-end mb-2 fs-2 d-flex p-2' rel="noreferrer"><IoHeart /></a>
-
-/*
-<motion.div
-    className='btn btn-no-outline float-end mb-2 me-2 fs-2 d-flex p-2'
-    onMouseEnter={onSettingsMouseEnter}
-    onMouseLeave={onSettingsMouseLeave}
-    variants={settingsVariants}
-    animate={settingsControls}
-    onClick={() => openModal('settings')}>
-    <IoSettingsOutline/>
-</motion.div>
-<div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('info')}><IoInformationCircleOutline /></div>
-{isProduction ? (<Fragment/>) : (
-    <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={devClick}><IoBandageOutline /></div>
-)}
-<div className='btn btn-advanced float-end mb-2 fs-2 d-flex p-2' onClick={() => openModal('idea')}><IoBulbOutline /></div>
-*/

@@ -85,7 +85,7 @@ function getMainStyles(
         transform,
         WebkitTransform: transform,
         // IE fallback: hide the real node using CSS when dragging
-        // because IE will ignore our custom "empty image" drag preview.
+        // because IE will ignore our custom 'empty image' drag preview.
         opacity: locked ? 1 : isDragging ? 0 : 1,
         height: locked ? '' : isDragging ? 0 : '',
     };
