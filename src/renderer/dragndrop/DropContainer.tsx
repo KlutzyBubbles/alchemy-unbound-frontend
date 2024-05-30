@@ -21,6 +21,10 @@ import { itemRecipeCheck, unlockCheck } from '../utils/achievements';
 import { BottomButton } from './MainButtons/BottomButtons';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { TopButtons } from './MainButtons/TopButtons';
+//import { IOptions, RecursivePartial } from '@tsparticles/engine';
+//import Particles, { initParticlesEngine } from '@tsparticles/react';
+//import { loadAll } from '@tsparticles/all';
+//import options from '../particles';
 
 export interface ContainerProps {
   openModal: (option: ModalOption, onClose?: () => void) => void
@@ -40,14 +44,18 @@ export const DropContainer: FC<ContainerProps> = ({
     const { playSound } = useContext(SoundContext);
     const mainElement = useRef<HTMLDivElement>();
     const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
+    const [refreshMission, setRefreshMission] = useState<number>(0);
     const [refreshHint, setRefreshHint] = useState<number>(0);
     const [creditsLeft, setCreditsLeft] = useState<number>(0);
+    //const [splitSize, setSplitSize] = useState<number[]>([75, 25]);
     const currentHover = useRef<string>(undefined);
     const speedTimerRef = useRef<NodeJS.Timeout>(undefined);
     const { settings, setSettings } = useContext(SettingsContext);
     const [boxes, setBoxes] = useState<{
         [key: string]: Box
     }>({});
+    //const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.theme, settings.fps));
+    //const [particleReady, setParticleReady] = useState<boolean>(false);
 
     async function refreshRecipes() {
         const working = await getAllRecipes();
@@ -57,6 +65,13 @@ export const DropContainer: FC<ContainerProps> = ({
     useEffect(() => {
         refreshRecipes();
         //mainElement.current.focus();
+        // (async() => {
+        //     await initParticlesEngine(async (engine) => {
+        //         //await loadSlim(engine);
+        //         await loadAll(engine);
+        //     });
+        //     setParticleReady(true);
+        // })();
         
         document.addEventListener('keydown', handleKeyDown2, false);
         document.addEventListener('keyup', handleKeyUp2, false);
@@ -68,6 +83,30 @@ export const DropContainer: FC<ContainerProps> = ({
             document.removeEventListener('keyup', handleKeyUp2, false);
         };
     }, []);
+
+    //useEffect(() => {
+    //    (async () => {
+    //        setParticleReady(false);
+    //        setCurrentParticles(options[settings.background](settings.theme, settings.fps, splitSize[0]));
+    //        await initParticlesEngine(async (engine) => {
+    //            //await loadSlim(engine);
+    //            await loadAll(engine);
+    //        });
+    //        setParticleReady(true);
+    //    })();
+    //}, [settings]);
+
+    //useEffect(() => {
+    //    (async () => {
+    //        setParticleReady(false);
+    //        setCurrentParticles(options[settings.background](settings.theme, settings.fps, splitSize[0]));
+    //        await initParticlesEngine(async (engine) => {
+    //            //await loadSlim(engine);
+    //            await loadAll(engine);
+    //        });
+    //        setParticleReady(true);
+    //    })();
+    //}, [splitSize]);
 
     useEffect(() => {
         setRefreshHint((value) => {
@@ -103,7 +142,14 @@ export const DropContainer: FC<ContainerProps> = ({
     useEffect(() => {
         (async () => {
             if (shouldUpdate) {
+                setLoading(true);
                 await refreshRecipes();
+                setRefreshMission((value) => {
+                    return value + 1;
+                });
+                setRefreshHint((value) => {
+                    return value + 1;
+                });
                 try {
                     const result = await window.ServerAPI.getUserDetails();
                     if (result.type === 'error') {
@@ -119,7 +165,6 @@ export const DropContainer: FC<ContainerProps> = ({
                 }
                 setBoxes(() => { return {}; });
                 setShouldUpdate(false);
-                setLoading(true);
             }
         })();
     }, [shouldUpdate]);
@@ -255,6 +300,11 @@ export const DropContainer: FC<ContainerProps> = ({
                 }
             } else {
                 const combined = combinedResult.result;
+                if (combined.missionComplete) {
+                    setRefreshMission((value) => {
+                        return value + 1;
+                    });
+                }
                 setCreditsLeft((credits) => {
                     credits += combined.creditAdjust;
                     return credits;
@@ -739,6 +789,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 className="split p-0 m-0"
                 gutterSize={2}
                 snapOffset={0}
+                // onDragEnd={(e) => setSplitSize(e)}
             >
                 <div
                     className='main-container'
@@ -748,7 +799,8 @@ export const DropContainer: FC<ContainerProps> = ({
                     <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
                         <TopButtons
                             openModal={openModal}
-                            credits={creditsLeft}/>
+                            credits={creditsLeft}
+                            refresh={refreshMission}/>
                         <AnimatePresence>
                             {boxes === undefined ? (<Fragment/>) : Object.keys(boxes).filter((v) => v !== undefined).map((key) => {
                                 const { left, top, element, combining, newCombining, loading, error, newDiscovery, firstDiscovery, locked } = boxes[key];
@@ -807,3 +859,14 @@ export const DropContainer: FC<ContainerProps> = ({
         </Fragment>
     );
 };
+/*
+
+                    {particleReady ? <Particles
+                        className='z-particles'
+                        id="backgroundParticles"
+                        options={currentParticles}
+                        style={{
+                            width: `${splitSize[0]}%`
+                        }}
+                    /> : <Fragment/>}
+*/

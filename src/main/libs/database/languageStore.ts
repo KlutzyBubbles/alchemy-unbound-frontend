@@ -4,16 +4,16 @@ import { getFolder } from '../steam';
 import { verifyFolder } from '../../utils';
 import baseLanguage from '../../../languages.json';
 import logger from 'electron-log/main';
-import { LanguageRecord, LanguageRecords } from '../../../common/types/saveFormat';
+import { FileVersionError, LanguageRecord, LanguageRecords } from '../../../common/types/saveFormat';
 import { saveToFile } from './helpers';
 import { hasProp } from '../../../common/utils';
-import { Language } from 'src/common/settings';
+import { Language } from '../../../common/settings';
 
 const LANG_DATABASE_VERISON = 1;
 
 export let data: LanguageRecords = {};
 
-let loadedVersion: number = -2;
+let loadedVersion: number = FileVersionError.NOT_LOADED;
 
 export function getLangDatabaseVersion(): number {
     return loadedVersion;
@@ -51,17 +51,18 @@ async function loadData(): Promise<LanguageRecords> {
         if (raw.version === 1) {
             return loadLangDatabaseV1(raw.data);
         } else {
-            loadedVersion = -1;
+            loadedVersion = FileVersionError.ERROR;
             logger.error(`Failed to load lang database because of unknown version '${raw.version}', has this been altered?`);
             throw(Error(`Failed to load lang database because of unknown version '${raw.version}', has this been altered?`));
         }
     } catch (e) {
-        loadedVersion = -2;
         if (e.code === 'ENOENT') {
             logger.info('No lang database file found, returning blank data');
+            loadedVersion = FileVersionError.DEFAULTS;
             return {};
         } else {
             logger.error(`Failed to read lang database file with error ${e.code}`);
+            loadedVersion = FileVersionError.ERROR;
             throw e;
         }
     }
@@ -71,7 +72,7 @@ export async function createLangDatabase(): Promise<void> {
     try {
         data = await loadData();
     } catch(e) {
-        loadedVersion = -2;
+        loadedVersion = FileVersionError.ERROR;
         logger.error(`Failed to load lang database '${e.message}'`);
     }
     if (Object.keys(data).length === 0) {

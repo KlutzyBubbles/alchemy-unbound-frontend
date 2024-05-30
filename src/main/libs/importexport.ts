@@ -88,7 +88,7 @@ export async function importFile(): Promise<boolean> {
         if (raw.info !== undefined) {
             foundInfo = {
                 type: raw.info.base ?? 'base',
-                expiry: raw.info.expiry
+                expires: raw.info.expires
             };
         }
         let workingVersion = database.version;

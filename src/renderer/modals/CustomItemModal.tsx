@@ -103,7 +103,7 @@ export const ItemModal: FC<ItemModalProps> = ({
                     <Modal.Title>{getFromStore('item.title', settings.language)}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
+                    <Form onSubmit={(e) => e.preventDefault()}>
                         <div className='row mb-2'>
                             <div className='col-12'>
                                 <p className='text-center'>{getFromStore('item.text', settings.language)}</p>

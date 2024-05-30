@@ -6,12 +6,13 @@ import { DEFAULT_HINT, DEFAULT_MAX_HINTS, Hint } from '../../common/hints';
 import { Compressed, compress, decompress, trimUndefinedRecursively } from 'compress-json';
 import { HINT_DLC, Recipe } from '../../common/types';
 import { data, traverseAndFill } from './database/recipeStore';
+import { FileVersionError } from '../../common/types/saveFormat';
 
 const HINT_VERISON = 1;
 
 let maxHints = DEFAULT_MAX_HINTS;
 let hint: Hint = DEFAULT_HINT;
-let loadedVersion: number = -2;
+let loadedVersion: number = FileVersionError.NOT_LOADED;
 let loaded = false;
 
 const EXCLUDED = ['piney', 'shep3rd', 'klutzybubbles', 'ango', 'uncle', 'flikz', 'tvision'];
@@ -108,7 +109,7 @@ export async function loadHint(): Promise<void> {
         if (raw.version === 1) {
             hint = loadHintV1(raw.hint);
         } else {
-            loadedVersion = -1;
+            loadedVersion = FileVersionError.ERROR;
             logger.error(`Failed to load hint because of unknown version '${raw.version}', has this been altered?`);
             throw(Error(`Failed to load hint because of unknown version '${raw.version}', has this been altered?`));
         }
@@ -120,13 +121,13 @@ export async function loadHint(): Promise<void> {
             logger.info('Hint file could not be found, initializing with default hint');
             if (hint === null || hint === undefined) {
                 hint = DEFAULT_HINT;
-                loadedVersion = -2;
+                loadedVersion = FileVersionError.DEFAULTS;
             }
         }
     }
     if (hint === null || hint === undefined) {
         hint = DEFAULT_HINT;
-        loadedVersion = -2;
+        loadedVersion = FileVersionError.DEFAULTS;
     }
 }
 
@@ -204,9 +205,13 @@ export async function getHintsLeft(): Promise<number> {
     return hint.hintsLeft;
 }
 
-export async function resetHint(): Promise<void> {
+export async function resetHint(soft: boolean = false): Promise<void> {
     logger.debug('resetHint()');
-    hint = DEFAULT_HINT;
+    if (soft) {
+        hint.hint = undefined;
+    } else {
+        hint = DEFAULT_HINT;
+    }
     await saveHint();
 }
 

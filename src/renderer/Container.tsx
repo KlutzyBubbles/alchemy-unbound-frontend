@@ -3,7 +3,8 @@ import { DropContainer } from './dragndrop/DropContainer';
 import { FC, Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { SettingsModal } from './modals/SettingsModal';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
-import { loadSlim } from '@tsparticles/slim';
+// import { loadSlim } from '@tsparticles/slim';
+import { loadAll } from '@tsparticles/all';
 import type { IOptions, RecursivePartial } from '@tsparticles/engine';
 import options from './particles';
 import { SettingsContext } from './providers/SettingsProvider';
@@ -28,7 +29,8 @@ export const ContentContainer: FC = () => {
     useEffect(() => {
         (async() => {
             await initParticlesEngine(async (engine) => {
-                await loadSlim(engine);
+                //await loadSlim(engine);
+                await loadAll(engine);
             });
             setParticleReady(true);
         })();
@@ -39,7 +41,8 @@ export const ContentContainer: FC = () => {
             setParticleReady(false);
             setCurrentParticles(options[settings.background](settings.theme, settings.fps));
             await initParticlesEngine(async (engine) => {
-                await loadSlim(engine);
+                //await loadSlim(engine);
+                await loadAll(engine);
             });
             setParticleReady(true);
         })();

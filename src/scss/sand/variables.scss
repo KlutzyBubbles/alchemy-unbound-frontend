@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $theme: "light" !default;
 
 //
@@ -59,6 +61,17 @@ $theme-fg-darkened: #363126;
 $body-bg:                   $theme-bg !default;
 $body-color:                $theme-fg !default;
 
+$body-color-shadow-1: color.scale($body-color, $lightness: 10%);
+$body-color-shadow-2: color.scale($body-color, $lightness: 20%);
+$body-color-shadow-3: color.scale($body-color, $lightness: 30%);
+$body-color-shadow-4: color.scale($body-color, $lightness: 40%);
+$body-color-shadow-5: color.scale($body-color, $lightness: 50%);
+// $body-color-shadow-1: color.scale($body-color, $lightness: -10%);
+// $body-color-shadow-2: color.scale($body-color, $lightness: -20%);
+// $body-color-shadow-3: color.scale($body-color, $lightness: -30%);
+// $body-color-shadow-4: color.scale($body-color, $lightness: -40%);
+// $body-color-shadow-5: color.scale($body-color, $lightness: -50%);
+
 $body-secondary-color:      rgba($body-color, .75) !default;
 $body-secondary-bg:         $theme-fg !default;
 
@@ -107,7 +120,7 @@ $link-color:                              $white !default;
 
 // Components
 
-$border-color:                rgba($white, .2) !default;
+$border-color:                $theme-fg-darkened !default;
 $border-color-translucent:    rgba($black, .175) !default;
 
 $box-shadow:                  1px 3px 24px -1px rgba($black, .15) !default;
@@ -169,14 +182,13 @@ $input-border-width:                    1px !default;
 $input-focus-border-color:              $input-border-color !default;
 $input-focus-box-shadow:                none !default;
 
-$input-placeholder-color:               $text-muted !default;
+$input-placeholder-color:               $body-color;
 
 $input-color:                           $body-color;
 $input-focus-bg:                        $input-bg;
 $input-focus-border-color:              rgba($body-color, .4);
 $input-focus-color:                     $input-color;
 
-$input-placeholder-color:               $secondary;
 $input-plaintext-color:                 $body-color;
 
 $form-select-disabled-color:        $input-placeholder-color !default;

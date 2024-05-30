@@ -64,14 +64,14 @@ export const ThemeButton: FC<ThemeButtonProps> = ({
 
     return (
         <div className='col-12 col-lg-4 d-flex align-items-stretch'>
-            <div className={`card theme-${name}`}>
-                <img src='image://sand.png' className='card-img-top' alt='Sand'/>
+            <div className={`card theme-${name} w-100`}>
+                <img src={`image://${id}/title.png`} className='card-img-top p-3' alt='Sand'/>
                 <div className='card-body d-flex flex-column'>
                     <ItemRenderer
                         theme={name}
                         element={mockElement({
                             name: name,
-                            display: getObjectFromStore(`store.titles.${id}`, settings.language),
+                            display: getObjectFromStore(`store.titles.${id}`, id),
                             emoji: emoji,
                             depth: 0,
                             first: 0,

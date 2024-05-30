@@ -2,13 +2,16 @@ import { IOptions, RecursivePartial } from '@tsparticles/engine';
 import { getColor } from '../utils/theme';
 import { ThemeType } from '../../common/settings';
 
-export const beachOptions: (theme: ThemeType, fps: number) => RecursivePartial<IOptions> = (theme: ThemeType, fps: number) => {
+export const beachOptions: (theme: ThemeType, fps: number, width?: number) => RecursivePartial<IOptions> = (theme: ThemeType, fps: number, width?: number) => {
     return {
         fpsLimit: fps,
         background: {
             color: {
                 value: getColor('background', theme),
             },
+        },
+        style: {
+            width: width === undefined ? '100%' : `${width}%`
         },
         interactivity: {
             detectsOn: 'window',
@@ -20,6 +23,9 @@ export const beachOptions: (theme: ThemeType, fps: number) => RecursivePartial<I
                 onClick: {
                     enable: true,
                     mode: 'repulse'
+                },
+                resize: {
+                    enable: true
                 }
             },
             modes: {
@@ -57,7 +63,7 @@ export const beachOptions: (theme: ThemeType, fps: number) => RecursivePartial<I
                 }
             },
             opacity: {
-                value: 0.7,
+                value: 0.85,
             },
             size: {
                 value: 75,

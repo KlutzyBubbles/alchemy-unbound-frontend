@@ -19,7 +19,8 @@ export enum ServerChannel {
     FINALIZE_TRANSACTION = 'server:finalizeTransaction',
     GET_USER_INFO = 'server:getUserInfo',
     CHECK_DLC = 'server:checkDLC',
-    RESTORE_PURCHASES = 'server:restore'
+    RESTORE_PURCHASES = 'server:restore',
+    GET_MISSION = 'server:getMission'
 }
 
 export enum ErrorChannel {

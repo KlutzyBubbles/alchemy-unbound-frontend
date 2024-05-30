@@ -52,4 +52,38 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '',
         koreana: ''
     },
+    themeBlue: {
+        english: 'Sky-ey theme for people who are high',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
+    },
+    themePink: {
+        english: 'Blossom very kawaii',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
+    },
 };

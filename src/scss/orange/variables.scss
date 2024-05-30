@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $theme: "light" !default;
 
 //
@@ -52,12 +54,23 @@ $dark:          $gray-900 !default;
 $min-contrast-ratio:   1.5 !default;
 
 // Body
-$theme-bg: #55030c;
-$theme-fg: #f48c06;
-$theme-fg-darkened: #e85d04;
+$theme-bg: #ff834c;
+$theme-fg: #a43e00;
+$theme-fg-darkened: #c50e00;
 
 $body-bg:                   $theme-bg !default;
 $body-color:                $theme-fg !default;
+
+$body-color-shadow-1: color.scale($body-color, $lightness: 10%);
+$body-color-shadow-2: color.scale($body-color, $lightness: 20%);
+$body-color-shadow-3: color.scale($body-color, $lightness: 30%);
+$body-color-shadow-4: color.scale($body-color, $lightness: 40%);
+$body-color-shadow-5: color.scale($body-color, $lightness: 50%);
+// $body-color-shadow-1: color.scale($body-color, $lightness: -10%);
+// $body-color-shadow-2: color.scale($body-color, $lightness: -20%);
+// $body-color-shadow-3: color.scale($body-color, $lightness: -30%);
+// $body-color-shadow-4: color.scale($body-color, $lightness: -40%);
+// $body-color-shadow-5: color.scale($body-color, $lightness: -50%);
 
 $body-secondary-color:      rgba($body-color, .75) !default;
 $body-secondary-bg:         $theme-fg !default;
@@ -66,12 +79,12 @@ $body-tertiary-color:       rgba($body-color, .5) !default;
 $body-tertiary-bg:          $gray-100 !default;
 $body-emphasis-color:       $body-color !default;
 
-$alt-bg: #4a030a;
+$alt-bg: #a43e00;
 $alt-fg: $theme-fg;
 
 $side-bg:                           $alt-bg;
 $side-color:                        $theme-fg;
-$side-element-bg:                   #370617;
+$side-element-bg:                   #ff834c;
 $side-element-color:                $side-color;
 $side-element-border-color:         $side-color;
 $side-element-bg-hover:             $side-color;
@@ -79,12 +92,12 @@ $side-element-color-hover:          $side-element-bg;
 $side-element-border-color-hover:   $side-color;
 $side-button-bg:                    $alt-bg;
 $side-button-color:                 $side-color;
-$side-button-bg-hover:              #370617;
+$side-button-bg-hover:              #ff834c;
 $side-button-color-hover:           $side-color;
 
 $main-bg:                                   $theme-bg;
 $main-color:                                $theme-fg;
-$main-element-bg:                           #370617;
+$main-element-bg:                           #ff834c;
 $main-element-color:                        $main-color;
 $main-element-border-color:                 $main-color;
 $main-element-bg-hover:                     $main-color;
@@ -176,7 +189,6 @@ $input-focus-bg:                        $input-bg;
 $input-focus-border-color:              rgba($body-color, .4);
 $input-focus-color:                     $input-color;
 
-$input-placeholder-color:               $secondary;
 $input-plaintext-color:                 $body-color;
 
 $form-select-disabled-color:        $input-placeholder-color !default;

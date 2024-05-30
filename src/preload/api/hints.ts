@@ -23,7 +23,7 @@ contextBridge.exposeInMainWorld(HintAPIName, {
     saveHint: () => ipcRenderer.invoke(HintChannel.SAVE),
     getMaxHints: () => ipcRenderer.invoke(HintChannel.GET_MAX),
     getHintsLeft: () => ipcRenderer.invoke(HintChannel.GET_LEFT),
-    resetHint: () => ipcRenderer.invoke(HintChannel.RESET),
+    resetHint: (soft?: boolean) => ipcRenderer.invoke(HintChannel.RESET, soft),
     hintComplete: () => ipcRenderer.invoke(HintChannel.COMPLETE),
     fillHints: () => ipcRenderer.invoke(HintChannel.FILL),
 });

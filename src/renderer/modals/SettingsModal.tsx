@@ -266,7 +266,7 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Form>
+                    <Form onSubmit={(e) => e.preventDefault()}>
                         <div className='row'>
                             <div className='col-6 col-md-5 col-lg-3'>
                                 <div className="form-check form-switch form-switch-lg">

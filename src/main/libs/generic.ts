@@ -5,6 +5,8 @@ import { getHintVersion } from './hints';
 import { getDatabaseInfo, getDatabaseVersion } from './database/recipeStore';
 import { getSettingsVersion } from './settings';
 import { getWorkingDatabase } from './database/workingName';
+import { getMissionDBVersion } from './database/missionStore';
+import { FileVersionError } from '../../common/types/saveFormat';
 
 export function getAppVersions(): AppVersions {
     return {
@@ -19,9 +21,10 @@ export async function getFileVersions(): Promise<FileVersions> {
     return {
         database: getDatabaseVersion(),
         hint: getHintVersion(),
-        stats: -1,
+        stats: FileVersionError.NO_VERSION,
         settings: getSettingsVersion(),
-        databaseInfo: getDatabaseInfo(),
+        mission: getMissionDBVersion(),
+        databaseInfo: await getDatabaseInfo(),
         databaseName: await getWorkingDatabase()
     };
 }

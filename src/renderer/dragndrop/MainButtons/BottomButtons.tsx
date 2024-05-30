@@ -43,7 +43,7 @@ export const BottomButton: FC<BottomButtonProps> = ({
 
     return (
         <div className='footer mt-auto z-mainButtons'>
-            <div className='btn btn-clear float-start mb-2 fs-1 d-flex p-2' onClick={clearAll}><IoTrashOutline /></div>
+            <div className='btn btn-clear float-start mb-2 ms-2 fs-1 d-flex p-2' onClick={clearAll}><IoTrashOutline /></div>
             <HintButton refreshProp={refreshHint} />
             {isProduction ? (<Fragment/>) : (
                 <div className='btn btn-info float-end mb-2 fs-2 d-flex p-2' onClick={devClick}><IoBandageOutline /></div>

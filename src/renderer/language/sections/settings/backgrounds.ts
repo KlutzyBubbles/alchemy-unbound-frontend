@@ -70,4 +70,38 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '',
         koreana: ''
     },
+    themePink: {
+        english: 'Leaves',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
+    },
+    themeBlue: {
+        english: 'Clouds',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
+    },
 };

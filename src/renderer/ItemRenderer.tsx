@@ -20,6 +20,7 @@ export type ItemRendererProps = {
     top?: number
     left?: number
     theme?: string
+    'data-bs-toggle'?: string
     onHoverEnd?: (event: MouseEvent) => void
     onHoverStart?: (event: MouseEvent) => void
     onContextMenu?: MouseEventHandler<HTMLDivElement>
@@ -198,6 +199,7 @@ export const ItemRenderer = React.forwardRef<HTMLInputElement, ItemRendererProps
             variants={variants}
             animate={animate}
             exit={exit}
+            data-bs-toggle={props['data-bs-toggle']}
             style={{
                 ...(type === ItemTypes.MAIN_ELEMENT || type === ItemTypes.LOCKED_ELEMENT ? getMainStyles(left, top, dragging, locked) : {}),
                 ...(dragging ? getItemStyles(initialOffset, currentOffset) : {}),

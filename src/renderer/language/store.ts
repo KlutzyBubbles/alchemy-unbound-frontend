@@ -43,7 +43,7 @@ export const LanguageStore: LanguageStoreRecurring = {
         koreana: '힌트 포인트 사용하려면 클릭하세요'
     },
     creditsLeft: {
-        english: 'Credits Left',
+        english: 'Credits',
         schinese: '',
         russian: '',
         spanish: '',

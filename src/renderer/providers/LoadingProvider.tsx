@@ -30,7 +30,10 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
         (async () => {
             if (loading) {
                 try {
-                    setFileVersions(await window.GenericAPI.getFileVersions());
+                    logger.info('Loading file versions');
+                    const versions = await window.GenericAPI.getFileVersions();
+                    logger.info('file versions loaded', versions);
+                    setFileVersions(versions);
                 } catch (e) {
                     logger.error('Failed to load file versions', e);
                 }

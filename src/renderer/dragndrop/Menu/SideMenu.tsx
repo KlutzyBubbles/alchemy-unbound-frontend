@@ -1,4 +1,4 @@
-import { FC, useContext, useEffect, useRef, useState } from 'react';
+import { FC, Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { IoAlertCircleOutline, IoCartOutline, IoCheckmarkOutline, IoDownloadOutline, IoExitOutline, IoPulseOutline, IoSaveOutline, IoSettingsOutline, IoStatsChartOutline, IoSwapHorizontalOutline } from 'react-icons/io5';
 import { motion, useAnimation } from 'framer-motion';
 import { ModalOption } from '../../Container';
@@ -8,10 +8,11 @@ import { SoundContext } from '../../providers/SoundProvider';
 import { SettingsContext } from '../../providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { UpdateContext } from '../../providers/UpdateProvider';
-import * as bootstrap from 'bootstrap';
-import { DatabaseType } from 'src/common/types/saveFormat';
+import { DatabaseType } from '../../../common/types/saveFormat';
 import { MenuModalItem } from './MenuModalItem';
 import { Recipe } from './Recipe';
+import { closeCanvas } from '../..//utils/dom';
+import { InfoContext } from '../../providers/InfoProvider';
 
 export interface SideMenuProps {
     openModal: (option: ModalOption) => void
@@ -23,7 +24,9 @@ export const SideMenu: FC<SideMenuProps> = ({
     const { settings } = useContext(SettingsContext);
     const { playSound } = useContext(SoundContext);
     const { setShouldUpdate } = useContext(UpdateContext);
+    const { fileVersions } = useContext(InfoContext);
     const [errorText, setErrorText] = useState<string>('');
+    const [switchOpen, setSwitchOpen] = useState<boolean>(false);
     const [successText, setSuccessText] = useState<string>('');
     const [importOrExport, setImportOrExport] = useState<string>('');
     const ioTimerRef = useRef<NodeJS.Timeout>(undefined);
@@ -38,7 +41,7 @@ export const SideMenu: FC<SideMenuProps> = ({
 
     const onSettingsMouseEnter = () => {
         settingsControls.start('start');
-        playSound('click2', 0.8);
+        playSound('click2', 0.5);
     };
 
     const onSettingsMouseLeave = () => {
@@ -46,7 +49,7 @@ export const SideMenu: FC<SideMenuProps> = ({
     };
 
     const onMouseOver = () => {
-        playSound('click2', 0.8);
+        playSound('click2', 0.5);
     };
 
     const exportFile = async () => {
@@ -172,27 +175,32 @@ export const SideMenu: FC<SideMenuProps> = ({
         return icon;
     };
 
-    const closeCanvas = () => {
-        const myOffCanvas = document.getElementById('sideMenu');
-        const openedCanvas = bootstrap.Offcanvas.getInstance(myOffCanvas);
-        openedCanvas?.hide();
-    };
-
     const optionClick = () => {
         closeCanvas();
         openModal('settings');
     };
 
     const switchClick = async () => {
+        setSwitchOpen(!switchOpen);
+        // closeCanvas();
+        // const versions = await window.GenericAPI.getFileVersions();
+        // let newType: DatabaseType = 'base';
+        // let newDb = 'db';
+        // if (versions.databaseInfo.type === 'base') {
+        //     newType = 'custom';
+        //     newDb = 'custom';
+        // }
+        // await window.ProfileAPI.switchProfile(newDb, { type: newType });
+        // setShouldUpdate(true);
+    };
+
+    const switchProfile = async (type: DatabaseType) => {
         closeCanvas();
-        const versions = await window.GenericAPI.getFileVersions();
-        let newType: DatabaseType = 'base';
-        let newDb = 'db';
-        if (versions.databaseInfo.type === 'base') {
-            newType = 'custom';
-            newDb = 'custom';
+        let newDb: string = type;
+        if (type === 'base') {
+            newDb = 'db';
         }
-        await window.ProfileAPI.switchProfile(newDb, { type: newType });
+        await window.ProfileAPI.switchProfile(newDb, { type });
         setShouldUpdate(true);
     };
 
@@ -232,7 +240,8 @@ export const SideMenu: FC<SideMenuProps> = ({
                     <div className='my-3'/>
                     <li className="nav-item btn btn-no-radius btn-left-hover"
                         onMouseEnter={onMouseOver}
-                        onClick={switchClick}>
+                        onClick={switchClick}
+                        data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                         <div className="nav-link d-flex">
                             <div className='mx-auto pt-half'>
                                 <h2 className='m-0'>{getFromStore('menu.switch', settings.language)}</h2>
@@ -243,26 +252,72 @@ export const SideMenu: FC<SideMenuProps> = ({
                             </div>
                         </div>
                     </li>
-                    <li className="nav-item btn btn-no-radius btn-left-hover"
-                        onMouseEnter={onMouseOver}
-                        onClick={exportFile}>
-                        <div className="nav-link d-flex">
-                            <div className='mx-auto pt-half'>
-                                <h2 className='m-0'>{getFromStore('settings.buttons.export', settings.language)}</h2>
+                    <div className="collapse" id="collapseExample">
+                        <div>
+                            <div className='row mx-0'>
+                                <div className="col-6 nav-item btn btn-no-radius btn-left-hover"
+                                    onMouseEnter={onMouseOver}
+                                    onClick={() => switchProfile('base')}>
+                                    <div className="nav-link d-flex">
+                                        <div className='mx-auto pt-half'>
+                                            <h2 className='m-0'>{getFromStore('saves.baseButton', settings.language)}</h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-6 nav-item btn btn-no-radius btn-right-hover"
+                                    onMouseEnter={onMouseOver}
+                                    onClick={() => switchProfile('custom')}>
+                                    <div className="nav-link d-flex">
+                                        <div className='mx-auto pt-half'>
+                                            <h2 className='m-0'>{getFromStore('saves.customButton', settings.language)}</h2>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            {exportIcon()}
-                        </div>
-                    </li>
-                    <li className="nav-item btn btn-no-radius btn-left-hover"
-                        onMouseEnter={onMouseOver}
-                        onClick={importFile}>
-                        <div className="nav-link d-flex">
-                            <div className='mx-auto pt-half'>
-                                <h2 className='m-0'>{getFromStore('settings.buttons.import', settings.language)}</h2>
+                            <div className='row mx-0 mb-3'>
+                                <div className="col-6 nav-item btn btn-no-radius btn-left-hover"
+                                    onMouseEnter={onMouseOver}
+                                    onClick={() => switchProfile('daily')}>
+                                    <div className="nav-link d-flex">
+                                        <div className='mx-auto pt-half'>
+                                            <h2 className='m-0'>{getFromStore('saves.dailyButton', settings.language)}</h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-6 nav-item btn btn-no-radius btn-right-hover"
+                                    onMouseEnter={onMouseOver}
+                                    onClick={() => switchProfile('weekly')}>
+                                    <div className="nav-link d-flex">
+                                        <div className='mx-auto pt-half'>
+                                            <h2 className='m-0'>{getFromStore('saves.weeklyButton', settings.language)}</h2>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            {importIcon()}
                         </div>
-                    </li>
+                    </div>
+                    {fileVersions.databaseInfo.type === 'base' ? <Fragment>
+                        <li className="nav-item btn btn-no-radius btn-left-hover"
+                            onMouseEnter={onMouseOver}
+                            onClick={exportFile}>
+                            <div className="nav-link d-flex">
+                                <div className='mx-auto pt-half'>
+                                    <h2 className='m-0'>{getFromStore('settings.buttons.export', settings.language)}</h2>
+                                </div>
+                                {exportIcon()}
+                            </div>
+                        </li>
+                        <li className="nav-item btn btn-no-radius btn-left-hover"
+                            onMouseEnter={onMouseOver}
+                            onClick={importFile}>
+                            <div className="nav-link d-flex">
+                                <div className='mx-auto pt-half'>
+                                    <h2 className='m-0'>{getFromStore('settings.buttons.import', settings.language)}</h2>
+                                </div>
+                                {importIcon()}
+                            </div>
+                        </li>
+                    </Fragment> : <Fragment />}
                 </ul>
             </div>
             <div className='footer mt-auto'>
@@ -330,3 +385,28 @@ export const SideMenu: FC<SideMenuProps> = ({
         </div>
     );
 };
+
+/*
+
+                    <Collapse in={switchOpen}>
+                        <Fragment>
+                            <div>
+                                <div className='row'>
+                                    <div className="col-6 nav-item btn btn-no-radius btn-left-hover"
+                                        onMouseEnter={onMouseOver}
+                                        onClick={switchClick}>
+                                        <div className="nav-link d-flex">
+                                            <div className='mx-auto pt-half'>
+                                                <h2 className='m-0'>{getFromStore('menu.switch', settings.language)}</h2>
+                                            </div>
+                                            <div
+                                                className='float-end fs-2 d-flex p-2'>
+                                                <IoSwapHorizontalOutline />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </Fragment>
+                    </Collapse>
+*/

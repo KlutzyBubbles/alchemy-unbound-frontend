@@ -13,6 +13,7 @@ import { DatabaseData, FileVersionError, RecipeRecord, RecipeRecordV3 } from '..
 import { getKeyByLanguage, getLanguage, getLanguageKeys, insertLanguage } from './languageStore';
 import { getWorkingDatabase } from './workingName';
 import { validateItems } from '../server';
+import { hasProp } from '../../../common/utils';
 
 const DATABASE_VERISON = 4;
 
@@ -21,7 +22,7 @@ export let serverVersion: number = 1;
 let info: DatabaseData = {
     type: 'base'
 };
-let loadedVersion: number = -2;
+let loadedVersion: number = FileVersionError.NOT_LOADED;
 let databaseOrder = 0;
 
 export function getDatabaseVersion(): number {
@@ -38,7 +39,11 @@ export function setServerVersion(version: number) {
     serverVersion = version;
 }
 
-export function getDatabaseInfo() {
+export async function getDatabaseInfo() {
+    logger.silly('getDatabaseInfo', info, loadedVersion);
+    if (loadedVersion === FileVersionError.NOT_LOADED) {
+        await createDatabase();
+    }
     return info;
 }
 
@@ -244,14 +249,18 @@ export async function checkLanguages(recipes: RecipeRecord[]): Promise<RecipeRec
     for (const chunk of chunkArray(needToCheck, 100)) {
         try {
             const validatedResponse = await validateItems(chunk);
+            logger.silly('Validation response', validatedResponse);
             if (validatedResponse === undefined) {
                 continue;
             } else if (validatedResponse.type === 'error') {
                 continue;
             } else {
-                for (const lang of validatedResponse.result.languages) {
-                    await insertLanguage(lang.name, lang, true);
-                    validated.push(lang.name);
+                // V1 doesnt return languages
+                if (hasProp(validatedResponse.result, 'languages')) {
+                    for (const lang of validatedResponse.result.languages) {
+                        await insertLanguage(lang.name, lang, true);
+                        validated.push(lang.name);
+                    }
                 }
                 for (const item of chunk) {
                     if (!validatedResponse.result.items.includes(item)) {
@@ -288,10 +297,12 @@ function chunkArray(array: string[], chunkSize: number): string[][] {
 }
 
 async function loadData(override?: DatabaseData): Promise<RecipeRecord[]> {
-    logger.silly('loadData()');
+    logger.silly('loadData()', override);
     try {
         //`${getFolder()}database/${await getWorkingDatabase()}.json`
-        const newPath = `${getFolder()}database/${await getWorkingDatabase()}.json`;
+        const working = await getWorkingDatabase();
+        logger.silly('Loading from working', working);
+        const newPath = `${getFolder()}database/${working}.json`;
         const oldPath = getFolder() + await getWorkingDatabase() + '.json';
         let raw = undefined;
         try {
@@ -320,18 +331,20 @@ async function loadData(override?: DatabaseData): Promise<RecipeRecord[]> {
         } else {
             loadedVersion = 0;
         }
-        logger.info('raw', raw);
+        logger.info('raw', raw.version);
         let workingVersion = raw.version;
         let workingData = raw.data;
         let foundInfo: DatabaseData = {
             type: 'base'
         };
         if (raw.info !== undefined) {
+            logger.silly('raw info good', raw.info);
             foundInfo = {
-                type: raw.info.base ?? 'base',
-                expiry: raw.info.expiry
+                type: raw.info.type ?? 'base',
+                expires: raw.info.expires
             };
         }
+        logger.silly('Setting info', info, foundInfo, raw.info);
         info = foundInfo;
         const workingInfo = override === undefined ? foundInfo : override;
         if (workingVersion === 1) {
@@ -351,7 +364,7 @@ async function loadData(override?: DatabaseData): Promise<RecipeRecord[]> {
         }
         if (workingVersion === 4) {
             logger.info('Found v4, loading...');
-            if (workingInfo.type !== 'base') {
+            if (workingInfo.type === 'custom') {
                 return await checkLanguages(await noFill(workingData));
             }
             return await checkLanguages(await fillWithBase(workingData));
@@ -362,20 +375,21 @@ async function loadData(override?: DatabaseData): Promise<RecipeRecord[]> {
             throw(Error(`Failed to load database because of unknown version '${raw.version}', has this been altered?`));
         }
     } catch (e) {
-        loadedVersion = FileVersionError.ERROR;
         serverVersion = LATEST_SERVER_VERSION;
         if (e.code === 'ENOENT') {
             logger.info('No database file found, returning blank data');
+            loadedVersion = FileVersionError.DEFAULTS;
             return [];
         } else {
             logger.error(`Failed to read database file with error ${e.code}`);
+            loadedVersion = FileVersionError.ERROR;
             throw e;
         }
     }
 }
 
 export async function createDatabase(override?: DatabaseData): Promise<void> {
-    logger.silly('createDatabase()');
+    logger.silly('createDatabase()', override, loadedVersion);
     try {
         // RELEASE --------------------------
         await verifyFolder();
@@ -412,6 +426,7 @@ export async function createDatabase(override?: DatabaseData): Promise<void> {
         }
         await save();
     }
+    logger.silly('Information loaded', data.length, info, loadedVersion, serverVersion);
     setDatabaseOrder();
 }
 
@@ -427,7 +442,7 @@ export async function resetAndBackup(prefix = 'db_backup_'): Promise<void> {
     serverVersion = LATEST_SERVER_VERSION;
     await save();
     setDatabaseOrder();
-    await resetHint();
+    await resetHint(true);
 }
 
 export async function reset(): Promise<void> {
@@ -441,7 +456,7 @@ export async function reset(): Promise<void> {
     serverVersion = LATEST_SERVER_VERSION;
     await save();
     setDatabaseOrder();
-    await resetHint();
+    await resetHint(true);
 }
 
 function setDatabaseOrder() {

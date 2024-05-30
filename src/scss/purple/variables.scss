@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $theme: "light" !default;
 
 //
@@ -58,6 +60,17 @@ $theme-fg-darkened: #5a189a;
 
 $body-bg:                   $theme-bg !default;
 $body-color:                $theme-fg !default;
+
+$body-color-shadow-1: color.scale($body-color, $lightness: 10%);
+$body-color-shadow-2: color.scale($body-color, $lightness: 20%);
+$body-color-shadow-3: color.scale($body-color, $lightness: 30%);
+$body-color-shadow-4: color.scale($body-color, $lightness: 40%);
+$body-color-shadow-5: color.scale($body-color, $lightness: 50%);
+// $body-color-shadow-1: color.scale($body-color, $lightness: -10%);
+// $body-color-shadow-2: color.scale($body-color, $lightness: -20%);
+// $body-color-shadow-3: color.scale($body-color, $lightness: -30%);
+// $body-color-shadow-4: color.scale($body-color, $lightness: -40%);
+// $body-color-shadow-5: color.scale($body-color, $lightness: -50%);
 
 $body-secondary-color:      rgba($body-color, .75) !default;
 $body-secondary-bg:         $theme-fg !default;
@@ -176,7 +189,6 @@ $input-focus-bg:                        $input-bg;
 $input-focus-border-color:              rgba($body-color, .4);
 $input-focus-color:                     $input-color;
 
-$input-placeholder-color:               $secondary;
 $input-plaintext-color:                 $body-color;
 
 $form-select-disabled-color:        $input-placeholder-color !default;

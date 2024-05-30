@@ -30,6 +30,18 @@ const sandTheme: Theme = {
     primary: '0d6efd'
 };
 
+const blueTheme: Theme = {
+    background: '9dd5ff',
+    foreground: 'e3f6ff',
+    primary: '0d6efd'
+};
+
+const pinkTheme: Theme = {
+    background: 'fdb1dd',
+    foreground: '5f416d',
+    primary: 'ed609e'
+};
+
 const purpleTheme: Theme = {
     background: '240046',
     foreground: 'c77dff',
@@ -37,8 +49,8 @@ const purpleTheme: Theme = {
 };
 
 const orangeTheme: Theme = {
-    background: '55030c',
-    foreground: 'f48c06',
+    background: 'ff834c',
+    foreground: 'a43e00',
     primary: '5A78AB'
 };
 
@@ -53,6 +65,10 @@ export function getColor(color: ColorType, theme: ThemeType): string {
         return purpleTheme[color];
     } else if (theme === 'themeOrange') {
         return orangeTheme[color];
+    } else if (theme === 'themeBlue') {
+        return blueTheme[color];
+    } else if (theme === 'themePink') {
+        return pinkTheme[color];
     }
     return lightTheme[color];
 }
@@ -64,6 +80,14 @@ export function getLegacyColor(theme: ThemeType): LegacyColor {
         return 'dark';
     } else if (theme === 'supporter') {
         return 'dark';
+    } else if (theme === 'themePurple') {
+        return 'dark';
+    } else if (theme === 'themeOrange') {
+        return 'dark';
+    } else if (theme === 'themeSand') {
+        return 'light';
+    } else if (theme === 'themeBlue') {
+        return 'light';
     } else {
         return 'light';
     }

@@ -12,6 +12,7 @@ export interface CreditButtonProps {
     setErrorText: Dispatch<SetStateAction<string>>
     setSuccessText: Dispatch<SetStateAction<string>>
     setLoading: Dispatch<SetStateAction<boolean>>
+    refreshValues: () => void
 }
 
 export const CreditButton: FC<CreditButtonProps> = ({
@@ -19,7 +20,8 @@ export const CreditButton: FC<CreditButtonProps> = ({
     id,
     setErrorText,
     setSuccessText,
-    setLoading
+    setLoading,
+    refreshValues
 }) => {
     const { settings } = useContext(SettingsContext);
 
@@ -40,6 +42,7 @@ export const CreditButton: FC<CreditButtonProps> = ({
                         getFromStore('errors.unknownError', settings.language));
                 } else {
                     setSuccessText(getFromStore('store.purchased', settings.language));
+                    refreshValues();
                 }
             }
         } catch (e) {
@@ -51,11 +54,11 @@ export const CreditButton: FC<CreditButtonProps> = ({
 
     return (
         <div className='col-12 mt-3'>
-            <div className={`card credit-${name}`}>
+            <div className={`card credit-card credit-${id} credit-${name}`}>
                 <div className='card-body d-flex flex-column'>
                     <div className='row'>
                         <div className='col-7 col-lg-9 col-xl-10'>
-                            <h1>{name} {getFromStore('store.titles.credits', settings.language)}</h1>
+                            <h1 className='title'>{name} {getFromStore('store.titles.credits', settings.language)}</h1>
                         </div>
                         <div className='col-5 col-lg-3 col-xl-2 d-grid'>
                             <div className='btn btn-success btn-lg' onClick={() => purchaseCredit(id)}>

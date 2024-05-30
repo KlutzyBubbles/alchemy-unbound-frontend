@@ -3,12 +3,13 @@ import { getFolder, getSteamGameLanguage } from './steam';
 import { verifyFolder } from '../utils';
 import { DEFAULT_SETTINGS, RawSettings, Settings } from '../../common/settings';
 import logger from 'electron-log/main';
+import { FileVersionError } from '../../common/types/saveFormat';
 
 const SETTINGS_VERISON = 3;
 
 let settings: Settings = DEFAULT_SETTINGS;
 let loaded = false;
-let loadedVersion: number = -2;
+let loadedVersion: number = FileVersionError.NOT_LOADED;
 
 export function getSettingsVersion(): number {
     return loadedVersion;
@@ -72,7 +73,7 @@ export async function loadSettings(): Promise<void> {
             loadV3(raw.settings);
             loaded = true;
         } else {
-            loadedVersion = -1;
+            loadedVersion = FileVersionError.ERROR;
             logger.error(`Failed to load settings because of unknown version '${raw.version}', has this been altered?`);
         }
     } catch(e) {
@@ -82,7 +83,7 @@ export async function loadSettings(): Promise<void> {
             logger.info('Settings file could not be found, initializing with default settings');
             if (settings === null || settings === undefined) {
                 settings = DEFAULT_SETTINGS;
-                loadedVersion = -2;
+                loadedVersion = FileVersionError.DEFAULTS;
             }
             settings.language = getSteamGameLanguage();
         }
@@ -90,7 +91,7 @@ export async function loadSettings(): Promise<void> {
     if (settings === null || settings === undefined) {
         logger.warn('Failed to load settings, using defaults');
         settings = DEFAULT_SETTINGS;
-        loadedVersion = -2;
+        loadedVersion = FileVersionError.DEFAULTS;
     }
 }
 

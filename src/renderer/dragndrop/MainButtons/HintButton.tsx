@@ -11,7 +11,8 @@ import { DEFAULT_HINT, DEFAULT_MAX_HINTS } from '../../../common/hints';
 import logger from 'electron-log/renderer';
 import { SettingsContext } from '../../providers/SettingsProvider';
 import { Overlay } from 'react-bootstrap';
-import { IoHelpOutline } from 'react-icons/io5';
+import { IoHelpOutline, IoRefreshOutline } from 'react-icons/io5';
+import { InfoContext } from '../../providers/InfoProvider';
 
 export interface HintButtonProps {
     refreshProp: number
@@ -28,6 +29,7 @@ export const HintButton: FC<HintButtonProps> = ({
     const [showTooltip, setShowTooltip] = useState<boolean>(true);
     const { settings } = useContext(SettingsContext);
     const tooltipRef = useRef(undefined);
+    const { fileVersions } = useContext(InfoContext);
 
     const refresh = async () => {
         try {
@@ -84,10 +86,21 @@ export const HintButton: FC<HintButtonProps> = ({
         setHovered(false);
     };
 
+    const resetHint = async () => {
+        await window.HintAPI.resetHint(true);
+        setCurrentHint(undefined);
+        setShowTooltip(false);
+        setHintOpen(false);
+    };
+
+    if (fileVersions.databaseInfo.type === 'custom') {
+        return <Fragment />;
+    }
+
     return (
         <Fragment>
             <div
-                className="hint-drop dropstart float-end mb-2 fs-1"
+                className="hint-drop dropstart float-end mb-2 me-2 fs-1"
                 ref={tooltipRef}
                 data-bs-display="static"
                 onMouseEnter={onHoverStart}
@@ -114,9 +127,9 @@ export const HintButton: FC<HintButtonProps> = ({
                         {hintPoints}/{maxHints}
                     </span>
                 </button>
-                <div className={`dropdown-menu ${ hintOpen ? 'show' : '' }`}>
+                <div className={`dropdown-menu ${ hintOpen ? 'show' : '' } overflow-visible`}>
                     {currentHint === undefined ? (
-                        <div className='dropdown-item'>
+                        <div className='dropdown-item text-body disabled'>
                             <ItemRenderer
                                 element={mockElement({
                                     name: '?',
@@ -157,30 +170,41 @@ export const HintButton: FC<HintButtonProps> = ({
                                 dragging={false}/>
                         </div>
                     ) : (
-                        <div className='dropdown-item'>
-                            <ItemRenderer
-                                element={mockElement(currentHint.a)}
-                                type={ItemTypes.RECIPE_ELEMENT}
-                                dragging={false}/>
-                            <span className='fs-3'>+</span>
-                            <ItemRenderer
-                                element={mockElement({
-                                    name: '?',
-                                    display: getPlaceholderLanguage('?'),
-                                    emoji: '❓',
-                                    depth: 0,
-                                    first: 0,
-                                    who_discovered: '',
-                                    base: 1
-                                })}
-                                type={ItemTypes.RECIPE_ELEMENT}
-                                dragging={false}/>
-                            <span className='fs-3'>=</span>
-                            <ItemRenderer
-                                element={mockElement(currentHint)}
-                                type={ItemTypes.RECIPE_ELEMENT}
-                                dragging={false}/>
-                        </div>
+                        <Fragment>
+                            <div className='dropdown-item text-body'>
+                                <div
+                                    className='badge btn btn-danger rounded-pill float-start fs-6 position-fixed m-0'
+                                    onClick={resetHint}
+                                    style={{
+                                        left: '-1.5rem',
+                                        bottom: '1.2rem'
+                                    }}>
+                                    <IoRefreshOutline />
+                                </div>
+                                <ItemRenderer
+                                    element={mockElement(currentHint.a)}
+                                    type={ItemTypes.RECIPE_ELEMENT}
+                                    dragging={false}/>
+                                <span className='fs-3'>+</span>
+                                <ItemRenderer
+                                    element={mockElement({
+                                        name: '?',
+                                        display: getPlaceholderLanguage('?'),
+                                        emoji: '❓',
+                                        depth: 0,
+                                        first: 0,
+                                        who_discovered: '',
+                                        base: 1
+                                    })}
+                                    type={ItemTypes.RECIPE_ELEMENT}
+                                    dragging={false}/>
+                                <span className='fs-3'>=</span>
+                                <ItemRenderer
+                                    element={mockElement(currentHint)}
+                                    type={ItemTypes.RECIPE_ELEMENT}
+                                    dragging={false}/>
+                            </div>
+                        </Fragment>
                     )}
                 </div>
             </div>

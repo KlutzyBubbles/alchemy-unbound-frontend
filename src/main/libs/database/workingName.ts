@@ -17,6 +17,7 @@ async function saveWorkingDatabase(): Promise<void> {
 }
 
 async function loadWorkingDatabase(): Promise<void> {
+    logger.silly('loadWorkingDatabase', name, loaded);
     try {
         const raw = await fs.readFile(getFolder() + 'working.database', 'utf-8');
         name = raw;
@@ -26,6 +27,7 @@ async function loadWorkingDatabase(): Promise<void> {
             logger.error('Error reading working database file', e);
         } else {
             logger.info('working database file could not be found, initializing with default db');
+            loaded = false;
             if (name === null || name === undefined)
                 name = DEFAULT_DATABASE;
         }
@@ -35,6 +37,7 @@ async function loadWorkingDatabase(): Promise<void> {
 }
 
 export async function getWorkingDatabase(): Promise<string> {
+    logger.silly('getWorkingDatabase', name, loaded);
     if (!loaded) {
         await loadWorkingDatabase();
     }

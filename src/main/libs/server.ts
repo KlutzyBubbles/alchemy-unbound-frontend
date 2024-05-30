@@ -1,5 +1,5 @@
 import logger from 'electron-log/main';
-import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse, PurchaseOutput, PurchaseSuccess, ValidateOutput, UserOutput, RedeemSuccess, GenericSuccess, GenericOutput, APIRecipe } from '../../common/types';
+import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse, PurchaseOutput, PurchaseSuccess, ValidateOutput, UserOutput, RedeemSuccess, GenericSuccess, GenericOutput, APIRecipe, MissionOutput, MissionAPISuccess, MissionCheckOutput, APIMissionCheck } from '../../common/types';
 import { getDatabaseInfo, getPlaceholderOrder, getRecipe, getRecipesForLanguage, insertRecipeRow, serverVersion, setDiscovered, traverseAndFill } from './database/recipeStore';
 import { getAppVersion, isPackaged } from './generic';
 import { getSettings } from './settings';
@@ -7,7 +7,10 @@ import { getSteamGameLanguage, getSteamworksClient, getWebAuthTicket } from './s
 import fetch, { HeadersInit, Response } from 'electron-fetch';
 import { TxnItems } from '../../common/server';
 import { addTheme, removeTheme } from './info';
-import { Language } from 'src/common/settings';
+import { Language } from '../../common/settings';
+import { MissionLevelStore, MissionStore, MissionType } from '../../common/types/saveFormat';
+import { addCombine, getMissionStore, setComplete, setMissionStore } from './database/missionStore';
+import { MissionDifficulty, missionRewards } from '../../common/mission';
 
 export type RequestErrorResult = {
   code: number,
@@ -371,13 +374,48 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
         logger.error('Cannot get recipe', e);
         exists = undefined;
     }
+    const databaseType = (await getDatabaseInfo()).type;
+    let mission: MissionStore | undefined = undefined;
+    try {
+        const tempResult = databaseType === 'daily' || databaseType === 'weekly' ? await getMission(databaseType) : undefined;
+        if (tempResult !== undefined && tempResult.type === 'success') {
+            mission = tempResult.result;
+        } else {
+            logger.error('Cannot get mission 1 from sub', tempResult);
+            mission = undefined;
+        }
+    } catch(e) {
+        logger.error('Cannot get mission 1', e);
+        mission = undefined;
+    }
+    if (mission !== undefined) {
+        addCombine(databaseType as MissionType);
+    }
     let newDiscovery = false;
     let firstDiscovery = false;
+    let missionComplete = false;
     if (exists !== undefined) {
         const hintAdded = await setDiscovered(exists.a.name, exists.b.name, true);
         if (!exists.discovered)
             newDiscovery = true;
         exists.discovered = 1;
+        if (mission !== undefined) {
+            console.log('mission existis recipe', exists);
+            for (const key of Object.keys(missionRewards)) {
+                const item = mission[key as MissionDifficulty];
+                if (item.name === exists.result) {
+                    if (!item.complete) {
+                        const temp = await submitMission(a, b, exists.result, databaseType as MissionType, mission.combines + 1);
+                        if (temp.type === 'success') {
+                            missionComplete = true;
+                        }
+                    } else {
+                        missionComplete = true;
+                    }
+                }
+            }
+            await addCombine(databaseType as MissionType);
+        }
         return {
             type: 'success',
             result: {
@@ -387,14 +425,12 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                 newDiscovery,
                 firstDiscovery,
                 recipe: exists,
+                missionComplete,
                 creditAdjust: 0
             }
         };
     } else {
-        if (getDatabaseInfo().type !== 'custom') {
-            throw new Error('Database isnt in custom mode');
-        }
-        const isCustom = getDatabaseInfo().type === 'custom';
+        const isCustom = databaseType === 'custom';
         if (!isCustom && (await getSettings(false)).offline) {
             return undefined;
         }
@@ -412,6 +448,22 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
             const body: APIRecipe = result.result as unknown as APIRecipe;
             newDiscovery = true;
             firstDiscovery = body.first ? true : false;
+            if (mission !== undefined) {
+                for (const key of Object.keys(missionRewards)) {
+                    const item = mission[key as MissionDifficulty];
+                    if (item.name === body.result) {
+                        if (!item.complete) {
+                            const temp = await submitMission(a, b, body.result, databaseType as MissionType, mission.combines + 1);
+                            if (temp.type === 'success') {
+                                missionComplete = true;
+                            }
+                        } else {
+                            missionComplete = true;
+                        }
+                    }
+                }
+                await addCombine(databaseType as MissionType);
+            }
             try {
                 const recipeRow = await insertRecipeRow({
                     a: a,
@@ -434,12 +486,13 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                         hintAdded: false,
                         newDiscovery,
                         firstDiscovery,
+                        missionComplete,
                         recipe: traverseAndFill(recipeRow),
                         creditAdjust: body.creditAdjust
                     }
                 };
             } catch(e) {
-                logger.error('Failed to insert recipe', e);
+                logger.error('Failed to insert recipe 1', e);
                 return {
                     type: 'success',
                     result: {
@@ -448,6 +501,7 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                         hintAdded: false,
                         newDiscovery,
                         firstDiscovery,
+                        missionComplete,
                         recipe: traverseAndFill({
                             order: getPlaceholderOrder(),
                             a: a,
@@ -474,10 +528,95 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
     }
 }
 
-// Returns undefined if in offline mode.
+// Returns undefined if no mission is available
+export async function submitMission(a: string, b: string, result: string, type: MissionType, combines: number): Promise<MissionCheckOutput | undefined> {
+    logger.silly('submitMission', a, b, result, type, combines);
+    const databaseType = (await getDatabaseInfo()).type;
+    let mission: MissionStore | undefined = undefined;
+    try {
+        const tempResult = databaseType === 'daily' || databaseType === 'weekly' ? await getMission(databaseType) : undefined;
+        if (tempResult !== undefined && tempResult.type === 'success') {
+            mission = tempResult.result;
+        } else {
+            logger.error('Cannot get mission 2 from sub', tempResult);
+            mission = undefined;
+        }
+    } catch(e) {
+        logger.error('Cannot get mission 2', e);
+        mission = undefined;
+    }
+    if (mission === undefined) {
+        return undefined;
+    }
+    let knownLevel: MissionDifficulty | undefined = undefined;
+    let knownItem: MissionLevelStore | undefined = undefined;
+    for (const key of Object.keys(missionRewards)) {
+        const item = mission[key as MissionDifficulty];
+        if (item.name === result) {
+            knownLevel = key as MissionDifficulty;
+            knownItem = item;
+            break;
+        }
+    }
+    if (knownLevel === undefined || knownItem === undefined) {
+        throw new Error('Unable to verify which level was complete');
+    }
+    if (knownItem.complete) {
+        return {
+            type: 'success',
+            result: {
+                responseCode: 200,
+                deprecated: false,
+                points: 0,
+                level: knownLevel
+            }
+        };
+    }
+    const apiResult = await apiRequest(
+        'GET',
+        '/v2/mission/check',
+        {
+            a,
+            b,
+            result,
+            type,
+            combines
+        },
+        undefined,
+        true
+    );
+    if (apiResult.type === 'success') {
+        const body: APIMissionCheck = apiResult.result as unknown as APIMissionCheck;
+        await setComplete(type, knownLevel, true);
+        return {
+            type: 'success',
+            result: {
+                responseCode: 200,
+                deprecated: false,
+                points: body.points,
+                level: knownLevel
+            }
+        };
+    } else {
+        if (apiResult.result.code === ServerErrorCode.ALREADY_COMPLETED) {
+            await setComplete(type, knownLevel, true);
+            return {
+                type: 'success',
+                result: {
+                    responseCode: 200,
+                    deprecated: false,
+                    points: 0,
+                    level: knownLevel
+                }
+            };
+        }
+        return apiResult;
+    }
+}
+
 export async function addItem(result: string, language: Language): Promise<CombineOutput | undefined> {
     logger.silly('addItem', result, language);
-    if (getDatabaseInfo().type !== 'custom') {
+    if ((await getDatabaseInfo()).type !== 'custom') {
         throw new Error('Database isnt in custom mode');
     }
     let exists: Recipe[] = [];
@@ -497,6 +636,7 @@ export async function addItem(result: string, language: Language): Promise<Combi
                 hintAdded: false,
                 newDiscovery: false,
                 firstDiscovery: false,
+                missionComplete: false,
                 creditAdjust: 0,
                 recipe: exists[0]
             }
@@ -537,12 +677,13 @@ export async function addItem(result: string, language: Language): Promise<Combi
                         hintAdded: false,
                         newDiscovery: false,
                         firstDiscovery: false,
+                        missionComplete: false,
                         recipe: traverseAndFill(recipeRow),
                         creditAdjust: body.creditAdjust
                     }
                 };
             } catch(e) {
-                logger.error('Failed to insert recipe', e);
+                logger.error('Failed to insert recipe 2', e);
                 return {
                     type: 'success',
                     result: {
@@ -551,6 +692,7 @@ export async function addItem(result: string, language: Language): Promise<Combi
                         hintAdded: false,
                         newDiscovery: false,
                         firstDiscovery: false,
+                        missionComplete: false,
                         recipe: traverseAndFill({
                             order: getPlaceholderOrder(),
                             a: '',
@@ -574,6 +716,86 @@ export async function addItem(result: string, language: Language): Promise<Combi
                 return apiResult;
             }
         }
+    }
+}
+
+export async function getMission(type: MissionType): Promise<MissionOutput | undefined> {
+    logger.silly('getMission', type);
+    let existing: MissionStore = undefined;
+    let addTime = 24 * 60 * 60 * 1000;
+    if (type === 'weekly') {
+        addTime *= 7;
+    }
+    const currentDate = new Date();
+    try {
+        existing = await getMissionStore(type);
+    } catch(e) {
+        logger.error('Cannot get mission', e);
+        existing = undefined;
+    }
+    logger.silly('Existing mission', existing);
+    if (existing !== undefined) {
+        logger.silly('Expiry Check', existing.expires, addTime, currentDate.getTime());
+        if (existing.expires + addTime <= currentDate.getTime()) {
+            logger.silly('Expiry expired');
+            // Expired
+            setMissionStore(type, undefined);
+            existing = undefined;
+        } else {
+            logger.silly('Returning existing');
+            return {
+                type: 'success',
+                result: existing
+            };
+        }
+    }
+    const apiResult = await apiRequest(
+        'GET',
+        `/v2/mission/${type}`,
+        undefined,
+        undefined,
+        false
+    );
+    if (apiResult.type === 'success') {
+        const body: MissionAPISuccess = apiResult.result as unknown as MissionAPISuccess;
+
+        const formatted: MissionStore = {
+            // success: body.success,
+            combines: 0,
+            expires: body.expires,
+            easy: {
+                complete: false,
+                ...body.easy
+            },
+            medium: {
+                complete: false,
+                ...body.medium
+            },
+            hard: {
+                complete: false,
+                ...body.hard
+            },
+            random: {
+                complete: false,
+                ...body.random
+            }
+        };
+
+        try {
+            await setMissionStore(type, formatted);
+            return {
+                type: 'success',
+                result: formatted
+            };
+        } catch(e) {
+            logger.error('Failed to set mission store', e, formatted, body);
+            return {
+                type: 'success',
+                result: formatted
+            };
+        }
+    } else {
+        return apiResult;
     }
 }
 
@@ -683,6 +905,7 @@ async function apiRequest(
         } else {
             logger.warn('Error making request', response.status, response.body);
             const json = (await response.json()) as RequestErrorResult;
+            logger.warn('Error making request body format', json);
             if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
                 throw('Unknown issue with input parameters');
             }
@@ -706,7 +929,7 @@ async function apiRequest(
 
 export async function restorePurchases() {
     logger.silly('restorePurchases');
-    for (const theme of ['themeOrange', 'themePurple', 'themeSand']) {
+    for (const theme of ['themeOrange', 'themePurple', 'themeSand', 'themePink', 'themeBlue']) {
         try {
             const result = await checkAndRedeem(theme);
             if (result === undefined) {

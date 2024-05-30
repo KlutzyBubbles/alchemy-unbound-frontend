@@ -1,7 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { addItem, checkDLC, combine, getEndpoint, getToken, getUserDetails, getVersion, initTransaction, restorePurchases } from '../../main/libs/server';
+import { addItem, checkDLC, combine, getEndpoint, getMission, getToken, getUserDetails, getVersion, initTransaction, restorePurchases } from '../../main/libs/server';
 import { ServerChannel } from '../../common/ipc';
-import { Language } from 'src/common/settings';
+import { Language } from '../../common/settings';
+import { MissionType } from '../../common/types/saveFormat';
 
 export const ServerAPIName = 'ServerAPI';
 
@@ -15,6 +16,7 @@ export interface IServerAPI {
     restorePurchases: typeof restorePurchases
     checkDLC: typeof checkDLC
     addItem: typeof addItem
+    getMission: typeof getMission
 }
 
 contextBridge.exposeInMainWorld(ServerAPIName, {
@@ -27,4 +29,5 @@ contextBridge.exposeInMainWorld(ServerAPIName, {
     getUserDetails: () => ipcRenderer.invoke(ServerChannel.GET_USER_INFO),
     checkDLC: () => ipcRenderer.invoke(ServerChannel.CHECK_DLC),
     restorePurchases: () => ipcRenderer.invoke(ServerChannel.RESTORE_PURCHASES),
+    getMission: (type: MissionType) => ipcRenderer.invoke(ServerChannel.GET_MISSION, type),
 });

@@ -1,5 +1,6 @@
+import { MissionDifficulty } from '../mission';
 import { Language } from '../settings';
-import { DatabaseData } from './saveFormat';
+import { DatabaseData, FileVersionError, MissionStore } from './saveFormat';
 
 export type Languages = {
     [key in Language]: string;
@@ -13,6 +14,24 @@ export type BasicElement = {
     first: number;
     who_discovered: string;
     base: number;
+}
+
+export type APILanguage = {
+    [K in Language]: string;
+} & {
+    emoji: string;
+    name: string;
+}
+
+export type APIMission = {
+    [key in MissionDifficulty]: APILanguage
+} & {
+    expires: number
+}
+
+export type APIMissionCheck = Success & {
+    points: number,
+    level: string
 }
 
 export type APIRecipe = {
@@ -102,15 +121,17 @@ export type FileVersions = {
     hint: number,
     stats: number,
     settings: number,
+    mission: number,
     databaseInfo: DatabaseData,
     databaseName: string
 }
 
 export const DEFAULT_FILE_VERSIONS: FileVersions = {
-    database: -3,
-    hint: -3,
-    stats: -3,
-    settings: -3,
+    database: FileVersionError.TYPE_DEFAULT,
+    hint: FileVersionError.TYPE_DEFAULT,
+    stats: FileVersionError.TYPE_DEFAULT,
+    settings: FileVersionError.TYPE_DEFAULT,
+    mission: FileVersionError.TYPE_DEFAULT,
     databaseName: 'unknown',
     databaseInfo: {
         type: 'base'
@@ -128,9 +149,27 @@ export type TokenHolderResponse = {
     deprecated: boolean
 }
 
+export type MissionCheckOutput = {
+    type: 'success',
+    result: MissionCheckSuccess
+} | {
+    type: 'error',
+    result: ServerError
+}
+
 export type CombineOutput = {
     type: 'success',
     result: CombineSuccess
+} | {
+    type: 'error',
+    result: ServerError
+}
+
+export type MissionAPISuccess = APIMission & Success
+
+export type MissionOutput = {
+    type: 'success',
+    result: MissionStore
 } | {
     type: 'error',
     result: ServerError
@@ -218,7 +257,15 @@ export type CombineSuccess = {
     newDiscovery: boolean,
     firstDiscovery: boolean,
     creditAdjust: number,
+    missionComplete: boolean,
     recipe: Recipe
+}
+
+export type MissionCheckSuccess = {
+    responseCode: number,
+    deprecated: boolean,
+    points: number,
+    level: MissionDifficulty,
 }
 
 export type ServerError = {
@@ -241,6 +288,13 @@ export enum ServerErrorCode {
     STEAM_ERROR = 10,
     ITEM_UNKNOWN = 11,
     TRANSLATION_ERROR = 12,
+    ALREADY_COMPLETED = 13,
+    ALREADY_PURCHASED = 14,
+    NOT_PURCHASED = 15,
+    ALREADY_FINALIZED = 16,
+    SINGLE_USE = 17,
+    NOT_AUTHENTICATED = 18,
+    NO_CREDITS = 19,
 }
 
 export enum LocalErrorCode {
@@ -265,6 +319,13 @@ export const ErrorCodeToString: {
     10: 'steamError',
     11: 'itemUnknown',
     12: 'translateError',
+    13: 'alreadyCompleted',
+    14: 'alreadyPurchased',
+    15: 'notPurchased',
+    16: 'alreadyFinalized',
+    17: 'singleUse',
+    18: 'notAuthorized',
+    19: 'noCredits',
     1001: 'unknownError'
 };
 

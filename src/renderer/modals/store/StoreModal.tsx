@@ -7,6 +7,7 @@ import { ThemeButton } from './ThemeButton';
 import { CreditButton } from './CreditButton';
 import { TxnItems } from '../../../common/server';
 import { ErrorCodeToString } from '../../../common/types';
+import { getLegacyColor, invertLegacyColor } from '../../utils/theme';
 
 
 export interface StoreModalProps {
@@ -24,7 +25,7 @@ export const StoreModal: FC<StoreModalProps> = ({
     const [errorText, setErrorText] = useState<string>('');
     const [successText, setSuccessText] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-    const [aiHintsUnlocked, setAIHintsUnlocked] = useState<boolean>(false);
+    // const [aiHintsUnlocked, setAIHintsUnlocked] = useState<boolean>(false);
     const [themes, setThemes] = useState<string[]>([]);
 
     useEffect(() => {
@@ -33,7 +34,7 @@ export const StoreModal: FC<StoreModalProps> = ({
                 try {
                     const info = await window.InfoAPI.getInfo();
                     setThemes(info.themesUnlocked);
-                    setAIHintsUnlocked(info.aiHints);
+                    // setAIHintsUnlocked(info.aiHints);
                 } catch (error) {
                     logger.error('Unknown issue loading themes', error);
                 }
@@ -50,33 +51,33 @@ export const StoreModal: FC<StoreModalProps> = ({
         });
     };
     
-    const purchaseAIHints = async () => {
-        console.log('AI Hints purchase');
-        try {
-            setLoading(true);
-            setErrorText('');
-            setSuccessText('');
-            const result = await window.ServerAPI.initTransaction('aiHints');
-            setLoading(false);
-            if (result === undefined) {
-                setErrorText(getFromStore('errors.offline', settings.language));
-            } else {
-                if (result.type === 'error') {
-                    setErrorText(Object.keys(ErrorCodeToString).includes(`${result.result.code}`) ?
-                        getFromStore(`errors.${ErrorCodeToString[result.result.code]}`, settings.language) :
-                        getFromStore('errors.unknownError', settings.language));
-                } else {
-                    setSuccessText(getFromStore('store.purchased', settings.language));
-                    window.InfoAPI.setInfoKey('aiHints', true);
-                    setAIHintsUnlocked(true);
-                }
-            }
-        } catch (e) {
-            logger.error('Failed to purchase AI hints', e);
-            setErrorText(e.message);
-            setLoading(false);
-        }
-    };
+    // const purchaseAIHints = async () => {
+    //     console.log('AI Hints purchase');
+    //     try {
+    //         setLoading(true);
+    //         setErrorText('');
+    //         setSuccessText('');
+    //         const result = await window.ServerAPI.initTransaction('aiHints');
+    //         setLoading(false);
+    //         if (result === undefined) {
+    //             setErrorText(getFromStore('errors.offline', settings.language));
+    //         } else {
+    //             if (result.type === 'error') {
+    //                 setErrorText(Object.keys(ErrorCodeToString).includes(`${result.result.code}`) ?
+    //                     getFromStore(`errors.${ErrorCodeToString[result.result.code]}`, settings.language) :
+    //                     getFromStore('errors.unknownError', settings.language));
+    //             } else {
+    //                 setSuccessText(getFromStore('store.purchased', settings.language));
+    //                 window.InfoAPI.setInfoKey('aiHints', true);
+    //                 setAIHintsUnlocked(true);
+    //             }
+    //         }
+    //     } catch (e) {
+    //         logger.error('Failed to purchase AI hints', e);
+    //         setErrorText(e.message);
+    //         setLoading(false);
+    //     }
+    // };
 
     const purchaseFillHints = async () => {
         console.log('Fill Hints purchase');
@@ -115,7 +116,7 @@ export const StoreModal: FC<StoreModalProps> = ({
             setSuccessText(getFromStore('store.restored', settings.language));
             const info = await window.InfoAPI.getInfo();
             setThemes(info.themesUnlocked);
-            setAIHintsUnlocked(info.aiHints);
+            // setAIHintsUnlocked(info.aiHints);
             setLoading(false);
         } catch (error) {
             logger.error('Error restoring purchases', error);
@@ -162,19 +163,19 @@ export const StoreModal: FC<StoreModalProps> = ({
                         setLoading={setLoading}
                         addTheme={addTheme}/>
                     <ThemeButton
-                        name={'purple'}
-                        id={'themePurple'}
-                        emoji={'🍆'}
-                        unlocked={themes.includes('themePurple')}
+                        name={'blue'}
+                        id={'themeBlue'}
+                        emoji={'☁️'}
+                        unlocked={themes.includes('themeBlue')}
                         setErrorText={setErrorText}
                         setSuccessText={setSuccessText}
                         setLoading={setLoading}
                         addTheme={addTheme}/>
                     <ThemeButton
-                        name={'orange'}
-                        id={'themeOrange'}
-                        emoji={'🍊'}
-                        unlocked={themes.includes('themeOrange')}
+                        name={'pink'}
+                        id={'themePink'}
+                        emoji={'🌸'}
+                        unlocked={themes.includes('themePink')}
                         setErrorText={setErrorText}
                         setSuccessText={setSuccessText}
                         setLoading={setLoading}
@@ -182,11 +183,11 @@ export const StoreModal: FC<StoreModalProps> = ({
                 </div>
                 <div className='row mx-0'>
                     <div className='col-12 mt-3'>
-                        <div className='card'>
+                        <div className={`card hint-${invertLegacyColor(getLegacyColor(settings.theme))}`}>
                             <div className='card-body d-flex flex-column'>
                                 <div className='row'>
                                     <div className='col-7 col-lg-9 col-xl-10'>
-                                        <h1>{getFromStore('store.titles.fillHints', settings.language)}</h1>
+                                        <h1 className='title'>{getFromStore('store.titles.fillHints', settings.language)}</h1>
                                     </div>
                                     <div className='col-5 col-lg-3 col-xl-2 d-grid'>
                                         <div className='btn btn-success btn-lg' onClick={purchaseFillHints}>
@@ -200,6 +201,49 @@ export const StoreModal: FC<StoreModalProps> = ({
                             </div>
                         </div>
                     </div>
+                </div>
+                <div className='row mx-0 mb-3'>
+                    <CreditButton
+                        name={'250'}
+                        id={'credit250'}
+                        setErrorText={setErrorText}
+                        setSuccessText={setSuccessText}
+                        setLoading={setLoading}
+                        refreshValues={refreshValues}/>
+                    <CreditButton
+                        name={'750'}
+                        id={'credit750'}
+                        setErrorText={setErrorText}
+                        setSuccessText={setSuccessText}
+                        setLoading={setLoading}
+                        refreshValues={refreshValues}/>
+                    <CreditButton
+                        name={'1500'}
+                        id={'credit1500'}
+                        setErrorText={setErrorText}
+                        setSuccessText={setSuccessText}
+                        setLoading={setLoading}
+                        refreshValues={refreshValues}/>
+                    <CreditButton
+                        name={'3500'}
+                        id={'credit3500'}
+                        setErrorText={setErrorText}
+                        setSuccessText={setSuccessText}
+                        setLoading={setLoading}
+                        refreshValues={refreshValues}/>
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button size="lg" variant="secondary" onClick={handleRestore}>
+                    {getFromStore('store.restore', settings.language)}
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
+};
+
+/*
+
                     <div className='col-12 mt-3'>
                         <div className='card'>
                             <div className='card-body d-flex flex-column'>
@@ -219,39 +263,4 @@ export const StoreModal: FC<StoreModalProps> = ({
                             </div>
                         </div>
                     </div>
-                </div>
-                <div className='row mx-0 mb-3'>
-                    <CreditButton
-                        name={'500'}
-                        id={'credit500'}
-                        setErrorText={setErrorText}
-                        setSuccessText={setSuccessText}
-                        setLoading={setLoading}/>
-                    <CreditButton
-                        name={'1500'}
-                        id={'credit1500'}
-                        setErrorText={setErrorText}
-                        setSuccessText={setSuccessText}
-                        setLoading={setLoading}/>
-                    <CreditButton
-                        name={'2500'}
-                        id={'credit2500'}
-                        setErrorText={setErrorText}
-                        setSuccessText={setSuccessText}
-                        setLoading={setLoading}/>
-                    <CreditButton
-                        name={'5000'}
-                        id={'credit5000'}
-                        setErrorText={setErrorText}
-                        setSuccessText={setSuccessText}
-                        setLoading={setLoading}/>
-                </div>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button size="lg" variant="secondary" onClick={handleRestore}>
-                    {getFromStore('store.restore', settings.language)}
-                </Button>
-            </Modal.Footer>
-        </Modal>
-    );
-};
+*/

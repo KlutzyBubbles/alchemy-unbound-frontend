@@ -248,6 +248,10 @@ export const StatsModal: FC<StatsModalProps> = ({
                                             <td>Settings</td>
                                             <td>{fileVersions.settings}</td>
                                         </tr>
+                                        <tr>
+                                            <td>Mission</td>
+                                            <td>{fileVersions.mission}</td>
+                                        </tr>
                                     </tbody>
                                 </Table>
                             </div>
@@ -269,7 +273,7 @@ export const StatsModal: FC<StatsModalProps> = ({
                                         <tr>
                                             <td>Database info</td>
                                             <td>{fileVersions.databaseInfo.type}
-                                                {fileVersions.databaseInfo.expiry === undefined ? '' : `(${new Date(fileVersions.databaseInfo.expiry).toISOString()})`}</td>
+                                                {fileVersions.databaseInfo.expires === undefined ? '' : `(${new Date(fileVersions.databaseInfo.expires).toISOString()})`}</td>
                                         </tr>
                                         <tr>
                                             <td>Supporter</td>

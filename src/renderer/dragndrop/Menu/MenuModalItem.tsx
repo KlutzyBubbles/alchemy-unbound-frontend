@@ -20,7 +20,7 @@ export const MenuModalItem: FC<MenuModalItemProps> = ({
     const { playSound } = useContext(SoundContext);
 
     const onMouseOver = () => {
-        playSound('click2', 0.8);
+        playSound('click2', 0.5);
     };
 
     const closeCanvas = () => {
