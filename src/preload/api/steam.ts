@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { SteamChannel } from '../../common/ipc';
-import { activateAchievement, getSteamGameLanguage, getSteamId, getUsername, isAchievementActivated, isDlcInstalled } from '../../main/libs/steam';
+import { activateAchievement, getSteamGameLanguage, getSteamId, getUsername, isAchievementActivated, isDlcInstalled, openToDLC } from '../../main/libs/steam';
 
 export const SteamAPIName = 'SteamAPI';
 
@@ -11,6 +11,7 @@ export interface ISteamAPI {
     getSteamGameLanguage: typeof getSteamGameLanguage
     isDlcInstalled: typeof isDlcInstalled
     getUsername: typeof getUsername
+    openToDLC: typeof openToDLC
 }
 
 contextBridge.exposeInMainWorld(SteamAPIName, {
@@ -19,5 +20,6 @@ contextBridge.exposeInMainWorld(SteamAPIName, {
     isDlcInstalled: (appid: number) => ipcRenderer.invoke(SteamChannel.CHECK_DLC, appid),
     getSteamId: () => ipcRenderer.invoke(SteamChannel.GET_ID),
     getSteamGameLanguage: () => ipcRenderer.invoke(SteamChannel.GET_LANGUAGE),
-    getUsername: () => ipcRenderer.invoke(SteamChannel.GET_NAME)
+    getUsername: () => ipcRenderer.invoke(SteamChannel.GET_NAME),
+    openToDLC: (appid: number) => ipcRenderer.invoke(SteamChannel.OPEN_DLC, appid)
 });

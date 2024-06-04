@@ -8,3 +8,5 @@ export const missionRewards: {
 };
 
 export type MissionDifficulty = 'easy' | 'medium' | 'hard' | 'random';
+
+export const difficulties: MissionDifficulty[] = ['easy', 'medium', 'hard', 'random'];

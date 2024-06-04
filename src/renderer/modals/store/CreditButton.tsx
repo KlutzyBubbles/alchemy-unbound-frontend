@@ -58,10 +58,10 @@ export const CreditButton: FC<CreditButtonProps> = ({
                 <div className='card-body d-flex flex-column'>
                     <div className='row'>
                         <div className='col-7 col-lg-9 col-xl-10'>
-                            <h1 className='title'>{name} {getFromStore('store.titles.credits', settings.language)}</h1>
+                            <h1 className='title mb-1 user-select-none'>{name} {getFromStore('store.titles.credits', settings.language)}</h1>
                         </div>
                         <div className='col-5 col-lg-3 col-xl-2 d-grid'>
-                            <div className='btn btn-success btn-lg' onClick={() => purchaseCredit(id)}>
+                            <div className='btn btn-success btn-lg user-select-none' onClick={() => purchaseCredit(id)}>
                                 {`USD ${(new Intl.NumberFormat('en-US', {
                                     style: 'currency',
                                     currency: 'USD'

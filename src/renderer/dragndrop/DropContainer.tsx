@@ -19,12 +19,8 @@ import { hasProp } from '../../common/utils';
 import { LoadingContext } from '../providers/LoadingProvider';
 import { itemRecipeCheck, unlockCheck } from '../utils/achievements';
 import { BottomButton } from './MainButtons/BottomButtons';
-import { SettingsContext } from '../providers/SettingsProvider';
 import { TopButtons } from './MainButtons/TopButtons';
-//import { IOptions, RecursivePartial } from '@tsparticles/engine';
-//import Particles, { initParticlesEngine } from '@tsparticles/react';
-//import { loadAll } from '@tsparticles/all';
-//import options from '../particles';
+import { KeybindListener } from './KeybindListener';
 
 export interface ContainerProps {
   openModal: (option: ModalOption, onClose?: () => void) => void
@@ -43,19 +39,15 @@ export const DropContainer: FC<ContainerProps> = ({
     const { setLoading } = useContext(LoadingContext);
     const { playSound } = useContext(SoundContext);
     const mainElement = useRef<HTMLDivElement>();
-    const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
+    const { shouldUpdate, setShouldUpdate, keybindUpdate } = useContext(UpdateContext);
     const [refreshMission, setRefreshMission] = useState<number>(0);
     const [refreshHint, setRefreshHint] = useState<number>(0);
     const [creditsLeft, setCreditsLeft] = useState<number>(0);
-    //const [splitSize, setSplitSize] = useState<number[]>([75, 25]);
     const currentHover = useRef<string>(undefined);
     const speedTimerRef = useRef<NodeJS.Timeout>(undefined);
-    const { settings, setSettings } = useContext(SettingsContext);
     const [boxes, setBoxes] = useState<{
         [key: string]: Box
     }>({});
-    //const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.theme, settings.fps));
-    //const [particleReady, setParticleReady] = useState<boolean>(false);
 
     async function refreshRecipes() {
         const working = await getAllRecipes();
@@ -64,49 +56,7 @@ export const DropContainer: FC<ContainerProps> = ({
 
     useEffect(() => {
         refreshRecipes();
-        //mainElement.current.focus();
-        // (async() => {
-        //     await initParticlesEngine(async (engine) => {
-        //         //await loadSlim(engine);
-        //         await loadAll(engine);
-        //     });
-        //     setParticleReady(true);
-        // })();
-        
-        document.addEventListener('keydown', handleKeyDown2, false);
-        document.addEventListener('keyup', handleKeyUp2, false);
-        return () => {
-            if (speedTimerRef.current !== undefined) {
-                clearTimeout(speedTimerRef.current);
-            }
-            document.removeEventListener('keydown', handleKeyDown2, false);
-            document.removeEventListener('keyup', handleKeyUp2, false);
-        };
     }, []);
-
-    //useEffect(() => {
-    //    (async () => {
-    //        setParticleReady(false);
-    //        setCurrentParticles(options[settings.background](settings.theme, settings.fps, splitSize[0]));
-    //        await initParticlesEngine(async (engine) => {
-    //            //await loadSlim(engine);
-    //            await loadAll(engine);
-    //        });
-    //        setParticleReady(true);
-    //    })();
-    //}, [settings]);
-
-    //useEffect(() => {
-    //    (async () => {
-    //        setParticleReady(false);
-    //        setCurrentParticles(options[settings.background](settings.theme, settings.fps, splitSize[0]));
-    //        await initParticlesEngine(async (engine) => {
-    //            //await loadSlim(engine);
-    //            await loadAll(engine);
-    //        });
-    //        setParticleReady(true);
-    //    })();
-    //}, [splitSize]);
 
     useEffect(() => {
         setRefreshHint((value) => {
@@ -737,45 +687,6 @@ export const DropContainer: FC<ContainerProps> = ({
         }
     };
 
-    const handleKeyDown2: EventListenerOrEventListenerObject = (e) => {
-        console.log('keydown', e);
-        const event = e as KeyboardEvent;
-        if (event.key === settings.keybinds.copy) {
-            setCopyHeld(true);
-        }
-        if (event.key === settings.keybinds.remove) {
-            setRemoveHeld(true);
-        }
-        if (event.key === settings.keybinds.lock) {
-            if (currentHover.current !== undefined) {
-                invertLock(currentHover.current);
-            }
-        }
-    };
-
-    const handleKeyUp2: EventListenerOrEventListenerObject = async (e) => {
-        console.log('keyup', e);
-        const event = e as KeyboardEvent;
-        if (event.key === settings.keybinds.copy) {
-            setCopyHeld(false);
-        }
-        if (event.key === settings.keybinds.remove) {
-            setRemoveHeld(false);
-        }
-        if (event.key === 'F11') {
-            try {
-                const isFullscreen = await window.DisplayAPI.isFullscreen();
-                window.DisplayAPI.setFullscreen(!isFullscreen);
-                setSettings({
-                    ...settings,
-                    fullscreen: !isFullscreen
-                });
-            } catch (e) {
-                logger.error('Failed to change fullscreen', e);
-            }
-        }
-    };
-
     const clearAll = () => {
         setBoxes({});
     };
@@ -784,6 +695,11 @@ export const DropContainer: FC<ContainerProps> = ({
 
     return (
         <Fragment>
+            <KeybindListener key={keybindUpdate} setCopyHeld={setCopyHeld} setRemoveHeld={setRemoveHeld} onLockClick={() => {
+                if (currentHover.current !== undefined) {
+                    invertLock(currentHover.current);
+                }
+            }} />
             <Split
                 sizes={[75, 25]}
                 className="split p-0 m-0"
@@ -799,6 +715,8 @@ export const DropContainer: FC<ContainerProps> = ({
                     <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
                         <TopButtons
                             openModal={openModal}
+                            refreshRecipes={refreshRecipes}
+                            clearAll={clearAll}
                             credits={creditsLeft}
                             refresh={refreshMission}/>
                         <AnimatePresence>
@@ -859,14 +777,3 @@ export const DropContainer: FC<ContainerProps> = ({
         </Fragment>
     );
 };
-/*
-
-                    {particleReady ? <Particles
-                        className='z-particles'
-                        id="backgroundParticles"
-                        options={currentParticles}
-                        style={{
-                            width: `${splitSize[0]}%`
-                        }}
-                    /> : <Fragment/>}
-*/

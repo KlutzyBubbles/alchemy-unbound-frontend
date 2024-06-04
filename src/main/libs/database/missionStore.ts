@@ -1,11 +1,11 @@
 import { promises as fs } from 'fs';
 import { Compressed, compress, decompress } from 'compress-json';
-import { getFolder } from '../steam';
+import { activateAchievement, getFolder } from '../steam';
 import { verifyFolder } from '../../utils';
 import logger from 'electron-log/main';
 import { FileVersionError, MissionStore, MissionStores, MissionType } from '../../../common/types/saveFormat';
 import { saveToFile } from './helpers';
-import { MissionDifficulty } from '../../../common/mission';
+import { MissionDifficulty, difficulties } from '../../../common/mission';
 import { hasProp } from '../../../common/utils';
 
 const MISSION_DATABASE_VERISON = 1;
@@ -86,6 +86,17 @@ export async function setComplete(key: MissionType, level: MissionDifficulty, co
     logger.silly('setComplete()', key, level, complete);
     if (hasProp(data, key) && data[key] !== undefined && hasProp(data[key], level) && data[key][level] !== undefined) {
         data[key][level].complete = complete;
+    }
+    let allComplete = true;
+    for (const level of difficulties) {
+        if (!data[key][level].complete) {
+            allComplete = false;
+            break;
+        }
+    }
+    if (allComplete) {
+        logger.silly('Activating achievement', key);
+        activateAchievement(key);
     }
     await save();
 }

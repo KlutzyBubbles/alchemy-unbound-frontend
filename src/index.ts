@@ -134,6 +134,16 @@ const createWindow = (): void => {
         shell.openExternal(url);
         return { action: 'deny' };
     });
+
+    mainWindow.on('close', () => {
+        mainWindow = undefined;
+        app.quit();
+    });
+
+    mainWindow.on('closed', () => {
+        mainWindow = undefined;
+        app.quit();
+    });
   
 };
 
@@ -200,9 +210,9 @@ app
         protocol.handle('image', (request) => {
             return net.fetch('file://' + path.join(__dirname, 'images', request.url.slice('image://'.length)));
         });
+        register();
         await createLangDatabase();
         await createDatabase();
-        register();
         await installExtension(REACT_DEVELOPER_TOOLS);
         await restorePurchases();
     })

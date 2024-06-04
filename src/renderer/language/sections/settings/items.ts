@@ -188,4 +188,21 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '删除项目',
         koreana: '아이템 제거'
     },
+    performance: {
+        english: 'Performance List',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
+    }
 };

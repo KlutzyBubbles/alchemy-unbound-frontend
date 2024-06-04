@@ -719,13 +719,14 @@ export async function addItem(result: string, language: Language): Promise<Combi
     }
 }
 
-export async function getMission(type: MissionType): Promise<MissionOutput | undefined> {
+export async function getMission(type: MissionType): Promise<MissionOutput> {
     logger.silly('getMission', type);
     let existing: MissionStore = undefined;
-    let addTime = 24 * 60 * 60 * 1000;
-    if (type === 'weekly') {
-        addTime *= 7;
-    }
+    // let addTime = 24 * 60 * 60 * 1000;
+    // let addTime = 60 * 60 * 1000;
+    // if (type === 'weekly') {
+    //     addTime *= 7;
+    // }
     const currentDate = new Date();
     try {
         existing = await getMissionStore(type);
@@ -735,8 +736,8 @@ export async function getMission(type: MissionType): Promise<MissionOutput | und
     }
     logger.silly('Existing mission', existing);
     if (existing !== undefined) {
-        logger.silly('Expiry Check', existing.expires, addTime, currentDate.getTime());
-        if (existing.expires + addTime <= currentDate.getTime()) {
+        logger.silly('Expiry Check', existing.expires, currentDate.getTime());
+        if (existing.expires <= currentDate.getTime()) {
             logger.silly('Expiry expired');
             // Expired
             setMissionStore(type, undefined);
@@ -745,7 +746,10 @@ export async function getMission(type: MissionType): Promise<MissionOutput | und
             logger.silly('Returning existing');
             return {
                 type: 'success',
-                result: existing
+                result: {
+                    ...existing,
+                    refreshed: false
+                }
             };
         }
     }
@@ -785,13 +789,19 @@ export async function getMission(type: MissionType): Promise<MissionOutput | und
             await setMissionStore(type, formatted);
             return {
                 type: 'success',
-                result: formatted
+                result: {
+                    ...formatted,
+                    refreshed: true
+                }
             };
         } catch(e) {
             logger.error('Failed to set mission store', e, formatted, body);
             return {
                 type: 'success',
-                result: formatted
+                result: {
+                    ...formatted,
+                    refreshed: true
+                }
             };
         }
     } else {
@@ -927,8 +937,9 @@ async function apiRequest(
     }
 }
 
-export async function restorePurchases() {
+export async function restorePurchases(): Promise<boolean> {
     logger.silly('restorePurchases');
+    let hasErrors = false;
     for (const theme of ['themeOrange', 'themePurple', 'themeSand', 'themePink', 'themeBlue']) {
         try {
             const result = await checkAndRedeem(theme);
@@ -946,10 +957,13 @@ export async function restorePurchases() {
                     }
                 } else {
                     logger.error('Unable to get purchase, leaving alone', theme);
+                    hasErrors = true;
                 }
             }
         } catch (error) {
             logger.error('Unable to check purchases, leaving alone', theme, error);
+            hasErrors = true;
         }
     }
+    return !hasErrors;
 }

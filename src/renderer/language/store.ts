@@ -9,6 +9,7 @@ import { LanguageStore as ItemLanguageStore } from './sections/item';
 import { LanguageStore as MenuLanguageStore } from './sections/menu';
 import { LanguageStore as SavesLanguageStore } from './sections/saves';
 import { LanguageStore as RecipesLanguageStore } from './sections/recipes';
+import { LanguageStore as TimerLanguageStore } from './sections/timer';
 
 export type LanguageStoreRecurring = {
     [key: string]: Languages | LanguageStoreRecurring
@@ -25,6 +26,7 @@ export const LanguageStore: LanguageStoreRecurring = {
     menu: MenuLanguageStore,
     saves: SavesLanguageStore,
     recipes: RecipesLanguageStore,
+    timer: TimerLanguageStore,
     hintTooltip: {
         english: 'Click to use a hint point',
         schinese: '点击使用提示点',
@@ -44,19 +46,19 @@ export const LanguageStore: LanguageStoreRecurring = {
     },
     creditsLeft: {
         english: 'Credits',
-        schinese: '',
-        russian: '',
-        spanish: '',
-        french: '',
-        japanese: '',
-        indonesian: '',
-        german: '',
-        latam: '',
-        italian: '',
-        dutch: '',
-        polish: '',
-        portuguese: '',
-        tchinese: '',
-        koreana: ''
-    },
+        schinese: '学分',
+        russian: 'Кредиты',
+        spanish: 'Créditos',
+        french: 'Crédits',
+        japanese: 'クレジット',
+        indonesian: 'Kredit',
+        german: 'Kredite',
+        latam: 'Créditos',
+        italian: 'Crediti',
+        dutch: 'Credits',
+        polish: 'Kredyty',
+        portuguese: 'Créditos',
+        tchinese: '學分',
+        koreana: '크레딧'
+    }
 };

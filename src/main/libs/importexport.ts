@@ -3,7 +3,7 @@ import logger from 'electron-log/main';
 import { dialog } from 'electron';
 import { hasProp } from '../../common/utils';
 import { getHintSaveFormat, loadHintV1, setHintRaw } from './hints';
-import { checkLanguages, databaseV1toV2, databaseV2toV3, databaseV3toV4, fillWithBase, getDatabaseSaveFormat, noFill, setDataRaw, setDatabaseInfo, setServerVersion } from './database/recipeStore';
+import { checkLanguages, databaseV1toV2, databaseV2toV3, databaseV3toV4, fillWithBase, getDatabaseInfo, getDatabaseSaveFormat, noFill, setDataRaw, setDatabaseInfo, setServerVersion } from './database/recipeStore';
 import { LATEST_SERVER_VERSION } from '../../common/types';
 import { DatabaseData } from '../../common/types/saveFormat';
 
@@ -41,12 +41,14 @@ export async function importFile(): Promise<boolean> {
             return false;
         }
         let raw = undefined;
+        logger.silly('Imported found text', text);
         try {
             raw = JSON.parse(text);
         } catch (e) {
             logger.error('Failed to translate imported database to JSON');
             throw new Error('Imported a malformed JSON');
         }
+        logger.silly('Imported found raw', raw);
         if (raw === undefined || raw === null) {
             return false;
         }
@@ -72,7 +74,7 @@ export async function importFile(): Promise<boolean> {
         }
         let tempServerVersion = -1;
         try {
-            tempServerVersion = parseInt(database.server ?? `${LATEST_SERVER_VERSION}`);
+            tempServerVersion = parseInt(database.server ?? '1'/*`${LATEST_SERVER_VERSION}`*/);
         } catch (e) {
             tempServerVersion = LATEST_SERVER_VERSION;
             logger.error('Failed to translate imported database to JSON');
@@ -85,11 +87,15 @@ export async function importFile(): Promise<boolean> {
         let foundInfo: DatabaseData = {
             type: 'base'
         };
-        if (raw.info !== undefined) {
+        if (hasProp(database, 'info') && database.info !== undefined) {
             foundInfo = {
-                type: raw.info.base ?? 'base',
-                expires: raw.info.expires
+                type: database.info.type ?? 'base',
+                expires: database.info.expires
             };
+        }
+        logger.silly('Imported found info', foundInfo, database.info);
+        if (foundInfo.type !== 'base'/* && (foundInfo.type as DatabaseType) !== 'custom'*/) {
+            throw new Error('Info type must be of type base');
         }
         let workingVersion = database.version;
         const v1db = database.data;
@@ -190,6 +196,10 @@ export async function exportDatabase(): Promise<boolean> {
         return false;
     }
     try {
+        const info = await getDatabaseInfo();
+        if (info.type !== 'base') {
+            throw new Error('Cannot export a non base save');
+        }
         await fs.writeFile(fileDialog.filePath, JSON.stringify({
             version: EXPORT_VERSION,
             database: getDatabaseSaveFormat(),

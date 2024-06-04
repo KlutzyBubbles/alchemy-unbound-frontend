@@ -27,7 +27,7 @@ export const CreditInfo: FC<CreditInfoProps> = ({
             className='btn btn-no-outline float-end mb-2 me-2 d-flex flex-shrink-1 p-2 z-mainButtons'
             onClick={creditClick}>
             <div className='fs-3'>
-                {fileVersions.databaseInfo.type !== 'custom' ? '∞': credits} {getFromStore('creditsLeft', settings.language)}
+                {fileVersions.databaseInfo.type !== 'custom' ? '∞': <span className={credits <= 0 ? 'text-danger' : ''}>{credits}</span>} {getFromStore('creditsLeft', settings.language)}
             </div>
         </div>
     );

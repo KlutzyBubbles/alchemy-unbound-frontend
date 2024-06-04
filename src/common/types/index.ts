@@ -167,9 +167,15 @@ export type CombineOutput = {
 
 export type MissionAPISuccess = APIMission & Success
 
+export type MissionStoreSuccess = MissionStore & {
+    expires: number,
+    combines: number,
+    refreshed: boolean
+}
+
 export type MissionOutput = {
     type: 'success',
-    result: MissionStore
+    result: MissionStoreSuccess
 } | {
     type: 'error',
     result: ServerError
@@ -349,5 +355,6 @@ export const SoundFiles: SoundFile[] = ['first-discovery', 'new-discovery', 'pic
 
 export const SUPPORTER_DLC = 2911170;
 export const HINT_DLC = 2920230;
+export const THEME_DLC = 3025900;
 
 export const LATEST_SERVER_VERSION = 2;

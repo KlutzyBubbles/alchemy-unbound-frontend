@@ -36,7 +36,7 @@ export const Recipe: FC<RecipeProps> = ({
                 })}
                 type={ItemTypes.RECIPE_ELEMENT}
                 dragging={false}/>
-            <span className='fs-3 side-text'>+</span>
+            <span className='fs-3 side-text user-select-none'>+</span>
             <ItemRenderer
                 element={mockElement({
                     name: recipe.b.name,
@@ -49,7 +49,7 @@ export const Recipe: FC<RecipeProps> = ({
                 })}
                 type={ItemTypes.RECIPE_ELEMENT}
                 dragging={false}/>
-            <span className='fs-3 side-text'>=</span>
+            <span className='fs-3 side-text user-select-none'>=</span>
             <ItemRenderer
                 element={mockElement({
                     name: recipe.result.name,

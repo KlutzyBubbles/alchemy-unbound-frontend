@@ -8,6 +8,8 @@ export const InfoContext = createContext<{
     setIsProduction: (isProduction: boolean) => void
     hasSupporterTheme: boolean
     setHasSupporterTheme: (hasSupporterTheme: boolean) => void
+    hasThemePack: boolean
+    setHasThemePack: (hasThemePack: boolean) => void
     hasHintCheat: boolean
     setHasHintCheat: (hasHintCheat: boolean) => void
     fileVersions: FileVersions
@@ -19,6 +21,8 @@ export const InfoContext = createContext<{
             setIsProduction: (isProduction: boolean) => { console.log('DEFAULT STILL RUN', isProduction); },
             hasSupporterTheme: true,
             setHasSupporterTheme: (hasSupporterTheme: boolean) => { console.log('DEFAULT STILL RUN', hasSupporterTheme); },
+            hasThemePack: true,
+            setHasThemePack: (hasThemePack: boolean) => { console.log('DEFAULT STILL RUN', hasThemePack); },
             hasHintCheat: true,
             setHasHintCheat: (hasHintCheat: boolean) => { console.log('DEFAULT STILL RUN', hasHintCheat); },
             fileVersions: DEFAULT_FILE_VERSIONS,
@@ -35,6 +39,7 @@ export const InfoProvider: FC<InfoProviderProps> = ({
     const [isProduction, setIsProduction] = useState<boolean>(true);
     const [isLegacy, setIsLegacy] = useState<boolean>(false);
     const [hasSupporterTheme, setHasSupporterTheme] = useState<boolean>(false);
+    const [hasThemePack, setHasThemePack] = useState<boolean>(false);
     const [hasHintCheat, setHasHintCheat] = useState<boolean>(false);
     const [fileVersions, setFileVersions] = useState<FileVersions>(DEFAULT_FILE_VERSIONS);
 
@@ -47,6 +52,8 @@ export const InfoProvider: FC<InfoProviderProps> = ({
                 setIsProduction,
                 hasSupporterTheme,
                 setHasSupporterTheme,
+                hasThemePack,
+                setHasThemePack,
                 hasHintCheat,
                 setHasHintCheat,
                 fileVersions,

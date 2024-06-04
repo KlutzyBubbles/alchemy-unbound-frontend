@@ -1,6 +1,6 @@
 import { Language, languages } from '../../common/settings';
 import steamworks from '@ai-zen/steamworks.js';
-import { PlayerSteamId, auth } from '@ai-zen/steamworks.js/client';
+import { PlayerSteamId, auth, overlay } from '@ai-zen/steamworks.js/client';
 import logger from 'electron-log/main';
 import os from 'os';
 
@@ -61,6 +61,10 @@ export function isAchievementActivated(achievement: string): boolean {
 
 export function isDlcInstalled(appid: number): boolean {
     return getSteamworksClient().apps.isDlcInstalled(appid);
+}
+
+export function openToDLC(appid: number): void {
+    getSteamworksClient().overlay.activateToStore(appid, overlay.StoreFlag.AddToCartAndShow);
 }
 
 export function getFolder() {

@@ -1,4 +1,6 @@
-import { type FC, useState, useRef, useEffect } from 'react';
+import { type FC, useState, useRef, useEffect, useContext } from 'react';
+import { getFromStore } from '../../language';
+import { SettingsContext } from '../../providers/SettingsProvider';
 
 export interface CountdownItemProps {
     date: Date,
@@ -9,6 +11,7 @@ export const CountdownItem: FC<CountdownItemProps> = ({
     date,
     onComplete
 }) => {
+    const { settings } = useContext(SettingsContext);
     const [days, setDays] = useState<number>(0);
     const [hours, setHours] = useState<number>(0);
     const [minutes, setMinutes] = useState<number>(0);
@@ -29,13 +32,13 @@ export const CountdownItem: FC<CountdownItemProps> = ({
         if (timer.current !== undefined) {
             clearInterval(timer.current);
         }
-        const timerTemp = setInterval(() => runTimeUpdate(date), 1000);
+        const timerTemp = setInterval(() => runTimeUpdate(date), 16);
         timer.current = timerTemp;
     }, [date]);
 
     const runTimeUpdate = (deadline: Date) => {
         const time = deadline.getTime() - (new Date()).getTime();
-        if (time < 0) {
+        if (time <= 1000) {
             setDays(0);
             setHours(0);
             setMinutes(0);
@@ -60,7 +63,10 @@ export const CountdownItem: FC<CountdownItemProps> = ({
     return (
         <div className='dropdown-item text-body disabled'>
             {complete ? 'Waiting...' : 
-                days > 0 ? `${days} Days, ${hours} Hours, ${minutes} Minutes` :  `${hours} Hours, ${minutes} Minutes, ${seconds} Seconds`}
+                days > 0 ?
+                    `${days} ${getFromStore('timer.days', settings.language)}, ${hours} ${getFromStore('timer.hours', settings.language)}, ${minutes} ${getFromStore('timer.minutes', settings.language)}`
+                    : 
+                    `${hours} ${getFromStore('timer.hours', settings.language)}, ${minutes} ${getFromStore('timer.minutes', settings.language)}, ${seconds} ${getFromStore('timer.seconds', settings.language)}`}
         </div>
     );
 };

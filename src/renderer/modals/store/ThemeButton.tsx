@@ -61,11 +61,13 @@ export const ThemeButton: FC<ThemeButtonProps> = ({
             setLoading(false);
         }
     };
-
+    // <img src={`image://${id}/title.png`} className='card-img-top p-3' alt='Sand'/>
+    // <h1 className='text-center py-3'>Beach</h1>
+    // <p className='card-text'>{getFromStore(`store.descriptions.${id}`, settings.language)}</p>
     return (
         <div className='col-12 col-lg-4 d-flex align-items-stretch'>
-            <div className={`card theme-${name} w-100`}>
-                <img src={`image://${id}/title.png`} className='card-img-top p-3' alt='Sand'/>
+            <div className={`card theme-box theme-${name} w-100`}>
+                <img src={`image://${id}/title.png`} className='card-img-top p-3 pb-2' alt='Sand'/>
                 <div className='card-body d-flex flex-column'>
                     <ItemRenderer
                         theme={name}
@@ -80,10 +82,9 @@ export const ThemeButton: FC<ThemeButtonProps> = ({
                         })}
                         type={ItemTypes.RECIPE_ELEMENT}
                         dragging={false}/>
-                    <p className='card-text'>{getFromStore(`store.descriptions.${id}`, settings.language)}</p>
-                    <div className='row footer mt-auto'>
+                    <div className='row footer mt-auto pt-3'>
                         <div className='col-12 d-grid'>
-                            <div className={`btn btn-${unlocked || purchased ? 'secondary disabled' : 'success'} btn-lg`} onClick={() => purchaseTheme(id)}>
+                            <div className={`btn btn-${unlocked || purchased ? 'secondary disabled' : 'success'} btn-lg user-select-none`} onClick={() => purchaseTheme(id)}>
                                 {unlocked || purchased ? getFromStore('store.purchasedButton', settings.language) : `USD ${(new Intl.NumberFormat('en-US', {
                                     style: 'currency',
                                     currency: 'USD'

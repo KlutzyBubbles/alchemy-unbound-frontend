@@ -6,8 +6,9 @@ import { getFromStore } from '../../language';
 import { ThemeButton } from './ThemeButton';
 import { CreditButton } from './CreditButton';
 import { TxnItems } from '../../../common/server';
-import { ErrorCodeToString } from '../../../common/types';
+import { ErrorCodeToString, SUPPORTER_DLC } from '../../../common/types';
 import { getLegacyColor, invertLegacyColor } from '../../utils/theme';
+import { InfoContext } from '../../providers/InfoProvider';
 
 
 export interface StoreModalProps {
@@ -26,6 +27,7 @@ export const StoreModal: FC<StoreModalProps> = ({
     const [successText, setSuccessText] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     // const [aiHintsUnlocked, setAIHintsUnlocked] = useState<boolean>(false);
+    const { hasSupporterTheme, hasThemePack } = useContext(InfoContext);
     const [themes, setThemes] = useState<string[]>([]);
 
     useEffect(() => {
@@ -112,8 +114,12 @@ export const StoreModal: FC<StoreModalProps> = ({
             setSuccessText('');
             setErrorText('');
             setLoading(true);
-            await window.ServerAPI.restorePurchases();
-            setSuccessText(getFromStore('store.restored', settings.language));
+            const result = await window.ServerAPI.restorePurchases();
+            if (result) {
+                setSuccessText(getFromStore('store.restored', settings.language));
+            } else {
+                setErrorText(getFromStore('store.noRestore', settings.language));
+            }
             const info = await window.InfoAPI.getInfo();
             setThemes(info.themesUnlocked);
             // setAIHintsUnlocked(info.aiHints);
@@ -152,12 +158,33 @@ export const StoreModal: FC<StoreModalProps> = ({
                         </Alert>
                         : (<Fragment/>)}
                 </div>
+                <div className='row mx-0'>
+                    <div className='col-12 mt-3'>
+                        <div className='card theme-supporter d-flex flex-row'>
+                            <div className='card-body d-flex flex-column'>
+                                <div className='row'>
+                                    <div className='col-7 col-lg-9 col-xl-10'>
+                                        <h1 className='title user-select-none'>{getFromStore('store.titles.themeSupporter', settings.language)}</h1>
+                                    </div>
+                                    <div className='col-5 col-lg-3 col-xl-2 d-grid'>
+                                        <div className={`btn btn-${hasSupporterTheme ? 'secondary disabled' : 'success'} btn-lg user-select-none`} onClick={() => window.SteamAPI.openToDLC(SUPPORTER_DLC)}>
+                                            {hasSupporterTheme ? getFromStore('store.purchasedButton', settings.language) : `USD ${(new Intl.NumberFormat('en-US', {
+                                                style: 'currency',
+                                                currency: 'USD'
+                                            })).format(9.99)}`}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div className='row mx-0 mt-3'>
                     <ThemeButton
                         name={'sand'}
                         id={'themeSand'}
                         emoji={'⛱️'}
-                        unlocked={themes.includes('themeSand')}
+                        unlocked={hasThemePack || themes.includes('themeSand')}
                         setErrorText={setErrorText}
                         setSuccessText={setSuccessText}
                         setLoading={setLoading}
@@ -166,7 +193,7 @@ export const StoreModal: FC<StoreModalProps> = ({
                         name={'blue'}
                         id={'themeBlue'}
                         emoji={'☁️'}
-                        unlocked={themes.includes('themeBlue')}
+                        unlocked={hasThemePack || themes.includes('themeBlue')}
                         setErrorText={setErrorText}
                         setSuccessText={setSuccessText}
                         setLoading={setLoading}
@@ -175,7 +202,7 @@ export const StoreModal: FC<StoreModalProps> = ({
                         name={'pink'}
                         id={'themePink'}
                         emoji={'🌸'}
-                        unlocked={themes.includes('themePink')}
+                        unlocked={hasThemePack || themes.includes('themePink')}
                         setErrorText={setErrorText}
                         setSuccessText={setSuccessText}
                         setLoading={setLoading}
@@ -183,19 +210,19 @@ export const StoreModal: FC<StoreModalProps> = ({
                 </div>
                 <div className='row mx-0'>
                     <div className='col-12 mt-3'>
-                        <div className={`card hint-${invertLegacyColor(getLegacyColor(settings.theme))}`}>
-                            <div className='card-body d-flex flex-column'>
-                                <div className='row'>
-                                    <div className='col-7 col-lg-9 col-xl-10'>
-                                        <h1 className='title'>{getFromStore('store.titles.fillHints', settings.language)}</h1>
-                                    </div>
-                                    <div className='col-5 col-lg-3 col-xl-2 d-grid'>
-                                        <div className='btn btn-success btn-lg' onClick={purchaseFillHints}>
-                                            {`USD ${(new Intl.NumberFormat('en-US', {
-                                                style: 'currency',
-                                                currency: 'USD'
-                                            })).format(TxnItems['fillHints'].amount / 100)}`}
-                                        </div>
+                        <div className='card d-flex flex-row'>
+                            <div className='flex-shrink-1'>
+                                <div className='card-body'>
+                                    <h1 className='title m-0 user-select-none'>{getFromStore('store.titles.fillHints', settings.language)}</h1>
+                                </div>
+                            </div>
+                            <div className={`flex-grow-1 hint-${invertLegacyColor(getLegacyColor(settings.theme))}`}>
+                                <div className='card-body d-grid'>
+                                    <div className='btn btn-success btn-lg ms-auto user-select-none' onClick={purchaseFillHints}>
+                                        {`USD ${(new Intl.NumberFormat('en-US', {
+                                            style: 'currency',
+                                            currency: 'USD'
+                                        })).format(TxnItems['fillHints'].amount / 100)}`}
                                     </div>
                                 </div>
                             </div>
@@ -243,6 +270,22 @@ export const StoreModal: FC<StoreModalProps> = ({
 };
 
 /*
+
+<div className='card-body d-flex flex-column'>
+                                <div className='row'>
+                                    <div className='col-7 col-lg-9 col-xl-10'>
+                                        <h1 className='title'>{getFromStore('store.titles.fillHints', settings.language)}</h1>
+                                    </div>
+                                    <div className='col-5 col-lg-3 col-xl-2 d-grid'>
+                                        <div className='btn btn-success btn-lg' onClick={purchaseFillHints}>
+                                            {`USD ${(new Intl.NumberFormat('en-US', {
+                                                style: 'currency',
+                                                currency: 'USD'
+                                            })).format(TxnItems['fillHints'].amount / 100)}`}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                     <div className='col-12 mt-3'>
                         <div className='card'>

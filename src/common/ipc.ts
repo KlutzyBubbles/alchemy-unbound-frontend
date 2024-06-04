@@ -7,6 +7,7 @@ export enum RecipeChannel {
     SAVE = 'recipe:save',
     HAS_ALL = 'recipe:hasAll',
     HAS_ATLEAST = 'recipe:hasAtleast',
+    SYNC_INFO = 'recipe:syncInfo',
 }
 
 export enum ServerChannel {
@@ -98,5 +99,6 @@ export enum SteamChannel {
     GET_ID = 'steam:getId',
     GET_LANGUAGE = 'steam:getLanguage',
     CHECK_DLC = 'steam:isDlcInstaled',
-    GET_NAME = 'steam:getName'
+    GET_NAME = 'steam:getName',
+    OPEN_DLC = 'steam:openDLC'
 }

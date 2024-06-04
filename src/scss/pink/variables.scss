@@ -122,7 +122,7 @@ $link-color:                              $white !default;
 
 // Components
 
-$border-color:                rgba($white, .2) !default;
+$border-color:                $body-color;
 $border-color-translucent:    rgba($black, .175) !default;
 
 $box-shadow:                  1px 3px 24px -1px rgba($black, .15) !default;
@@ -176,9 +176,9 @@ $btn-box-shadow:              $box-shadow !default;
 // Forms
 
 $input-bg:                              transparent !default;
-$input-disabled-bg:                     rgba($white, .1) !default;
+$input-disabled-bg:                     rgba($black, .15) !default;
 
-$input-border-color:                    rgba($white, .4) !default;
+$input-border-color:                    $border-color;
 $input-border-width:                    1px !default;
 
 $input-focus-border-color:              $input-border-color !default;
@@ -319,7 +319,7 @@ $btn-close-color:            $black;
 
 $modal-content-color:               $body-color;
 $modal-content-bg:                  #fdb1dd;
-$modal-content-border-color:        $border-color-translucent;
+$modal-content-border-color:        $border-color;
 
 $modal-backdrop-bg:                 $black;
 $modal-backdrop-opacity:            .5;

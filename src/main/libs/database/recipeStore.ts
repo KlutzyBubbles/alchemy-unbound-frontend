@@ -1,7 +1,7 @@
-import { BasicElement, LATEST_SERVER_VERSION, Languages, Recipe, RecipeRow } from '../../../common/types';
+import { BasicElement, LATEST_SERVER_VERSION, Languages, Recipe, RecipeRow, SUPPORTER_DLC } from '../../../common/types';
 import { promises as fs } from 'fs';
 import { Compressed, compress, decompress, trimUndefinedRecursively } from 'compress-json';
-import { getFolder } from '../steam';
+import { getFolder, isDlcInstalled } from '../steam';
 import { verifyFolder } from '../../utils';
 import { Language, languages } from '../../../common/settings';
 import baseData from '../../../base.json';
@@ -14,6 +14,7 @@ import { getKeyByLanguage, getLanguage, getLanguageKeys, insertLanguage } from '
 import { getWorkingDatabase } from './workingName';
 import { validateItems } from '../server';
 import { hasProp } from '../../../common/utils';
+import { getMissionStore } from './missionStore';
 
 const DATABASE_VERISON = 4;
 
@@ -36,6 +37,7 @@ export function getPlaceholderOrder(): number {
 }
 
 export function setServerVersion(version: number) {
+    logger.silly('setServerVersion', version, serverVersion);
     serverVersion = version;
 }
 
@@ -445,6 +447,22 @@ export async function resetAndBackup(prefix = 'db_backup_'): Promise<void> {
     await resetHint(true);
 }
 
+export async function syncInfo() {
+    if (info.type === 'daily' || info.type === 'weekly') {
+        const mission = await getMissionStore(info.type);
+        if (mission === undefined) {
+            return;
+        }
+        if (info.expires !== mission.expires) {
+            setDatabaseInfo({
+                type: info.type,
+                expires: mission.expires
+            });
+            await reset();
+        }
+    }
+}
+
 export async function reset(): Promise<void> {
     logger.silly('reset()', info, data.length);
     if (info.type === 'custom') {
@@ -537,7 +555,11 @@ export async function setDiscovered(a: string, b: string, discovered: boolean): 
             break;
         }
     }
-    if (data.filter((recipe) => recipe.discovered).length % 10 === 0) {
+    let every = 50;
+    if (isDlcInstalled(SUPPORTER_DLC)) {
+        every = 25;
+    }
+    if (data.filter((recipe) => recipe.discovered).length % every === 0) {
         await addHintPoint(1);
         return true;
     }

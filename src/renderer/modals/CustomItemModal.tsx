@@ -63,22 +63,25 @@ export const ItemModal: FC<ItemModalProps> = ({
                         const errorCode = output.result.code;
                         if (errorCode <= 7 || errorCode === ServerErrorCode.STEAM_ERROR) {
                             // Soft / Unknown error that shouldn't ever make it here.
+                            if (errorCode === ServerErrorCode.NO_TOKEN) {
+                                logger.error(`Item no token error '${result}'`);
+                            }
                             logger.error(`Found error code ${errorCode} where it shouln't be. Please report this if you see it`);
                         } else {
-                            logger.error(`Idea a/b/result unknown error '${result}'`);
-                            setErrorText(getFromStore('errors.unknownError', settings.language));
-                            await window.ErrorAPI.registerError({
-                                a: '',
-                                b: '',
-                                result: result,
-                                type: 'item',
-                                code: errorCode
-                            });
-                            setLoading(false);
+                            logger.error(`Item a/b/result unknown error '${result}'`);
                         }
+                        setErrorText(getFromStore('errors.unknownError', settings.language));
+                        await window.ErrorAPI.registerError({
+                            a: '',
+                            b: '',
+                            result: result,
+                            type: 'item',
+                            code: errorCode
+                        });
+                        setLoading(false);
                     } else {
                         if (output === undefined) {
-                            logger.debug('Idea failed in offline mode (two)');
+                            logger.debug('Item failed in offline mode (two)');
                             setErrorText(getFromStore('errors.offline', settings.language));
                         } else {
                             setSuccessText(getFromStore('item.submitted', settings.language));

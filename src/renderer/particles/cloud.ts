@@ -93,7 +93,7 @@ export const cloudOptions: (theme: ThemeType, fps: number) => RecursivePartial<I
             },
             // shape: {
             //     type: 'circle',
-            // },
+            // },//
             shape: {
                 type: 'images',
                 options: {

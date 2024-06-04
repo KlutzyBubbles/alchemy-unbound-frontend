@@ -17,12 +17,16 @@ import { SoundContext } from '../../providers/SoundProvider';
 
 export interface TopButtonProps {
     openModal: (option: ModalOption) => void
+    refreshRecipes: () => void,
+    clearAll: () => void,
     credits: number,
     refresh: number
 }
 
 export const TopButtons: FC<TopButtonProps> = ({
     openModal,
+    refreshRecipes,
+    clearAll,
     credits,
     refresh
 }) => {
@@ -52,78 +56,96 @@ export const TopButtons: FC<TopButtonProps> = ({
         };
     }, []);
 
-    useEffect(() => {
-        (async () => {
-            try {
-                setLoading(true);
-                logger.info('Refreshing missions');
-                const type = fileVersions.databaseInfo.type;
-                if (type === 'daily' || type === 'weekly') {
-                    const mission = await window.ServerAPI.getMission(type);
-                    logger.info('missions', mission, type);
-                    if (mission.type === 'error') {
-                        logger.error('Issue with mission response', mission);
-                    } else {
-                        setMission(mission.result);
+    const refreshMission = async () => {
+        try {
+            setLoading(true);
+            logger.info('Refreshing missions');
+            const type = fileVersions.databaseInfo.type;
+            if (type === 'daily' || type === 'weekly') {
+                const mission = await window.ServerAPI.getMission(type);
+                logger.info('missions', mission, type);
+                if (mission.type === 'error') {
+                    logger.error('Issue with mission response', mission);
+                } else {
+                    setMission(mission.result);
+                    if (mission.result.refreshed) {
+                        await window.RecipeAPI.syncInfo();
+                        clearAll();
+                        refreshRecipes();
                     }
                 }
-                setLoading(false);
-            } catch (error) {
-                setLoading(false);
-                logger.error('Error getting mission', error);
-            }  
-        })();
+            }
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
+            logger.error('Error getting mission', error);
+        }
+    };
+
+    useEffect(() => {
+        refreshMission();
     }, [refresh, fileVersions]);
+
+    useEffect(() => {
+        if (missionDropdownOpen && mission === undefined) {
+            refreshMission();
+        }
+    }, [missionDropdownOpen]);
+
+    const onTimeComplete = () => {
+        console.log('compelte');
+        setLoading(true);
+        setTimeout(refreshMission, 1000);
+    };
 
     return (
         <div className='z-mainButtons d-flex'>
             <div
                 className='btn btn-no-outline float-start mb-2 fs-1 d-flex flex-shrink-1 p-2 z-mainButtons'
                 data-bs-toggle="offcanvas" data-bs-target="#sideMenu"><IoMenuOutline /></div>
-            {fileVersions.databaseInfo.type === 'daily' || fileVersions.databaseInfo.type === 'weekly' ?
-                loading ? <Fragment>
-                    <div className='d-flex justify-content-center'>
-                        <div className='spinner-border' role='status'>
-                            <span className='visually-hidden'>Loading...</span>
-                        </div>
+            {fileVersions.databaseInfo.type === 'daily' || fileVersions.databaseInfo.type === 'weekly' ? 
+                <div className='flex-grow-1 text-center dropdown-center pt-2'
+                    ref={missionButtonRef}
+                    data-bs-display="static">
+                    {mission === undefined || selectedMission === undefined ? 
+                        <ItemRenderer
+                            element={mockElement({
+                                name: fileVersions.databaseInfo.type,
+                                display: getObjectFromStore(`saves.${fileVersions.databaseInfo.type}`, fileVersions.databaseInfo.type),
+                                emoji: '🎯',
+                                depth: 0,
+                                first: 0,
+                                who_discovered: '',
+                                base: 1
+                            })}
+                            type={ItemTypes.RECIPE_ELEMENT}
+                            dragging={false}
+                            onClick={() => {
+                                playSound('drop', 0.5);
+                                setMissionDropdownOpen(!missionDropdownOpen);
+                            }}
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"/>
+                        :
+                        <MissionItem store={mission[selectedMission]} type={selectedMission} isItem={false} onClick={() => setMissionDropdownOpen(!missionDropdownOpen)} />
+                    }
+                    <div className={`dropdown-menu ${ missionDropdownOpen ? 'show' : '' }`}>
+                        {loading ? <Fragment>
+                            <div className='d-flex justify-content-center'>
+                                <div className='spinner-border' role='status'>
+                                    <span className='visually-hidden'>Loading...</span>
+                                </div>
+                            </div>
+                        </Fragment> : mission === undefined ? <div className='dropdown-item'><h4>No Mission</h4></div> :
+                            <Fragment>
+                                <CountdownItem date={new Date(new Date(mission.expires).getTime())} onComplete={onTimeComplete} />
+                                <MissionItem store={mission.easy} type={'easy'} isItem={true} onClick={() => setSelectedMission('easy')} />
+                                <MissionItem store={mission.medium} type={'medium'} isItem={true} onClick={() => setSelectedMission('medium')} />
+                                <MissionItem store={mission.hard} type={'hard'} isItem={true} onClick={() => setSelectedMission('hard')} />
+                                <MissionItem store={mission.random} type={'random'} isItem={true} onClick={() => setSelectedMission('random')} />
+                            </Fragment>}
                     </div>
-                </Fragment> : 
-                    <div className='flex-grow-1 text-center dropdown-center pt-2'
-                        ref={missionButtonRef}
-                        data-bs-display="static">
-                        {mission === undefined || selectedMission === undefined ? 
-                            <ItemRenderer
-                                element={mockElement({
-                                    name: fileVersions.databaseInfo.type,
-                                    display: getObjectFromStore(`saves.${fileVersions.databaseInfo.type}`, fileVersions.databaseInfo.type),
-                                    emoji: '🎯',
-                                    depth: 0,
-                                    first: 0,
-                                    who_discovered: '',
-                                    base: 1
-                                })}
-                                type={ItemTypes.RECIPE_ELEMENT}
-                                dragging={false}
-                                onClick={() => {
-                                    playSound('drop', 0.5);
-                                    setMissionDropdownOpen(!missionDropdownOpen);
-                                }}
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"/>
-                            :
-                            <MissionItem store={mission[selectedMission]} type={selectedMission} isItem={false} onClick={() => setMissionDropdownOpen(!missionDropdownOpen)} />
-                        }
-                        <div className={`dropdown-menu ${ missionDropdownOpen ? 'show' : '' }`}>
-                            {mission === undefined ? <div className='dropdown-item'><h4>No Mission</h4></div> :
-                                <Fragment>
-                                    <CountdownItem date={new Date(new Date(mission.expires).getTime() + (fileVersions.databaseInfo.type === 'weekly' ? 7 : 1) * 24 * 60 * 60 * 1000)} onComplete={() => console.log('complete')} />
-                                    <MissionItem store={mission.easy} type={'easy'} isItem={true} onClick={() => setSelectedMission('easy')} />
-                                    <MissionItem store={mission.medium} type={'medium'} isItem={true} onClick={() => setSelectedMission('medium')} />
-                                    <MissionItem store={mission.hard} type={'hard'} isItem={true} onClick={() => setSelectedMission('hard')} />
-                                    <MissionItem store={mission.random} type={'random'} isItem={true} onClick={() => setSelectedMission('random')} />
-                                </Fragment>}
-                        </div>
-                    </div>
+                </div>
                 :
                 <div className='flex-grow-1 text-body-secondary mt-3'>
                     <h4 className='text-center user-select-none'>{getFromStore(`saves.${fileVersions.databaseInfo.type}`, settings.language)}</h4>
@@ -133,4 +155,4 @@ export const TopButtons: FC<TopButtonProps> = ({
             <CreditInfo openModal={openModal} credits={credits}/>
         </div>
     );
-};
+};// (fileVersions.databaseInfo.type === 'weekly' ? 7 : 1) * 24 * 

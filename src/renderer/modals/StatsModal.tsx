@@ -89,7 +89,7 @@ export const StatsModal: FC<StatsModalProps> = ({
         <Modal show={show} onHide={handleHide} centered size="xl" data-bs-theme={settings.theme}>
             <Modal.Header closeButton>
                 <Modal.Title>
-                    <h2 className='mb-0 ms-2'>{getFromStore('info.stats.title', settings.language)}</h2>
+                    <h2 className='mb-0 ms-2 user-select-none'>{getFromStore('info.stats.title', settings.language)}</h2>
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>

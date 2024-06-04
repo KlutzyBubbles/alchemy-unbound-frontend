@@ -1,4 +1,5 @@
 import { DatabaseData } from '../../../common/types/saveFormat';
+import { getMission } from '../server';
 import { createDatabase, getDatabaseInfo, reset, save, setDatabaseInfo } from './recipeStore';
 import { setWorkingDatabase } from './workingName';
 import logger from 'electron-log/main';
@@ -25,10 +26,15 @@ async function switchInfo(info: DatabaseData) {
         existingInfo = info;
     }
     if (existingInfo.type === 'daily' || existingInfo.type === 'weekly') {
-        if (existingInfo.expires !== info.expires) {
+        const mission = await getMission(existingInfo.type);
+        let expires = existingInfo.expires;
+        if (mission.type === 'success') {
+            expires = mission.result.expires;
+        }
+        if (existingInfo.expires !== expires) {
             setDatabaseInfo({
                 type: existingInfo.type,
-                expires: info.expires
+                expires: expires
             });
             await reset();
         }

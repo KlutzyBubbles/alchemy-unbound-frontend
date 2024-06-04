@@ -1,13 +1,13 @@
 import { ipcMain } from 'electron';
 import { ErrorEntryAdd, Recipe } from '../common/types';
-import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor, hasAllRecipes, hasAtleastRecipe } from './libs/database/recipeStore';
+import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor, hasAllRecipes, hasAtleastRecipe, syncInfo } from './libs/database/recipeStore';
 import { addItem, checkDLC, combine, getEndpoint, getMission, getToken, getUserDetails, getVersion, initTransaction, restorePurchases } from './libs/server';
 import { DisplayChannel, ErrorChannel, GenericChannel, HintChannel, ImportExportChannel, InfoChannel, ProfileChannel, RecipeChannel, ServerChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
 import { Language, Settings } from '../common/settings';
 import { getSettings, loadSettings, saveSettings, setSetting, setSettings } from './libs/settings';
 import { getAppVersions, isPackaged, getSystemInformation, quit, getFileVersions } from './libs/generic';
 import { getCurrentDisplay, getDisplays, isFullscreen, moveToDisplay, setFullscreen } from './libs/display';
-import { activateAchievement, getSteamGameLanguage, getSteamId, getUsername, isAchievementActivated, isDlcInstalled } from './libs/steam';
+import { activateAchievement, getSteamGameLanguage, getSteamId, getUsername, isAchievementActivated, isDlcInstalled, openToDLC } from './libs/steam';
 import { getStats, loadStats, saveStats, setStat, setStats } from './libs/stats';
 import { Stats } from '../common/stats';
 import { addHintPoint, fillHints, getHint, getHintsLeft, getMaxHints, hintComplete, loadHint, resetHint, saveHint } from './libs/hints';
@@ -44,6 +44,9 @@ export function register() {
     });
     ipcMain.handle(RecipeChannel.HAS_ATLEAST, async (_, result: string) => {
         return hasAtleastRecipe(result);
+    });
+    ipcMain.handle(RecipeChannel.SYNC_INFO, async () => {
+        return syncInfo();
     });
 
     // Server handlers
@@ -200,6 +203,9 @@ export function register() {
     });
     ipcMain.handle(SteamChannel.GET_NAME, async () => {
         return getUsername();
+    });
+    ipcMain.handle(SteamChannel.OPEN_DLC, async (_, appid: number) => {
+        return openToDLC(appid);
     });
     
     // Hint handlers

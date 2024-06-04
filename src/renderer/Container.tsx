@@ -1,7 +1,7 @@
 import { Container, Row } from 'react-bootstrap';
 import { DropContainer } from './dragndrop/DropContainer';
 import { FC, Fragment, useContext, useEffect, useRef, useState } from 'react';
-import { SettingsModal } from './modals/SettingsModal';
+import { SettingsModal } from './modals/settings/SettingsModal';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 // import { loadSlim } from '@tsparticles/slim';
 import { loadAll } from '@tsparticles/all';
@@ -19,7 +19,7 @@ export type ModalOption = 'settings' | 'info' | 'stats' | 'store' | 'addItem' | 
 
 export const ContentContainer: FC = () => {
     const { settings } = useContext(SettingsContext);
-    const { loading } = useContext(LoadingContext);
+    const { loadingVisible } = useContext(LoadingContext);
     const [currentModal, setCurrentModal] = useState<ModalOption>('none');
     const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.theme, settings.fps));
     const [particleReady, setParticleReady] = useState<boolean>(false);
@@ -75,12 +75,12 @@ export const ContentContainer: FC = () => {
         setCurrentModal(option);
     };
 
-    if (loading) {
+    if (loadingVisible) {
         return (
             <div data-bs-theme={settings.theme}>
-                <Container fluid={true} className='p-0 bg-theme full-size overflow-hidden' data-bs-theme={settings.theme}>
+                <Container fluid={true} className='p-0 loading-fullscreen full-size overflow-hidden' data-bs-theme={settings.theme}>
                     <div className='overlay'>
-                        <div className={`${loading ? 'd-flex' : 'd-none'} justify-content-center`}>
+                        <div className='d-flex justify-content-center'>
                             <div className="spinner-border spinner-lg" role="loading"/>
                         </div>
                     </div>
