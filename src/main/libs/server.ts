@@ -11,6 +11,7 @@ import { Language } from '../../common/settings';
 import { MissionLevelStore, MissionStore, MissionType } from '../../common/types/saveFormat';
 import { addCombine, getMissionStore, setComplete, setMissionStore } from './database/missionStore';
 import { MissionDifficulty, missionRewards } from '../../common/mission';
+import { delay } from '../../common/utils';
 
 export type RequestErrorResult = {
   code: number,
@@ -860,7 +861,8 @@ async function apiRequest(
     path: string,
     queryParams?: Record<string, string | number | boolean>,
     body?: Record<string, unknown>,
-    tokenRequired: boolean = false
+    tokenRequired: boolean = false,
+    cooloff: boolean = false
 ): Promise<GenericOutput> {
     logger.debug('apiRequest', method, path, queryParams, body, tokenRequired);
     logger.warn('wapiRequest', method, path, queryParams, body, tokenRequired);
@@ -907,13 +909,19 @@ async function apiRequest(
         if (response.ok) {
             const body: GenericSuccess = (await response.json()) as GenericSuccess;
             logger.debug('Response body', body);
-            logger.warn('wResponse body', body);
             return {
                 type: 'success',
                 result: body
             };
         } else {
             logger.warn('Error making request', response.status, response.body);
+            if (response.status === 429) {
+                // Rate limited
+                if (!cooloff) {
+                    await delay(500);
+                    return apiRequest(method, path, queryParams, body, tokenRequired, true);
+                }
+            }
             const json = (await response.json()) as RequestErrorResult;
             logger.warn('Error making request body format', json);
             if ([ServerErrorCode.QUERY_MISSING, ServerErrorCode.QUERY_INVALID, ServerErrorCode.QUERY_UNDEFINED].includes(json.code)) {
