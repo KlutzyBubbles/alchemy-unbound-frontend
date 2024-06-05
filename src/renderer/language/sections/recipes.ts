@@ -53,37 +53,9 @@ export const LanguageStore: LanguageStoreRecurring = {
         koreana: '해커'
     },
     piney: {
-        english: 'Piney',
-        schinese: 'Piney',
-        russian: 'Piney',
-        spanish: 'Piney',
-        french: 'Piney',
-        japanese: 'Piney',
-        indonesian: 'Piney',
-        german: 'Piney',
-        latam: 'Piney',
-        italian: 'Piney',
-        dutch: 'Piney',
-        polish: 'Piney',
-        portuguese: 'Piney',
-        tchinese: 'Piney',
-        koreana: 'Piney'
+        english: 'Piney'
     },
     klutzybubbles: {
-        english: 'KlutzyBubbles',
-        schinese: 'KlutzyBubbles',
-        russian: 'KlutzyBubbles',
-        spanish: 'KlutzyBubbles',
-        french: 'KlutzyBubbles',
-        japanese: 'KlutzyBubbles',
-        indonesian: 'KlutzyBubbles',
-        german: 'KlutzyBubbles',
-        latam: 'KlutzyBubbles',
-        italian: 'KlutzyBubbles',
-        dutch: 'KlutzyBubbles',
-        polish: 'KlutzyBubbles',
-        portuguese: 'KlutzyBubbles',
-        tchinese: 'KlutzyBubbles',
-        koreana: 'KlutzyBubbles'
+        english: 'KlutzyBubbles'
     }
 };

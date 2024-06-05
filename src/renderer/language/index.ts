@@ -1,21 +1,30 @@
 import { Languages } from '../../common/types';
 import { Language, languages } from '../../common/settings';
-import { LanguageStore, LanguageStoreRecurring } from './store';
+import { LanguageStore, LanguageStoreItem, LanguageStoreRecurring } from './store';
 import { hasProp } from '../../common/utils';
 import logger from 'electron-log/renderer';
+
+function fillPartial(object: LanguageStoreItem): Languages {
+    for (const languageKey of languages) {
+        if (!hasProp(object, languageKey) || object[languageKey] === undefined || object[languageKey] === null) {
+            object[languageKey] = object.english;
+        }
+    }
+    return object as Languages;
+}
 
 function getRawObjectFromStore(name: string): Languages {
     if (name.includes('.')) {
         const tree = name.split('.');
-        let workingSection: Languages | LanguageStoreRecurring = LanguageStore;
+        let workingSection: LanguageStoreItem | LanguageStoreRecurring = LanguageStore;
         let found = 0;
         for (const branch of tree) {
             found++;
-            if (hasProp(workingSection, 'latam')) {
+            if (hasProp(workingSection, 'english')) {
                 if (found < tree.length) {
                     logger.warn('Found language before tree end (requested, found)', name, tree.slice(0, found).join(','));
                 }
-                return (workingSection as Languages);
+                return fillPartial(workingSection as LanguageStoreItem);
             } else {
                 const recurring = workingSection as LanguageStoreRecurring;
                 if (hasProp(recurring, branch)) {
@@ -27,8 +36,8 @@ function getRawObjectFromStore(name: string): Languages {
                 }
             }
         }
-        if (hasProp(workingSection, 'latam')) {
-            return (workingSection as Languages);
+        if (hasProp(workingSection, 'english')) {
+            return fillPartial(workingSection as LanguageStoreItem);
         } else {
             logger.warn('getObjectFromStore INVALID_LANGUAGE_TREE_DEF', name);
             return getPlaceholderLanguage('INVALID');

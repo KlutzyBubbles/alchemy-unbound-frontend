@@ -11,8 +11,10 @@ import { LanguageStore as SavesLanguageStore } from './sections/saves';
 import { LanguageStore as RecipesLanguageStore } from './sections/recipes';
 import { LanguageStore as TimerLanguageStore } from './sections/timer';
 
+export type LanguageStoreItem = Partial<Omit<Languages, 'english'>> & { english: string };
+
 export type LanguageStoreRecurring = {
-    [key: string]: Languages | LanguageStoreRecurring
+    [key: string]: LanguageStoreItem | LanguageStoreRecurring
 }
 
 export const LanguageStore: LanguageStoreRecurring = {

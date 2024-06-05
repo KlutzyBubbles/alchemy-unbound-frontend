@@ -67,8 +67,13 @@ export function getDatabaseSaveFormat() {
 }
 
 export async function save(): Promise<void> {
+    logger.silly('recipeStore save', loadedVersion);
     await verifyFolder('database');
-    await saveToFile(`database/${await getWorkingDatabase()}.json`, getDatabaseSaveFormat());
+    if (loadedVersion < 0 && loadedVersion !== FileVersionError.DEFAULTS) {
+        logger.warn('Database not saved due to file version potentially not loaded', loadedVersion);
+    } else {
+        await saveToFile(`database/${await getWorkingDatabase()}.json`, getDatabaseSaveFormat());
+    }
 }
 
 export async function setDataRaw(newData: RecipeRecord[]) {
@@ -331,7 +336,7 @@ async function loadData(override?: DatabaseData): Promise<RecipeRecord[]> {
         if (raw.version !== undefined) {
             loadedVersion = raw.version;
         } else {
-            loadedVersion = 0;
+            loadedVersion = FileVersionError.NO_VERSION;
         }
         logger.info('raw', raw.version);
         let workingVersion = raw.version;

@@ -27,8 +27,13 @@ export function getDatabaseSaveFormat() {
 }
 
 export async function save(): Promise<void> {
+    logger.silly('languageStore save', loadedVersion);
     await verifyFolder();
-    await saveToFile('lang.json', getDatabaseSaveFormat());
+    if (loadedVersion < 0 && loadedVersion !== FileVersionError.DEFAULTS) {
+        logger.warn('Database not saved due to file version potentially not loaded', loadedVersion);
+    } else {
+        await saveToFile('lang.json', getDatabaseSaveFormat());
+    }
 }
 
 export async function setDataRaw(newData: LanguageRecords) {
@@ -46,7 +51,7 @@ async function loadData(): Promise<LanguageRecords> {
         if (raw.version !== undefined) {
             loadedVersion = raw.version;
         } else {
-            loadedVersion = 0;
+            loadedVersion = FileVersionError.NO_VERSION;
         }
         if (raw.version === 1) {
             return loadLangDatabaseV1(raw.data);

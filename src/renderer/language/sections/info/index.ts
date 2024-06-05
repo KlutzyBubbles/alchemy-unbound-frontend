@@ -1,24 +1,18 @@
 import { LanguageStoreRecurring } from '../../store';
 import { LanguageStore as StatsLanguageStore } from './stats';
+import { LanguageStore as DevLanguageStore } from './dev';
+import { LanguageStore as FilesLanguageStore } from './files';
 
 export const LanguageStore: LanguageStoreRecurring = {
     stats: StatsLanguageStore,
+    dev: DevLanguageStore,
+    files: FilesLanguageStore,
     alchemyUnbound: {
         english: 'Alchemy Unbound',
-        schinese: 'Alchemy Unbound',
-        russian: 'Alchemy Unbound',
         spanish: 'el Alchemy Unbound',
         french: 'Baguette Unbound',
         japanese: 'Alchemy Unboundu',
-        indonesian: 'Alchemy Unbound',
-        german: 'Alchemy Unbound',
-        latam: 'Alchemy Unbound',
-        italian: 'Alchemy Unbound',
-        dutch: 'Alchemy Unbound',
-        polish: 'Alchemy Unbound',
-        portuguese: 'Alchemy Unboundo',
-        tchinese: 'Alchemy Unbound',
-        koreana: 'Alchemy Unbound'
+        portuguese: 'Alchemy Unboundo'
     },
     apiErrorsTitle: {
         english: 'API Errors',

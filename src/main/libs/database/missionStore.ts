@@ -45,7 +45,7 @@ async function loadData(): Promise<MissionStores> {
         if (raw.version !== undefined) {
             loadedVersion = raw.version;
         } else {
-            loadedVersion = 0;
+            loadedVersion = FileVersionError.NO_VERSION;
         }
         if (raw.version === 1) {
             return loadMissionDBV1(raw.data);

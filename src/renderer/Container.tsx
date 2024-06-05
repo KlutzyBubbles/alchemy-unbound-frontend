@@ -11,7 +11,7 @@ import { SettingsContext } from './providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { LoadingContext } from './providers/LoadingProvider';
 import { SideMenu } from './dragndrop/Menu/SideMenu';
-import { StatsModal } from './modals/StatsModal';
+import { StatsModal } from './modals/stats/StatsModal';
 import { StoreModal } from './modals/store/StoreModal';
 import { ItemModal } from './modals/CustomItemModal';
 
