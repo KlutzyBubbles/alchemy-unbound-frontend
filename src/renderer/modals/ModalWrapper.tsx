@@ -1,4 +1,4 @@
-import { type FC, useContext, ReactNode, PropsWithChildren } from 'react';
+import { type FC, useContext, ReactNode, PropsWithChildren, CSSProperties, Fragment } from 'react';
 import { Modal } from 'react-bootstrap';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { ThemeType } from '../../common/settings';
@@ -8,7 +8,8 @@ export interface ModalWrapperProps {
   show: boolean
   title: string
   theme?: ThemeType
-  footerContent: ReactNode
+  style?: CSSProperties
+  footerContent?: ReactNode
   handleHide: () => void
 }
 
@@ -17,12 +18,19 @@ export const ModalWrapper: FC<PropsWithChildren<ModalWrapperProps>> = ({
     theme,
     title,
     children,
+    style,
     footerContent,
     handleHide
 }) => {
     const { settings } = useContext(SettingsContext);
 
-    return <Modal show={show} onHide={handleHide} centered size="xl" data-bs-theme={theme ?? settings.theme}>
+    return <Modal
+        show={show}
+        onHide={handleHide}
+        centered
+        size="xl"
+        data-bs-theme={theme ?? settings.theme}
+        style={style}>
         <Modal.Header closeButton data-bs-theme={theme ?? settings.theme}>
             <Modal.Title>
                 <h2 className='mb-0 ms-2 user-select-none'>{getFromStore(title, settings.language)}</h2>
@@ -31,8 +39,9 @@ export const ModalWrapper: FC<PropsWithChildren<ModalWrapperProps>> = ({
         <Modal.Body>
             {children}
         </Modal.Body>
-        <Modal.Footer>
-            {footerContent}
-        </Modal.Footer>
+        {footerContent === undefined ? <Fragment /> : 
+            <Modal.Footer>
+                {footerContent}
+            </Modal.Footer>}
     </Modal>;
 };

@@ -1,10 +1,11 @@
 import { useState, type FC, useEffect, useContext, Fragment } from 'react';
-import { Alert, Button, Form, Modal } from 'react-bootstrap';
+import { Alert, Button, Form } from 'react-bootstrap';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { getFromStore } from '../language';
 import logger from 'electron-log/renderer';
 import { ServerErrorCode } from '../../common/types';
 import { DEFAULT_SETTINGS, Language, languageDisplay, languages } from '../../common/settings';
+import { ModalWrapper } from './ModalWrapper';
 
 export interface ItemModalProps {
   show: boolean
@@ -99,68 +100,60 @@ export const ItemModal: FC<ItemModalProps> = ({
         }
     };
 
-    return (
-        <Fragment>
-            <Modal show={show} onHide={handleHide} centered size="xl" data-bs-theme={settings.theme}>
-                <Modal.Header closeButton data-bs-theme={settings.theme}>
-                    <Modal.Title>{getFromStore('item.title', settings.language)}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form onSubmit={(e) => e.preventDefault()}>
-                        <div className='row mb-2'>
-                            <div className='col-12'>
-                                <p className='text-center'>{getFromStore('item.text', settings.language)}</p>
-                            </div>
-                        </div>
-                        <div className='row mb-4'>
-                            <div className='col-12 col-md-8'>
-                                <input
-                                    type="text"
-                                    className="form-control override-focus"
-                                    disabled={loading}
-                                    value={result}
-                                    onChange={(e) => setResult(e.currentTarget.value)}
-                                    placeholder={getFromStore('item.item', settings.language)}/>
-                            </div>
-                            <div className='col-12 col-md-4'>
-                                <Form.Select aria-label="Language" onChange={onLanguageSelect} value={language}>
-                                    {languages.map((language) => {
-                                        return (<option
-                                            key={language}
-                                            value={language}>
-                                            {languageDisplay[language].native} ({languageDisplay[language].english})
-                                        </option>);
-                                    })}
-                                </Form.Select>
-                            </div>
-                        </div>
-                        <div className='row px-3'>
-                            {errorText !== '' ?
-                                <Alert variant="danger" onClose={() => setErrorText('')} dismissible>
-                                    <span>{errorText}</span>
-                                </Alert>
-                                : (<Fragment/>)}
-                        </div>
-                        <div className='row px-3'>
-                            {successText !== '' ?
-                                <Alert variant="success" onClose={() => setSuccessText('')} dismissible>
-                                    <span>{successText}</span>
-                                </Alert>
-                                : (<Fragment/>)}
-                        </div>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleHide} className='me-auto'>
-                        {getFromStore('item.buttons.cancel', settings.language)}
-                    </Button>
-                    <Button variant="primary" onClick={submitIdea}>
-                        {loading ? (<div className="spinner-border" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </div>) : getFromStore('item.buttons.submit', settings.language)}
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-        </Fragment>
-    );
+    const footerContent = <Fragment>
+        <Button variant="secondary" onClick={handleHide} className='me-auto'>
+            {getFromStore('item.buttons.cancel', settings.language)}
+        </Button>
+        <Button variant="primary" onClick={submitIdea}>
+            {loading ? (<div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+            </div>) : getFromStore('item.buttons.submit', settings.language)}
+        </Button>
+    </Fragment>;
+
+    return <ModalWrapper show={show} title={'item.title'} footerContent={footerContent} handleHide={handleHide}>
+        <Form onSubmit={(e) => e.preventDefault()}>
+            <div className='row mb-2'>
+                <div className='col-12'>
+                    <p className='text-center'>{getFromStore('item.text', settings.language)}</p>
+                </div>
+            </div>
+            <div className='row mb-4'>
+                <div className='col-12 col-md-8'>
+                    <input
+                        type="text"
+                        className="form-control override-focus"
+                        disabled={loading}
+                        value={result}
+                        onChange={(e) => setResult(e.currentTarget.value)}
+                        placeholder={getFromStore('item.item', settings.language)}/>
+                </div>
+                <div className='col-12 col-md-4'>
+                    <Form.Select aria-label="Language" onChange={onLanguageSelect} value={language}>
+                        {languages.map((language) => {
+                            return (<option
+                                key={language}
+                                value={language}>
+                                {languageDisplay[language].native} ({languageDisplay[language].english})
+                            </option>);
+                        })}
+                    </Form.Select>
+                </div>
+            </div>
+            <div className='row px-3'>
+                {errorText !== '' ?
+                    <Alert variant="danger" onClose={() => setErrorText('')} dismissible>
+                        <span>{errorText}</span>
+                    </Alert>
+                    : (<Fragment/>)}
+            </div>
+            <div className='row px-3'>
+                {successText !== '' ?
+                    <Alert variant="success" onClose={() => setSuccessText('')} dismissible>
+                        <span>{successText}</span>
+                    </Alert>
+                    : (<Fragment/>)}
+            </div>
+        </Form>
+    </ModalWrapper>;
 };

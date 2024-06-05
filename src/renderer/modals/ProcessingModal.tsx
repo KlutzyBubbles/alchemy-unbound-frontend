@@ -1,7 +1,5 @@
-import { type FC, useContext, ReactNode, } from 'react';
-import { Modal } from 'react-bootstrap';
-import { SettingsContext } from '../providers/SettingsProvider';
-import { getFromStore } from '../language';
+import { type FC, ReactNode, } from 'react';
+import { ModalWrapper } from './ModalWrapper';
 
 export interface ProcessingModalProps {
   show: boolean,
@@ -14,18 +12,9 @@ export const ProcessingModal: FC<ProcessingModalProps> = ({
     onCancel,
     children
 }) => {
-    const { settings } = useContext(SettingsContext);
-
-    return (
-        <Modal show={show} onHide={onCancel} centered size="xl" data-bs-theme={settings.theme} style={{
-            background: '#000000dd'
-        }}>
-            <Modal.Header closeButton data-bs-theme={settings.theme}>
-                <Modal.Title>{getFromStore('dialog.processingTitle', settings.language)}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                {children}
-            </Modal.Body>
-        </Modal>
-    );
+    return <ModalWrapper show={show} title={'dialog.processingTitle'} handleHide={onCancel} style={{
+        background: '#000000dd'
+    }}>
+        {children}
+    </ModalWrapper>;
 };

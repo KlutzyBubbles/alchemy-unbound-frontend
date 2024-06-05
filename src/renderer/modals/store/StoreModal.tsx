@@ -1,5 +1,5 @@
 import { type FC, useContext, useState, Fragment, useEffect } from 'react';
-import { Alert, Button, Modal } from 'react-bootstrap';
+import { Alert, Button } from 'react-bootstrap';
 import { SettingsContext } from '../../providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { getFromStore } from '../../language';
@@ -9,6 +9,7 @@ import { TxnItems } from '../../../common/server';
 import { ErrorCodeToString, SUPPORTER_DLC } from '../../../common/types';
 import { getLegacyColor, invertLegacyColor } from '../../utils/theme';
 import { InfoContext } from '../../providers/InfoProvider';
+import { ModalWrapper } from '../ModalWrapper';
 
 
 export interface StoreModalProps {
@@ -131,142 +132,136 @@ export const StoreModal: FC<StoreModalProps> = ({
         }
     };
 
-    return (
-        <Modal show={show} onHide={handleHide} centered size='xl' data-bs-theme={settings.theme}>
-            <Modal.Header closeButton>
-                <Modal.Title>{getFromStore('store.title', settings.language)}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body className='p-0'>
-                <div className='row mx-3'>
-                    {loading ?
-                        <Alert className='mb-0 mt-3' variant="info" onClose={() => setErrorText('')} dismissible>
-                            <span>{getFromStore('store.loading', settings.language)}</span>
-                        </Alert>
-                        : (<Fragment/>)}
-                </div>
-                <div className='row mx-3'>
-                    {errorText !== '' ?
-                        <Alert className='mb-0 mt-3' variant="danger" onClose={() => setErrorText('')} dismissible>
-                            <span>{errorText}</span>
-                        </Alert>
-                        : (<Fragment/>)}
-                </div>
-                <div className='row mx-3'>
-                    {successText !== '' ?
-                        <Alert className='mb-0 mt-3' variant="success" onClose={() => setSuccessText('')} dismissible>
-                            <span>{successText}</span>
-                        </Alert>
-                        : (<Fragment/>)}
-                </div>
-                <div className='row mx-0'>
-                    <div className='col-12 mt-3'>
-                        <div className='card theme-supporter d-flex flex-row'>
-                            <div className='card-body d-flex flex-column'>
-                                <div className='row'>
-                                    <div className='col-7 col-lg-9 col-xl-10'>
-                                        <h1 className='title user-select-none'>{getFromStore('store.titles.themeSupporter', settings.language)}</h1>
-                                    </div>
-                                    <div className='col-5 col-lg-3 col-xl-2 d-grid'>
-                                        <div className={`btn btn-${hasSupporterTheme ? 'secondary disabled' : 'success'} btn-lg user-select-none`} onClick={() => window.SteamAPI.openToDLC(SUPPORTER_DLC)}>
-                                            {hasSupporterTheme ? getFromStore('store.purchasedButton', settings.language) : `USD ${(new Intl.NumberFormat('en-US', {
-                                                style: 'currency',
-                                                currency: 'USD'
-                                            })).format(9.99)}`}
-                                        </div>
-                                    </div>
+    const footerContent = <Button size="lg" variant="secondary" onClick={handleRestore}>
+        {getFromStore('store.restore', settings.language)}
+    </Button>;
+
+    return <ModalWrapper show={show} title={'store.title'} footerContent={footerContent} handleHide={handleHide}>
+        <Fragment>
+            <div className='row mx-3'>
+                {loading ?
+                    <Alert className='mb-0 mt-3' variant="info" onClose={() => setErrorText('')} dismissible>
+                        <span>{getFromStore('store.loading', settings.language)}</span>
+                    </Alert>
+                    : (<Fragment/>)}
+            </div>
+            <div className='row mx-3'>
+                {errorText !== '' ?
+                    <Alert className='mb-0 mt-3' variant="danger" onClose={() => setErrorText('')} dismissible>
+                        <span>{errorText}</span>
+                    </Alert>
+                    : (<Fragment/>)}
+            </div>
+            <div className='row mx-3'>
+                {successText !== '' ?
+                    <Alert className='mb-0 mt-3' variant="success" onClose={() => setSuccessText('')} dismissible>
+                        <span>{successText}</span>
+                    </Alert>
+                    : (<Fragment/>)}
+            </div>
+            <div className='row mx-0'>
+                <div className='col-12 mt-3'>
+                    <div className='card theme-supporter d-flex flex-row'>
+                        <div className='card-body d-flex flex-column'>
+                            <div className='row'>
+                                <div className='col-7 col-lg-9 col-xl-10'>
+                                    <h1 className='title user-select-none'>{getFromStore('store.titles.themeSupporter', settings.language)}</h1>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className='row mx-0 mt-3'>
-                    <ThemeButton
-                        name={'sand'}
-                        id={'themeSand'}
-                        emoji={'⛱️'}
-                        unlocked={hasThemePack || themes.includes('themeSand')}
-                        setErrorText={setErrorText}
-                        setSuccessText={setSuccessText}
-                        setLoading={setLoading}
-                        addTheme={addTheme}/>
-                    <ThemeButton
-                        name={'blue'}
-                        id={'themeBlue'}
-                        emoji={'☁️'}
-                        unlocked={hasThemePack || themes.includes('themeBlue')}
-                        setErrorText={setErrorText}
-                        setSuccessText={setSuccessText}
-                        setLoading={setLoading}
-                        addTheme={addTheme}/>
-                    <ThemeButton
-                        name={'pink'}
-                        id={'themePink'}
-                        emoji={'🌸'}
-                        unlocked={hasThemePack || themes.includes('themePink')}
-                        setErrorText={setErrorText}
-                        setSuccessText={setSuccessText}
-                        setLoading={setLoading}
-                        addTheme={addTheme}/>
-                </div>
-                <div className='row mx-0'>
-                    <div className='col-12 mt-3'>
-                        <div className='card d-flex flex-row'>
-                            <div className='flex-shrink-1'>
-                                <div className='card-body'>
-                                    <h1 className='title m-0 user-select-none'>{getFromStore('store.titles.fillHints', settings.language)}</h1>
-                                </div>
-                            </div>
-                            <div className={`flex-grow-1 hint-${invertLegacyColor(getLegacyColor(settings.theme))}`}>
-                                <div className='card-body d-grid'>
-                                    <div className='btn btn-success btn-lg ms-auto user-select-none' onClick={purchaseFillHints}>
-                                        {`USD ${(new Intl.NumberFormat('en-US', {
+                                <div className='col-5 col-lg-3 col-xl-2 d-grid'>
+                                    <div className={`btn btn-${hasSupporterTheme ? 'secondary disabled' : 'success'} btn-lg user-select-none`} onClick={() => window.SteamAPI.openToDLC(SUPPORTER_DLC)}>
+                                        {hasSupporterTheme ? getFromStore('store.purchasedButton', settings.language) : `USD ${(new Intl.NumberFormat('en-US', {
                                             style: 'currency',
                                             currency: 'USD'
-                                        })).format(TxnItems['fillHints'].amount / 100)}`}
+                                        })).format(9.99)}`}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className='row mx-0 mb-3'>
-                    <CreditButton
-                        name={'250'}
-                        id={'credit250'}
-                        setErrorText={setErrorText}
-                        setSuccessText={setSuccessText}
-                        setLoading={setLoading}
-                        refreshValues={refreshValues}/>
-                    <CreditButton
-                        name={'750'}
-                        id={'credit750'}
-                        setErrorText={setErrorText}
-                        setSuccessText={setSuccessText}
-                        setLoading={setLoading}
-                        refreshValues={refreshValues}/>
-                    <CreditButton
-                        name={'1500'}
-                        id={'credit1500'}
-                        setErrorText={setErrorText}
-                        setSuccessText={setSuccessText}
-                        setLoading={setLoading}
-                        refreshValues={refreshValues}/>
-                    <CreditButton
-                        name={'3500'}
-                        id={'credit3500'}
-                        setErrorText={setErrorText}
-                        setSuccessText={setSuccessText}
-                        setLoading={setLoading}
-                        refreshValues={refreshValues}/>
+            </div>
+            <div className='row mx-0 mt-3'>
+                <ThemeButton
+                    name={'sand'}
+                    id={'themeSand'}
+                    emoji={'⛱️'}
+                    unlocked={hasThemePack || themes.includes('themeSand')}
+                    setErrorText={setErrorText}
+                    setSuccessText={setSuccessText}
+                    setLoading={setLoading}
+                    addTheme={addTheme}/>
+                <ThemeButton
+                    name={'blue'}
+                    id={'themeBlue'}
+                    emoji={'☁️'}
+                    unlocked={hasThemePack || themes.includes('themeBlue')}
+                    setErrorText={setErrorText}
+                    setSuccessText={setSuccessText}
+                    setLoading={setLoading}
+                    addTheme={addTheme}/>
+                <ThemeButton
+                    name={'pink'}
+                    id={'themePink'}
+                    emoji={'🌸'}
+                    unlocked={hasThemePack || themes.includes('themePink')}
+                    setErrorText={setErrorText}
+                    setSuccessText={setSuccessText}
+                    setLoading={setLoading}
+                    addTheme={addTheme}/>
+            </div>
+            <div className='row mx-0'>
+                <div className='col-12 mt-3'>
+                    <div className='card d-flex flex-row'>
+                        <div className='flex-shrink-1'>
+                            <div className='card-body'>
+                                <h1 className='title m-0 user-select-none'>{getFromStore('store.titles.fillHints', settings.language)}</h1>
+                            </div>
+                        </div>
+                        <div className={`flex-grow-1 hint-${invertLegacyColor(getLegacyColor(settings.theme))}`}>
+                            <div className='card-body d-grid'>
+                                <div className='btn btn-success btn-lg ms-auto user-select-none' onClick={purchaseFillHints}>
+                                    {`USD ${(new Intl.NumberFormat('en-US', {
+                                        style: 'currency',
+                                        currency: 'USD'
+                                    })).format(TxnItems['fillHints'].amount / 100)}`}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button size="lg" variant="secondary" onClick={handleRestore}>
-                    {getFromStore('store.restore', settings.language)}
-                </Button>
-            </Modal.Footer>
-        </Modal>
-    );
+            </div>
+            <div className='row mx-0 mb-3'>
+                <CreditButton
+                    name={'250'}
+                    id={'credit250'}
+                    setErrorText={setErrorText}
+                    setSuccessText={setSuccessText}
+                    setLoading={setLoading}
+                    refreshValues={refreshValues}/>
+                <CreditButton
+                    name={'750'}
+                    id={'credit750'}
+                    setErrorText={setErrorText}
+                    setSuccessText={setSuccessText}
+                    setLoading={setLoading}
+                    refreshValues={refreshValues}/>
+                <CreditButton
+                    name={'1500'}
+                    id={'credit1500'}
+                    setErrorText={setErrorText}
+                    setSuccessText={setSuccessText}
+                    setLoading={setLoading}
+                    refreshValues={refreshValues}/>
+                <CreditButton
+                    name={'3500'}
+                    id={'credit3500'}
+                    setErrorText={setErrorText}
+                    setSuccessText={setSuccessText}
+                    setLoading={setLoading}
+                    refreshValues={refreshValues}/>
+            </div>
+        </Fragment>
+    </ModalWrapper>;
 };
 
 /*
