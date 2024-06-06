@@ -211,9 +211,9 @@ app
             return net.fetch('file://' + path.join(__dirname, 'images', request.url.slice('image://'.length)));
         });
         register();
+        await installExtension(REACT_DEVELOPER_TOOLS);
         await createLangDatabase();
         await createDatabase();
-        await installExtension(REACT_DEVELOPER_TOOLS);
         await restorePurchases();
     })
     .catch(console.log);
