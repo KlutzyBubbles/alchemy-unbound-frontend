@@ -51,6 +51,7 @@ export async function getAllRecipes(): Promise<RecipeElement[]> {
                     emoji: recipes[0].emoji,
                     first: filtering.first,
                     base: filtering.base,
+                    ai: filtering.ai,
                     sortOrder: ordering.order,
                     sortDepth: ordering.depth,
                     recipes: recipes
@@ -70,6 +71,7 @@ export function mockElement(recipe: Recipe | BasicElement): RecipeElement {
             emoji: recipe.emoji,
             base: false,
             first: false,
+            ai: false,
             sortDepth: 0,
             sortOrder: 0,
             recipes: [
@@ -87,6 +89,7 @@ export function mockElement(recipe: Recipe | BasicElement): RecipeElement {
             emoji: recipe.emoji,
             base: false,
             first: false,
+            ai: false,
             sortDepth: 0,
             sortOrder: 0,
             recipes: [
@@ -139,15 +142,20 @@ export function getOrderDepth(recipes: Recipe[]): OrderDepth {
 export function getBaseFirst(recipes: Recipe[], steamId: string): BaseFirst {
     let base = false;
     let first = false;
+    let ai = false;
     for (const recipe of recipes) {
-        if (!base && recipe.base)
+        if (recipe.base) {
             base = true;
+        } else {
+            ai = true;
+        }
         if (!first && (recipe.who_discovered === steamId || recipe.first))
             first = true;
     }
     return {
         base,
-        first
+        first,
+        ai
     };
 }
 

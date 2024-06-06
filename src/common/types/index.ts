@@ -89,8 +89,20 @@ export type RecipeElement = {
     sortDepth: number;
     sortOrder: number;
     base: boolean;
+    ai: boolean;
     first: boolean;
-    recipes: Recipe[];
+    recipes?: Recipe[];
+}
+
+export type SideElement = {
+    name: string;
+    display: Languages;
+    emoji: string;
+    sortDepth: number;
+    sortOrder: number;
+    base: boolean;
+    ai: boolean;
+    first: boolean;
 }
 
 export type OrderDepth = {
@@ -101,6 +113,7 @@ export type OrderDepth = {
 export type BaseFirst = {
     base: boolean;
     first: boolean;
+    ai: boolean;
 }
 
 export type SystemVersion = {

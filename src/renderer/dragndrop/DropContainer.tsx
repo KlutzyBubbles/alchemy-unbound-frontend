@@ -404,6 +404,7 @@ export const DropContainer: FC<ContainerProps> = ({
                                             emoji: recipe.emoji,
                                             first: filtering.first,
                                             base: filtering.base,
+                                            ai: filtering.ai,
                                             sortOrder: ordering.order,
                                             sortDepth: ordering.depth,
                                             recipes: updatedRecipes
@@ -497,6 +498,7 @@ export const DropContainer: FC<ContainerProps> = ({
                                             emoji: recipe.emoji,
                                             first: filtering.first,
                                             base: filtering.base,
+                                            ai: filtering.ai,
                                             sortOrder: ordering.order,
                                             sortDepth: ordering.depth,
                                             recipes: updatedRecipes

@@ -34,7 +34,6 @@ export interface BoxProps {
   loading: boolean,
   error: number,
   locked: boolean,
-  // combineRaw: (a: string, b: string) => Promise<void>,
   children?: ReactNode
 }
 
@@ -65,41 +64,41 @@ export const MainElement: FC<BoxProps> = ({
         drag(node, options);
         drop(node, options);
     };
-    const [recipes, setRecipes] = useState<Recipe[]>(element.recipes);
-    const [isBase, setIsBase] = useState<boolean>(true);
-    const [isAI, setIsAI] = useState<boolean>(false);
+    const [recipes, setRecipes] = useState<Recipe[]>(element.recipes ?? []);
+    const [copyFlipFlop, setCopyFlipFlop] = useState<boolean>(true);
+    const [draggingState, setDraggingState] = useState<boolean>(true);
     const mounted = useRef(false);
-
-    useEffect(() => {
-        let isBase = false;
-        let isAI = false;
-        for (const recipe of element.recipes) {
-            if (recipe.base) {
-                isBase = true;
-            } else {
-                isAI = true;
-            }
-        }
-        setIsBase(isBase);
-        setIsAI(isAI);
-    }, [element]);
     
     const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
         () => ({
             type: locked ? ItemTypes.LOCKED_ELEMENT : ItemTypes.ELEMENT,
             item: () => {
-                return { type: locked ? ItemTypes.LOCKED_ELEMENT : copyHeld ? ItemTypes.COPY_ELEMENT : ItemTypes.ELEMENT, id: dragId, left, top, element: element };
+                return { type: copyHeld ? ItemTypes.COPY_ELEMENT : locked ? ItemTypes.LOCKED_ELEMENT : ItemTypes.ELEMENT, id: dragId, left, top, element: element };
             },
-            collect: (monitor) => ({
-                isDragging: monitor.isDragging(),
-            }),
+            collect: (monitor) => {
+                setDraggingState(monitor.isDragging());
+                return{
+                    isDragging: monitor.isDragging(),
+                };
+            },
             options: {
                 force: Math.random(),
                 dropEffect: locked ? 'copy' : copyHeld ? 'copy' : 'move'
             } as DragSourceOptions
         }),
-        [element, dragId, left, top, copyHeld, locked],
+        [element, dragId, left, top, copyHeld, locked, setDraggingState],
     );
+
+    useEffect(() => {
+        if (!draggingState) {
+            setCopyFlipFlop(false);
+        } else {
+            if (copyHeld) {
+                setCopyFlipFlop(true);
+                logger.info('dragging with copy');
+            }
+        }
+    }, [draggingState]);
 
     useEffect(() => {
         if (newDiscovery && mounted.current) {
@@ -215,7 +214,8 @@ export const MainElement: FC<BoxProps> = ({
     useEffect(() => {
         (async () => {
             if (mounted.current) {
-                if (isDragging && !copyHeld && !locked) {
+                if (draggingState && !copyFlipFlop && !locked) {
+                    console.log('hidingingnig');
                     controls.start('hide');
                 } else {
                     await controls.start('show');
@@ -225,7 +225,7 @@ export const MainElement: FC<BoxProps> = ({
                 }
             }
         })();
-    }, [isDragging]);
+    }, [draggingState, copyHeld, locked, copyFlipFlop]);
 
     const customVariants: Variants = {
         error: () => ({
@@ -329,7 +329,8 @@ export const MainElement: FC<BoxProps> = ({
         <ItemRenderer
             element={element}
             type={locked ? ItemTypes.LOCKED_ELEMENT : ItemTypes.MAIN_ELEMENT}
-            dragging={isDragging && !copyHeld && !locked}
+            dragging={isDragging}
+            draggingRenderer={isDragging && !copyFlipFlop && !locked}
             ref={dragDrop}
             top={top}
             left={left}
@@ -351,6 +352,7 @@ export const MainElement: FC<BoxProps> = ({
             animate={controls}
             disabled={loading}
             locked={locked}
+            lockedVisibility={locked}
             exit={{
                 opacity: 0,
                 scale: 0,
@@ -363,8 +365,8 @@ export const MainElement: FC<BoxProps> = ({
                 <Dropdown.Menu>
                     <Dropdown.ItemText>
                         <button className={`btn badge text-bg-${locked ? 'secondary' : 'primary'} rounded-pill`} onClick={() => lockBox(dragId, !locked)}>{locked ? (<IoLockClosedOutline/>) : (<IoLockOpenOutline/>)}</button>
-                        {isBase ? (<div className='badge text-bg-secondary rounded-pill float-end fs-6 ms-2'>Base</div>) : (<Fragment/>)}
-                        {isAI ? (<div className='badge text-bg-success rounded-pill float-end fs-6 ms-2'>AI</div>) : (<Fragment/>)}
+                        {element.base ? (<div className='badge text-bg-secondary rounded-pill float-end fs-6 ms-2'>Base</div>) : (<Fragment/>)}
+                        {element.ai ? (<div className='badge text-bg-success rounded-pill float-end fs-6 ms-2'>AI</div>) : (<Fragment/>)}
                     </Dropdown.ItemText>
                     {recipes.filter((item) => item.discovered).map((recipe) => {
                         if (recipe.a.name === '' || recipe.b.name === '') {

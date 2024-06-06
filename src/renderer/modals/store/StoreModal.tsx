@@ -1,5 +1,5 @@
 import { type FC, useContext, useState, Fragment, useEffect } from 'react';
-import { Alert, Button } from 'react-bootstrap';
+import { Alert, Button, Collapse } from 'react-bootstrap';
 import { SettingsContext } from '../../providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { getFromStore } from '../../language';
@@ -30,6 +30,8 @@ export const StoreModal: FC<StoreModalProps> = ({
     // const [aiHintsUnlocked, setAIHintsUnlocked] = useState<boolean>(false);
     const { hasSupporterTheme, hasThemePack } = useContext(InfoContext);
     const [themes, setThemes] = useState<string[]>([]);
+    const [info, setInfo] = useState<boolean>(false);
+    const [rigged, setRigged] = useState<boolean>(false);
 
     useEffect(() => {
         (async () => {
@@ -132,12 +134,34 @@ export const StoreModal: FC<StoreModalProps> = ({
         }
     };
 
-    const footerContent = <Button size="lg" variant="secondary" onClick={handleRestore}>
-        {getFromStore('store.restore', settings.language)}
-    </Button>;
+    const footerContent = <Fragment>
+        <Button size='lg' variant={info ? 'primary' : 'outline-primary'} onClick={() => setInfo(!info)} className='me-auto'>
+            {getFromStore('store.infoButton', settings.language)}
+        </Button>
+        <Button size="lg" variant="secondary" onClick={handleRestore}>
+            {getFromStore('store.restore', settings.language)}
+        </Button>;
+    </Fragment>;
 
     return <ModalWrapper show={show} title={'store.title'} footerContent={footerContent} handleHide={handleHide}>
         <Fragment>
+            <Collapse in={info}>
+                <div>
+                    {settings.language !== 'english' ? <p>{getFromStore('store.info.translated', settings.language)}</p> : ''}
+                    <p>{getFromStore('store.info.oneA', settings.language)} (<a href="javascript:void(0)" onClick={() => setRigged(!rigged)}>{getFromStore('store.info.oneB', settings.language)}</a>).</p>
+                    <Collapse in={rigged}>
+                        <div>
+                            <div className="card">
+                                <div className="card-body">
+                                    <p className='m-0'>{getFromStore('store.info.twoA', settings.language)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </Collapse>
+                    <p>{getFromStore('store.info.oneC', settings.language)}</p>
+                    <p>{getFromStore('store.info.threeA', settings.language)}</p>
+                </div>
+            </Collapse>
             <div className='row mx-3'>
                 {loading ?
                     <Alert className='mb-0 mt-3' variant="info" onClose={() => setErrorText('')} dismissible>

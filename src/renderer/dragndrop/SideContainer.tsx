@@ -1,4 +1,4 @@
-import { useState, type ChangeEventHandler, type FC, useContext, MouseEventHandler, useRef, Fragment } from 'react';
+import { useState, type ChangeEventHandler, type FC, useContext, MouseEventHandler, useRef, Fragment, useEffect } from 'react';
 import { RecipeElement } from '../../common/types';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { IoArrowDown, IoArrowUp, IoFilterOutline } from 'react-icons/io5';
@@ -37,6 +37,11 @@ export const SideContainer: FC<ContainerProps> = ({
     const [searchTextFinal, setSearchTextFinal] = useState<string>('');
     const { settings } = useContext(SettingsContext);
     const { fileVersions } = useContext(InfoContext);
+
+    useEffect(() => {
+        logger.warn('STARTTTING', elements.length);
+        // logger.warn(elements);
+    });
 
     const onSearchType: ChangeEventHandler<HTMLInputElement> = (e) => {
         if (['send help', 'help me', 'please help', 'halp'].includes(e.target.value.toLocaleLowerCase())) {

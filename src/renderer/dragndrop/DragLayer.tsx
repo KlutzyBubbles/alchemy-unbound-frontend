@@ -43,7 +43,9 @@ export const CustomDragLayer: FC<Record<string, never>> = () => {
                     element={item.element}
                     type={itemType}
                     dragging={true}
+                    draggingRenderer={true}
                     locked={itemType === ItemTypes.LOCKED_ELEMENT}
+                    lockedVisibility={itemType === ItemTypes.LOCKED_ELEMENT}
                     initialOffset={initialOffset}
                     currentOffset={currentOffset}/>
             );

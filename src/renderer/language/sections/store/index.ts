@@ -1,10 +1,12 @@
 import { LanguageStoreRecurring } from '../../store';
 import { LanguageStore as TitlesLanguageStore } from './titles';
+import { LanguageStore as InfoLanguageStore } from './info';
 import { LanguageStore as DescriptionsLanguageStore } from './descriptions';
 
 export const LanguageStore: LanguageStoreRecurring = {
     titles: TitlesLanguageStore,
     descriptions: DescriptionsLanguageStore,
+    info: InfoLanguageStore,
     title: {
         english: 'Store',
         schinese: '商店',
@@ -109,6 +111,23 @@ export const LanguageStore: LanguageStoreRecurring = {
     },
     noRestore: {
         english: 'Failed to restore all or some purchases, they have been left in their current state until the server can confirm the status.',
+        schinese: '',
+        russian: '',
+        spanish: '',
+        french: '',
+        japanese: '',
+        indonesian: '',
+        german: '',
+        latam: '',
+        italian: '',
+        dutch: '',
+        polish: '',
+        portuguese: '',
+        tchinese: '',
+        koreana: ''
+    },
+    infoButton: {
+        english: 'Info',
         schinese: '',
         russian: '',
         spanish: '',

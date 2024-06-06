@@ -28,7 +28,7 @@ export const KeybindListener: FC<KeybindListenerProps> = ({
     }, []);
 
     const handleKeyDown: EventListenerOrEventListenerObject = (e) => {
-        console.log('keydown', e, settings.keybinds);
+        //console.log('keydown', e, settings.keybinds);
         const event = e as KeyboardEvent;
         if (event.key === settings.keybinds.copy) {
             setCopyHeld(true);
@@ -38,14 +38,11 @@ export const KeybindListener: FC<KeybindListenerProps> = ({
         }
         if (event.key === settings.keybinds.lock) {
             onLockClick();
-            // if (currentHover.current !== undefined) {
-            //     invertLock(currentHover.current);
-            // }
         }
     };
 
     const handleKeyUp: EventListenerOrEventListenerObject = async (e) => {
-        console.log('keyup', e);
+        //console.log('keyup', e);
         const event = e as KeyboardEvent;
         if (event.key === settings.keybinds.copy) {
             setCopyHeld(false);
