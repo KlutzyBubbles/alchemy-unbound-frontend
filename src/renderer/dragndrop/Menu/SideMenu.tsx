@@ -11,7 +11,7 @@ import { UpdateContext } from '../../providers/UpdateProvider';
 import { DatabaseType } from '../../../common/types/saveFormat';
 import { MenuModalItem } from './MenuModalItem';
 import { Recipe } from './Recipe';
-import { closeCanvas } from '../..//utils/dom';
+import { closeCanvas } from '../../utils/dom';
 import { InfoContext } from '../../providers/InfoProvider';
 import { ProcessingModal } from '../../modals/ProcessingModal';
 import { LoadingContext } from '../../providers/LoadingProvider';
@@ -216,16 +216,6 @@ export const SideMenu: FC<SideMenuProps> = ({
 
     const switchClick = async () => {
         setSwitchOpen(!switchOpen);
-        // closeCanvas();
-        // const versions = await window.GenericAPI.getFileVersions();
-        // let newType: DatabaseType = 'base';
-        // let newDb = 'db';
-        // if (versions.databaseInfo.type === 'base') {
-        //     newType = 'custom';
-        //     newDb = 'custom';
-        // }
-        // await window.ProfileAPI.switchProfile(newDb, { type: newType });
-        // setShouldUpdate(true);
     };
 
     const switchProfile = async (type: DatabaseType) => {
@@ -251,7 +241,7 @@ export const SideMenu: FC<SideMenuProps> = ({
     return (
         <Fragment>
             <ProcessingModal onCancel={onCancelBefore} show={showIOProcessing}>
-                <p>{getFromStore(processingText, settings.language)}</p>
+                <p><span className="spinner-grow spinner-grow-sm me-2" aria-hidden="true"></span>{getFromStore(processingText, settings.language)}</p>
             </ProcessingModal>
             <div className="offcanvas offcanvas-start side-menu" tabIndex={-1} id="sideMenu" aria-labelledby="sideMenuLabel">
                 <div className="offcanvas-header pb-0">

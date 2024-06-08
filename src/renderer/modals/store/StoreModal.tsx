@@ -148,12 +148,12 @@ export const StoreModal: FC<StoreModalProps> = ({
             <Collapse in={info}>
                 <div>
                     {settings.language !== 'english' ? <p>{getFromStore('store.info.translated', settings.language)}</p> : ''}
-                    <p>{getFromStore('store.info.oneA', settings.language)} (<a href="javascript:void(0)" onClick={() => setRigged(!rigged)}>{getFromStore('store.info.oneB', settings.language)}</a>).</p>
-                    <Collapse in={rigged}>
+                    <p>{getFromStore('store.info.oneA', settings.language)} (<span className='btn btn-link p-0 text-body' onClick={() => setRigged(!rigged)}>{getFromStore('store.info.oneB', settings.language)}</span>).</p>
+                    <Collapse in={rigged} className='mb-3'>
                         <div>
                             <div className="card">
                                 <div className="card-body">
-                                    <p className='m-0'>{getFromStore('store.info.twoA', settings.language)}</p>
+                                    <p className='m-0 text-body'>{getFromStore('store.info.twoA', settings.language)}</p>
                                 </div>
                             </div>
                         </div>

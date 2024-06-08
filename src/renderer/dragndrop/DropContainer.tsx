@@ -43,6 +43,7 @@ export const DropContainer: FC<ContainerProps> = ({
     const [refreshMission, setRefreshMission] = useState<number>(0);
     const [refreshHint, setRefreshHint] = useState<number>(0);
     const [creditsLeft, setCreditsLeft] = useState<number>(0);
+    const [sizeChange, setSizeChange] = useState<number>(0);
     const currentHover = useRef<string>(undefined);
     const speedTimerRef = useRef<NodeJS.Timeout>(undefined);
     const [boxes, setBoxes] = useState<{
@@ -707,7 +708,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 className="split p-0 m-0"
                 gutterSize={2}
                 snapOffset={0}
-                // onDragEnd={(e) => setSplitSize(e)}
+                onDragEnd={() => setSizeChange((change) => change + 1)}
             >
                 <div
                     className='main-container'
@@ -770,6 +771,7 @@ export const DropContainer: FC<ContainerProps> = ({
                 </div>
                 <SideContainer
                     elements={elements}
+                    sizeChange={sizeChange}
                     removeBox={removeBox}
                     moveBox={moveBox}
                     addBox={addBoxRandomLocation}

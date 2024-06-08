@@ -19,6 +19,7 @@ export interface SideListProps {
     searchText: string,
     sortBy: number,
     sortAscending: boolean,
+    sizeChange: number,
     performance: boolean
 }
 
@@ -59,6 +60,7 @@ export const SideList: FC<SideListProps> = ({
     searchText,
     sortBy,
     sortAscending,
+    sizeChange,
     performance
 }) => {
     const [elementHolder, setElementHolder] = useState<SideElement[]>(recipeToSideElement(elements));
@@ -251,6 +253,22 @@ export const SideList: FC<SideListProps> = ({
             });
         }
     };
+
+    useEffect(() => {
+        logger.info('items changeeed');
+        if (itemsDisplayed < elementHolder.length) {
+            logger.info('length');
+            if (elementRef.current !== undefined) {
+                logger.info('current');
+                if (elementRef.current.scrollHeight <= elementRef.current.clientHeight) {
+                    logger.info('Increasing for space');
+                    setItemsDisplayed((itemsDisplayed) => {
+                        return itemsDisplayed + 100;
+                    });
+                }
+            }
+        }
+    }, [itemsDisplayed, elementHolder, sizeChange]);
 
     return (
         <div ref={(ref) => {

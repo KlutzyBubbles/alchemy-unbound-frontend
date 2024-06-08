@@ -59,7 +59,7 @@ $theme-fg: #e3f6ff;
 $theme-fg-darkened: #004375;
 
 $body-bg:                   $theme-bg !default;
-$body-color:                $theme-fg !default;
+$body-color:                $theme-fg-darkened !default;
 
 $body-color-shadow-1: color.scale($body-color, $lightness: 10%);
 $body-color-shadow-2: color.scale($body-color, $lightness: 20%);

@@ -84,6 +84,7 @@ export const BottomButton: FC<BottomButtonProps> = ({
                 <div
                     ref={legacyRef}
                     className='btn btn-deprecated float-end mb-2 fs-1 d-flex p-2'
+                    onClick={() => openModal('v2')}
                     onMouseEnter={() => setShowLegacyTooltip(true)}
                     onMouseLeave={() => setShowLegacyTooltip(false)}
                 ><IoConstructOutline /></div>

@@ -14,6 +14,7 @@ export interface ContainerProps {
   moveBox: (id: string, left: number, top: number) => Promise<void>
   refreshRecipes: () => Promise<void>
   openModal: (option: ModalOption, onClose?: () => void) => void
+  sizeChange: number,
   elements: RecipeElement[],
 }
 
@@ -27,6 +28,7 @@ export const SideContainer: FC<ContainerProps> = ({
     addBox,
     refreshRecipes,
     openModal,
+    sizeChange,
     elements                     
 }) => {
     const timeout = useRef<NodeJS.Timeout>(undefined);
@@ -90,6 +92,7 @@ export const SideContainer: FC<ContainerProps> = ({
                 searchText={searchTextFinal}
                 sortBy={sortBy}
                 sortAscending={sortAscending}
+                sizeChange={sizeChange}
                 performance={settings.performance}/>
             <div className='footer mt-auto'>
                 <div className='row mx-0'>
