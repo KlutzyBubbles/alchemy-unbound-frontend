@@ -1,5 +1,5 @@
 import logger from 'electron-log/main';
-import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse, PurchaseOutput, PurchaseSuccess, ValidateOutput, UserOutput, RedeemSuccess, GenericSuccess, GenericOutput, APIRecipe, MissionOutput, MissionAPISuccess, MissionCheckOutput, APIMissionCheck } from '../../common/types';
+import { CombineOutput, ServerErrorCode, Recipe, TokenHolder, TokenHolderResponse, PurchaseOutput, PurchaseSuccess, ValidateOutput, UserOutput, RedeemSuccess, GenericSuccess, GenericOutput, APIRecipe, MissionOutput, MissionAPISuccess, MissionCheckOutput, APIMissionCheck, UserSuccess, RedeemBulkSuccess, ServerError } from '../../common/types';
 import { getDatabaseInfo, getPlaceholderOrder, getRecipe, getRecipesForLanguage, insertRecipeRow, serverVersion, setDiscovered, traverseAndFill } from './database/recipeStore';
 import { getAppVersion, isPackaged } from './generic';
 import { getSettings } from './settings';
@@ -34,7 +34,7 @@ let endpointVersion: EndpointVersion | 'custom' = 'custom'; // 'release';
 
 let endpoint = 'http://localhost:5001';
 // endpoint = 'https://api.alchemyunbound.net';
-// endpoint = 'https://alchemy-unbound-prerelease-b687af701d77.herokuapp.com';
+endpoint = 'https://alchemy-unbound-prerelease-b687af701d77.herokuapp.com';
 if (isPackaged()) {
     // Production
     endpoint = 'https://api.alchemyunbound.net';
@@ -93,7 +93,7 @@ async function refreshToken(): Promise<TokenHolderResponse> {
         return await createToken();
     } else {
         logger.debug('Expiry dates', token.expiryDate, ((new Date()).getTime() + 600000) / 1000);
-        if (token.expiryDate < ((new Date()).getTime() + 600000) / 1000) {
+        if (token.expiryDate < ((new Date()).getTime() + 300000) / 1000) {
             let response: Response | undefined = undefined;
             try {
                 const url = `${getEndpointUri()}/v${serverVersion}/session?version=${getAppVersion()}`;
@@ -246,7 +246,7 @@ export async function checkAndRedeem(item: string) {
     logger.silly('checkAndRedeem', item);
     const result = await apiRequest(
         'GET',
-        '/v2/purchase',
+        '/v2/purchase/check',
         {
             item
         },
@@ -269,6 +269,66 @@ export async function checkAndRedeem(item: string) {
                     success: true,
                     softError: false
                 }
+            };
+        } else {
+            return undefined;
+        }
+    } else {
+        return result;
+    }
+}
+
+export async function checkAndRedeemBulk(items: string[]): Promise<{
+    type: 'success',
+    result: {
+        item: string,
+        success: boolean,
+        softError: boolean
+    }[]
+} | {
+    type: 'error',
+    result: ServerError
+}>  {
+    logger.silly('checkAndRedeemBulk', items);
+    const result = await apiRequest(
+        'POST',
+        '/v2/purchase/check',
+        undefined,
+        {
+            items
+        },
+        true
+    );
+    if (result.type === 'success') {
+        const body: RedeemBulkSuccess = result.result as RedeemBulkSuccess;
+        const resultItems: {
+            item: string,
+            success: boolean,
+            softError: boolean
+        }[] = [];
+        if (body.success) {
+            logger.log('inside success');
+            for (const returned of body.items) {
+                if (!returned.redeemed) {
+                    const redeem = await redeemItem(returned.item);
+                    if (redeem.type === 'error') {
+                        resultItems.push({
+                            item: returned.item,
+                            success: false,
+                            softError: true
+                        });
+                        continue;
+                    }
+                    resultItems.push({
+                        item: returned.item,
+                        success: true,
+                        softError: false
+                    });
+                }
+            }
+            return {
+                type: 'success',
+                result: resultItems
             };
         } else {
             return undefined;
@@ -834,19 +894,58 @@ export async function validateItems(items: string[]): Promise<ValidateOutput> {
     ) as ValidateOutput;
 }
 
+let userDetails: {
+    details: UserSuccess,
+    howRecent: number
+} | undefined = undefined;
+
 export async function getUserDetails(): Promise<UserOutput> {
     logger.silly('getUserDetails');
-    return await apiRequest(
-        'GET',
-        '/v2/session/user',
-        undefined,
-        undefined,
-        false
-    ) as UserOutput;
+    if (userDetails === undefined) {
+        const apiResult = await apiRequest(
+            'GET',
+            '/v2/session/user',
+            undefined,
+            undefined,
+            false
+        ) as UserOutput;
+        if (apiResult.type === 'success') {
+            const body: UserSuccess = apiResult.result as UserSuccess;
+            userDetails = {
+                details: body,
+                howRecent: new Date().getTime()
+            };
+        }
+        return apiResult;
+    } else {
+        logger.debug('Expiry dates', userDetails.howRecent, ((new Date()).getTime() + 60000));
+        if (userDetails.howRecent + 60000 < (new Date()).getTime()) {
+            const apiResult = await apiRequest(
+                'GET',
+                '/v2/session/user',
+                undefined,
+                undefined,
+                false
+            ) as UserOutput;
+            if (apiResult.type === 'success') {
+                const body: UserSuccess = apiResult.result as UserSuccess;
+                userDetails = {
+                    details: body,
+                    howRecent: new Date().getTime()
+                };
+            }
+            return apiResult;
+        } else {
+            return {
+                type: 'success',
+                result: userDetails.details
+            };
+        }
+    }
 }
 
 export async function checkDLC(): Promise<UserOutput> {
-    logger.silly('getUserDetails');
+    logger.silly('checkDLC');
     return await apiRequest(
         'GET',
         '/v2/session/dlc',
@@ -948,30 +1047,51 @@ async function apiRequest(
 export async function restorePurchases(): Promise<boolean> {
     logger.silly('restorePurchases');
     let hasErrors = false;
-    for (const theme of ['themeOrange', 'themePurple', 'themeSand', 'themePink', 'themeBlue']) {
-        try {
-            const result = await checkAndRedeem(theme);
-            if (result === undefined) {
-                logger.info('Removing theme', theme);
-                await removeTheme(theme);
-            } else {
-                if (result.type === 'success') {
-                    if (!result.result.success) {
-                        logger.info('Removing theme', theme);
-                        await removeTheme(theme);
-                    } else {
-                        logger.info('Adding theme', theme);
-                        await addTheme(theme);
-                    }
+    const themes = ['themeOrange', 'themePurple', 'themeSand', 'themePink', 'themeBlue'];
+    try {
+        const result = await checkAndRedeemBulk(themes);
+        if (result.type === 'error') {
+            hasErrors = true;
+        } else {
+            const items = result.result.filter((item) => item.success).map((item) => item.item);
+            for (const theme of themes) {
+                if (!items.includes(theme)) {
+                    logger.info('Removing theme', theme);
+                    await removeTheme(theme);
                 } else {
-                    logger.error('Unable to get purchase, leaving alone', theme);
-                    hasErrors = true;
+                    logger.info('Adding theme', theme);
+                    await addTheme(theme);
                 }
             }
-        } catch (error) {
-            logger.error('Unable to check purchases, leaving alone', theme, error);
-            hasErrors = true;
         }
+    } catch (error) {
+        logger.error('Unable to check purchases, leaving alone', themes, error);
+        hasErrors = true;
     }
+    // for (const theme of ['themeOrange', 'themePurple', 'themeSand', 'themePink', 'themeBlue']) {
+    //     try {
+    //         const result = await checkAndRedeem(theme);
+    //         if (result === undefined) {
+    //             logger.info('Removing theme', theme);
+    //             await removeTheme(theme);
+    //         } else {
+    //             if (result.type === 'success') {
+    //                 if (!result.result.success) {
+    //                     logger.info('Removing theme', theme);
+    //                     await removeTheme(theme);
+    //                 } else {
+    //                     logger.info('Adding theme', theme);
+    //                     await addTheme(theme);
+    //                 }
+    //             } else {
+    //                 logger.error('Unable to get purchase, leaving alone', theme);
+    //                 hasErrors = true;
+    //             }
+    //         }
+    //     } catch (error) {
+    //         logger.error('Unable to check purchases, leaving alone', theme, error);
+    //         hasErrors = true;
+    //     }
+    // }
     return !hasErrors;
 }

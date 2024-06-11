@@ -157,6 +157,7 @@ app.on('ready', createWindow);
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
     logger.error('Saving thinggiieiei');
+    mainWindow = undefined;
     //cancelWebAuthTicket();
     console.log('saving staefts');
     saveStats().then(() => {
@@ -176,6 +177,7 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
     logger.error('Saving things');
+    mainWindow = undefined;
     //cancelWebAuthTicket();
     console.log('saving stats');
     timeoutPromise(saveStats(), 10000).then(() => {

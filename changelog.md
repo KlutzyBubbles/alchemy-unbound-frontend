@@ -1,4 +1,11 @@
-Fixes:
+[h1]V2 is here![/h1]
+
+I know the updates have been few and far between, but the update is finally here.
+
+With all the changes, this game has been rewritten 
+
+
+[h1]Fixes[/h1]
 
 - Fixed element dissapearing when copy key was released
 - Optimized side list sort and filter to work better with thousands of items
@@ -37,7 +44,9 @@ These items are divided into groups.
 
 [h2]Store and Themes[/h2]
 
-Support the game with items from the store
+Support the game with items from the store, from some themes (sorry im no designer but i tried my best) to items to help combining.
+
+Credits will only be used in freeplay mode, see the top right of the screen for how many credits you have
 
 
 [h1]Potential Roadmap[/h1]

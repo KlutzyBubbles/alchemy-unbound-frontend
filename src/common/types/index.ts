@@ -269,6 +269,13 @@ export type RedeemSuccess = Success & {
     redeemed: boolean
 }
 
+export type RedeemBulkSuccess = Success & {
+    items: {
+        item: string,
+        redeemed: boolean
+    }[]
+}
+
 export type CombineSuccess = {
     responseCode: number,
     deprecated: boolean,

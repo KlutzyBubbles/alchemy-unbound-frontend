@@ -101,15 +101,23 @@ export const MainElement: FC<BoxProps> = ({
     }, [draggingState]);
 
     useEffect(() => {
-        if (newDiscovery && mounted.current) {
-            controls.start('newItem').then(() => {
-                if (mounted.current) {
-                    controls.start('newItemAway').then(() => {
-                        stopState(dragId, 'newDiscovery');
-                    });
+        (async () => {
+            if (newDiscovery && mounted.current) {
+                try {
+                    await controls.start('newItem');
+                } catch (error) {
+                    logger.error('Unable to init animation "newItem"', error);
                 }
-            });
-        }
+                try {
+                    if (newDiscovery && mounted.current) {
+                        await controls.start('newItemAway');
+                        stopState(dragId, 'newDiscovery');
+                    }
+                } catch (error) {
+                    logger.error('Unable to init animation "newItemAway"', error);
+                }
+            }
+        })();
     }, [newDiscovery]);
 
     useEffect(() => {
@@ -182,7 +190,11 @@ export const MainElement: FC<BoxProps> = ({
     useEffect(() => {
         (async () => {
             if (mounted.current) {
-                controls.start('error');
+                try {
+                    controls.start('error');
+                } catch (error) {
+                    logger.error('Unable to init animation "error"', error);
+                }
             }
         })();
     }, [error]);
@@ -191,9 +203,17 @@ export const MainElement: FC<BoxProps> = ({
         (async () => {
             if (mounted.current) {
                 if (loading) {
-                    controls.start('flash');
+                    try {
+                        controls.start('flash');
+                    } catch (error) {
+                        logger.error('Unable to init animation "flash"', error);
+                    }
                 } else {
-                    controls.start('stopFlash');
+                    try {
+                        controls.start('stopFlash');
+                    } catch (error) {
+                        logger.error('Unable to init animation "stopFlash"', error);
+                    }
                 }
             }
         })();
@@ -203,9 +223,17 @@ export const MainElement: FC<BoxProps> = ({
         (async () => {
             if (mounted.current) {
                 if (combining) {
-                    controls.start('spin');
+                    try {
+                        controls.start('spin');
+                    } catch (error) {
+                        logger.error('Unable to init animation "spin"', error);
+                    }
                 } else {
-                    controls.start('stopSpin');
+                    try {
+                        controls.start('stopSpin');
+                    } catch (error) {
+                        logger.error('Unable to init animation "stopSpin"', error);
+                    }
                 }
             }
         })();
@@ -216,11 +244,23 @@ export const MainElement: FC<BoxProps> = ({
             if (mounted.current) {
                 if (draggingState && !copyFlipFlop && !locked) {
                     console.log('hidingingnig');
-                    controls.start('hide');
+                    try {
+                        controls.start('hide');
+                    } catch (error) {
+                        logger.error('Unable to init animation "hide"', error);
+                    }
                 } else {
-                    await controls.start('show');
+                    try {
+                        controls.start('show');
+                    } catch (error) {
+                        logger.error('Unable to init animation "show"', error);
+                    }
                     if (loading && mounted.current) {
-                        controls.start('flash');
+                        try {
+                            controls.start('flash');
+                        } catch (error) {
+                            logger.error('Unable to init animation "flash"', error);
+                        }
                     }
                 }
             }
