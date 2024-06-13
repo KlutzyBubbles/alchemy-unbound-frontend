@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import { ErrorEntryAdd, Recipe } from '../common/types';
-import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor, hasAllRecipes, hasAtleastRecipe, syncInfo } from './libs/database/recipeStore';
+import { insertRecipe, deleteRecipe, getRecipe, getAllRecipes, save, resetAndBackup, getRecipesFor, hasAllRecipes, hasAtleastRecipe, syncInfo, countBaseRecipes, countBaseResults } from './libs/database/recipeStore';
 import { addItem, checkDLC, combine, getEndpoint, getMission, getToken, getUserDetails, getVersion, initTransaction, restorePurchases } from './libs/server';
 import { DisplayChannel, ErrorChannel, GenericChannel, HintChannel, ImportExportChannel, InfoChannel, ProfileChannel, RecipeChannel, ServerChannel, SettingsChannel, StatsChannel, SteamChannel } from '../common/ipc';
 import { Language, Settings } from '../common/settings';
@@ -47,6 +47,12 @@ export function register() {
     });
     ipcMain.handle(RecipeChannel.SYNC_INFO, async () => {
         return syncInfo();
+    });
+    ipcMain.handle(RecipeChannel.COUNT_BASE_RECIPES, async () => {
+        return countBaseRecipes();
+    });
+    ipcMain.handle(RecipeChannel.COUNT_BASE_RESULTS, async () => {
+        return countBaseResults();
     });
 
     // Server handlers

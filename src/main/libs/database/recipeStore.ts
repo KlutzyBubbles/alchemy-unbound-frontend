@@ -9,7 +9,7 @@ import baseData from '../../../base.json';
 import logger from 'electron-log/main';
 import { addHintPoint, resetHint } from '../hints';
 import { saveToFile } from './helpers';
-import { DatabaseData, FileVersionError, RecipeRecord, RecipeRecordV3 } from '../../../common/types/saveFormat';
+import { DatabaseData, DatabaseType, FileVersionError, RecipeRecord, RecipeRecordV3 } from '../../../common/types/saveFormat';
 import { getKeyByLanguage, getLanguage, getLanguageKeys, insertLanguage } from './languageStore';
 import { getWorkingDatabase } from './workingName';
 import { validateItems } from '../server';
@@ -231,7 +231,7 @@ export async function noFill(loaded: Compressed): Promise<RecipeRecord[]> {
     return tempData;
 }
 
-export async function checkLanguages(recipes: RecipeRecord[]): Promise<RecipeRecord[]> {
+export async function checkLanguages(recipes: RecipeRecord[], skipServer: boolean = false): Promise<RecipeRecord[]> {
     logger.silly('checkLanguages()', recipes.length);
     const tempData = structuredClone(recipes);
     logger.info('tempData', tempData.length);
@@ -253,31 +253,37 @@ export async function checkLanguages(recipes: RecipeRecord[]): Promise<RecipeRec
     needToCheck = [...new Set(needToCheck)];
     const validated: string[] = [];
     const notExists: string[] = [];
-    for (const chunk of chunkArray(needToCheck, 100)) {
-        try {
-            const validatedResponse = await validateItems(chunk);
-            logger.silly('Validation response', validatedResponse);
-            if (validatedResponse === undefined) {
-                continue;
-            } else if (validatedResponse.type === 'error') {
-                continue;
-            } else {
-                // V1 doesnt return languages
-                if (hasProp(validatedResponse.result, 'languages')) {
-                    for (const lang of validatedResponse.result.languages) {
-                        await insertLanguage(lang.name, lang, true);
-                        validated.push(lang.name);
+    if (skipServer) {
+        for (const item of needToCheck) {
+            notExists.push(item);
+        }
+    } else {
+        for (const chunk of chunkArray(needToCheck, 100)) {
+            try {
+                const validatedResponse = await validateItems(chunk);
+                logger.silly('Validation response', validatedResponse);
+                if (validatedResponse === undefined) {
+                    continue;
+                } else if (validatedResponse.type === 'error') {
+                    continue;
+                } else {
+                    // V1 doesnt return languages
+                    if (hasProp(validatedResponse.result, 'languages')) {
+                        for (const lang of validatedResponse.result.languages) {
+                            await insertLanguage(lang.name, lang, true);
+                            validated.push(lang.name);
+                        }
+                    }
+                    for (const item of chunk) {
+                        if (!validatedResponse.result.items.includes(item)) {
+                            notExists.push(item);
+                        }
                     }
                 }
-                for (const item of chunk) {
-                    if (!validatedResponse.result.items.includes(item)) {
-                        notExists.push(item);
-                    }
-                }
+            } catch (error) {
+                logger.error('Error validating items', error);
+                continue;
             }
-        } catch (error) {
-            logger.error('Error validating items', error);
-            continue;
         }
     }
     for (const recipe of tempData) {
@@ -372,9 +378,10 @@ async function loadData(override?: DatabaseData): Promise<RecipeRecord[]> {
         if (workingVersion === 4) {
             logger.info('Found v4, loading...');
             if (workingInfo.type === 'custom') {
-                return await checkLanguages(await noFill(workingData));
+                return await checkLanguages(await noFill(workingData), true);
+            } else {
+                return await checkLanguages(await fillWithBase(workingData));
             }
-            return await checkLanguages(await fillWithBase(workingData));
         } else {
             loadedVersion = FileVersionError.UNKOWN_VERSION;
             serverVersion = LATEST_SERVER_VERSION;
@@ -492,7 +499,7 @@ function setDatabaseOrder() {
     databaseOrder = highest + 1;
 }
 
-export async function insertRecipeRow(recipe: Omit<RecipeRow, 'order'>): Promise<RecipeRecord> {
+export async function insertRecipeRow(recipe: Omit<RecipeRow, 'order'>, validateType?: DatabaseType): Promise<RecipeRecord> {
     await insertLanguage(recipe.result, {
         ...recipe.display,
         emoji: recipe.emoji
@@ -510,6 +517,11 @@ export async function insertRecipeRow(recipe: Omit<RecipeRow, 'order'>): Promise
         base: recipe.base,
         custom: recipe.custom
     };
+    if (validateType !== undefined) {
+        if ((await getDatabaseInfo()).type !== validateType) {
+            throw new Error('Failed to validate types, maybe the user tried switching while combining');
+        }
+    }
     data.push(recipeRow);
     databaseOrder++;
     await save();
@@ -614,6 +626,7 @@ export async function getRecipesForLanguage(result: string, language: Language):
 }
 
 export async function getAllRecipes(): Promise<Recipe[]> {
+    logger.silly('getAllRecipes');
     const formatted = [];
     for (const recipe of data) {
         const temp = traverseAndFill(recipe);
@@ -672,6 +685,7 @@ export function traverseAndFill(recipe?: RecipeRecord): Recipe | undefined {
 }
 
 export function hasAllRecipes(result: string): boolean {
+    logger.silly('hasAllRecipes', result);
     const recipes = data.filter((value) => (value.result === result && value.base));
     if (recipes.length === 0) {
         return false;
@@ -686,7 +700,23 @@ export function hasAllRecipes(result: string): boolean {
     return hasAll;
 }
 
-export function hasAtleastRecipe(result: string): boolean {
+export function countBaseRecipes(): number {
+    logger.silly('countBaseRecipes');
+    return data.filter((item) => item.base && item.discovered).length;
+}
+
+export function countBaseResults(): number {
+    logger.silly('countBaseResults');
+    return (new Set(data.filter((item) => item.base && item.discovered).map((item) => item.result))).size;
+}
+
+export function hasAtleastRecipe(result: string, ignoreCustom: boolean = false): boolean {
+    logger.silly('hasAtleastRecipe', result, ignoreCustom);
+    if (info.type !== 'custom') {
+        if (!ignoreCustom) {
+            return false;
+        }
+    }
     const recipes = data.filter((value) => (value.result === result && value.base));
     if (recipes.length === 0) {
         return false;

@@ -8,6 +8,8 @@ export enum RecipeChannel {
     HAS_ALL = 'recipe:hasAll',
     HAS_ATLEAST = 'recipe:hasAtleast',
     SYNC_INFO = 'recipe:syncInfo',
+    COUNT_BASE_RECIPES = 'recipe:countBaseRecipes',
+    COUNT_BASE_RESULTS = 'recipe:countBaseResults',
 }
 
 export enum ServerChannel {

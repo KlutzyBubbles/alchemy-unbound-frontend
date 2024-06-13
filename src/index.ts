@@ -152,47 +152,33 @@ const createWindow = (): void => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow);
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-    logger.error('Saving thinggiieiei');
-    mainWindow = undefined;
-    //cancelWebAuthTicket();
-    console.log('saving staefts');
-    saveStats().then(() => {
-        console.log('Saved stats');
-    }).catch((e) => {
-        logger.error('Failed to save stats', e);
-    });
-    saveSettings().then(() => {
-        console.log('Saved settings');
-    }).catch((e) => {
-        logger.error('Failed to save settings', e);
-    });
-    app.quit();
-    app.quit();
-    return;
+let flagQuit = false;
+
+app.on('before-quit', async (e) => {
+    logger.silly('before-quit');
+    if (!flagQuit) {
+        e.preventDefault();
+        mainWindow = undefined;
+        try {
+            await timeoutPromise(saveSettings(), 10000);
+            logger.silly('Saved settings');
+        } catch (error) {
+            logger.error('Failed to save settings', e);
+        }
+        try {
+            await timeoutPromise(saveStats(), 10000);
+            logger.silly('Saved stats');
+        } catch (error) {
+            logger.error('Failed to save stats', e);
+        }
+        flagQuit = true;
+        app.quit();
+    }
 });
 
-app.on('will-quit', () => {
-    logger.error('Saving things');
-    mainWindow = undefined;
-    //cancelWebAuthTicket();
-    console.log('saving stats');
-    timeoutPromise(saveStats(), 10000).then(() => {
-        console.log('Saved stats');
-    }).catch((e) => {
-        logger.error('Failed to save stats', e);
-    });
-    timeoutPromise(saveSettings(), 10000).then(() => {
-        console.log('Saved settings');
-    }).catch((e) => {
-        logger.error('Failed to save settings', e);
-    });
-    app.quit();
-    app.quit();
-    return;
+app.on('quit', () => {
+    logger.silly('quit');
+    app.exit(0);
 });
 
 app.on('activate', () => {

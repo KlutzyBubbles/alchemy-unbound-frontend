@@ -284,6 +284,7 @@ export type CombineSuccess = {
     firstDiscovery: boolean,
     creditAdjust: number,
     missionComplete: boolean,
+    insertFailed: boolean,
     recipe: Recipe
 }
 
@@ -324,7 +325,8 @@ export enum ServerErrorCode {
 }
 
 export enum LocalErrorCode {
-    UNKNOWN = 1001
+    UNKNOWN = 1001,
+    RATE_LIMITED = 429
 }
 
 export type ErrorCode = ServerErrorCode | LocalErrorCode;
@@ -352,6 +354,7 @@ export const ErrorCodeToString: {
     17: 'singleUse',
     18: 'notAuthorized',
     19: 'noCredits',
+    429: 'rateLimited',
     1001: 'unknownError'
 };
 

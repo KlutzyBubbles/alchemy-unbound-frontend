@@ -34,7 +34,7 @@ let endpointVersion: EndpointVersion | 'custom' = 'custom'; // 'release';
 
 let endpoint = 'http://localhost:5001';
 // endpoint = 'https://api.alchemyunbound.net';
-endpoint = 'https://alchemy-unbound-prerelease-b687af701d77.herokuapp.com';
+// endpoint = 'https://alchemy-unbound-prerelease-b687af701d77.herokuapp.com';
 if (isPackaged()) {
     // Production
     endpoint = 'https://api.alchemyunbound.net';
@@ -428,6 +428,7 @@ export async function initTransaction(item: string): Promise<PurchaseOutput> {
 // Returns undefined if in offline mode.
 export async function combine(a: string, b: string): Promise<CombineOutput | undefined> {
     logger.silly('combine', a, b);
+    const databaseType = (await getDatabaseInfo()).type;
     let exists: Recipe | undefined = undefined;
     try {
         exists = await getRecipe(a, b);
@@ -435,7 +436,6 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
         logger.error('Cannot get recipe', e);
         exists = undefined;
     }
-    const databaseType = (await getDatabaseInfo()).type;
     let mission: MissionStore | undefined = undefined;
     try {
         const tempResult = databaseType === 'daily' || databaseType === 'weekly' ? await getMission(databaseType) : undefined;
@@ -486,6 +486,7 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                 newDiscovery,
                 firstDiscovery,
                 recipe: exists,
+                insertFailed: false,
                 missionComplete,
                 creditAdjust: 0
             }
@@ -538,7 +539,7 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                     who_discovered: body.who_discovered,
                     base: body.base ? 1 : 0,
                     custom: body.custom ? 1 : 0
-                });
+                }, databaseType);
                 return {
                     type: 'success',
                     result: {
@@ -548,6 +549,7 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                         newDiscovery,
                         firstDiscovery,
                         missionComplete,
+                        insertFailed: false,
                         recipe: traverseAndFill(recipeRow),
                         creditAdjust: body.creditAdjust
                     }
@@ -563,6 +565,7 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
                         newDiscovery,
                         firstDiscovery,
                         missionComplete,
+                        insertFailed: true,
                         recipe: traverseAndFill({
                             order: getPlaceholderOrder(),
                             a: a,
@@ -698,6 +701,7 @@ export async function addItem(result: string, language: Language): Promise<Combi
                 newDiscovery: false,
                 firstDiscovery: false,
                 missionComplete: false,
+                insertFailed: false,
                 creditAdjust: 0,
                 recipe: exists[0]
             }
@@ -729,7 +733,7 @@ export async function addItem(result: string, language: Language): Promise<Combi
                     who_discovered: body.who_discovered,
                     base: body.base ? 1 : 0,
                     custom: body.custom ? 1 : 0
-                });
+                }, 'custom');
                 return {
                     type: 'success',
                     result: {
@@ -739,6 +743,7 @@ export async function addItem(result: string, language: Language): Promise<Combi
                         newDiscovery: false,
                         firstDiscovery: false,
                         missionComplete: false,
+                        insertFailed: false,
                         recipe: traverseAndFill(recipeRow),
                         creditAdjust: body.creditAdjust
                     }
@@ -754,6 +759,7 @@ export async function addItem(result: string, language: Language): Promise<Combi
                         newDiscovery: false,
                         firstDiscovery: false,
                         missionComplete: false,
+                        insertFailed: true,
                         recipe: traverseAndFill({
                             order: getPlaceholderOrder(),
                             a: '',

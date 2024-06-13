@@ -3,7 +3,7 @@ import logger from 'electron-log/main';
 import { dialog } from 'electron';
 import { hasProp } from '../../common/utils';
 import { getHintSaveFormat, loadHintV1, setHintRaw } from './hints';
-import { checkLanguages, databaseV1toV2, databaseV2toV3, databaseV3toV4, fillWithBase, getDatabaseInfo, getDatabaseSaveFormat, noFill, setDataRaw, setDatabaseInfo, setServerVersion } from './database/recipeStore';
+import { checkLanguages, databaseV1toV2, databaseV2toV3, databaseV3toV4, fillWithBase, getDatabaseInfo, getDatabaseSaveFormat, setDataRaw, setDatabaseInfo, setServerVersion } from './database/recipeStore';
 import { LATEST_SERVER_VERSION } from '../../common/types';
 import { DatabaseData } from '../../common/types/saveFormat';
 
@@ -139,10 +139,11 @@ export async function importFile(): Promise<boolean> {
                 logger.info('Found v4, importing...');
                 logger.info(v4db);
                 setDatabaseInfo(foundInfo);
-                if (foundInfo.type === 'base') {
-                    await setDataRaw(await checkLanguages(await fillWithBase(v4db)));
-                }
-                await setDataRaw(await checkLanguages(await noFill(v4db)));
+                // if (foundInfo.type === 'custom') {
+                //     await setDataRaw(await noFill(v4db));
+                // } else {
+                await setDataRaw(await checkLanguages(await fillWithBase(v4db)));
+                // }
             } catch (e) {
                 logger.error('Database import error', e);
                 throw new Error('Failed loading the database from version 3');

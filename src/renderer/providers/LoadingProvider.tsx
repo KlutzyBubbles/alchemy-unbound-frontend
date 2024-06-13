@@ -1,7 +1,7 @@
 import { FC, ReactNode, createContext, useContext, useEffect, useState } from 'react';
 import { SettingsContext } from './SettingsProvider';
 import logger from 'electron-log/renderer';
-import { unlockCheck } from '../utils/achievements';
+// import { unlockCheck } from '../utils/achievements';
 import { InfoContext } from './InfoProvider';
 import { SUPPORTER_DLC, THEME_DLC } from '../../common/types';
 import { BackgroundType, DEFAULT_SETTINGS } from '../../common/settings';
@@ -159,11 +159,11 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
                 }
                 // clearInterval();
                 setIntervalId(setInterval(() => {
-                    window.StatsAPI.getStats().then((stats) => {
-                        unlockCheck(stats);
-                    }).catch((e) => {
-                        logger.error('Cannot load stats in interval', e);
-                    });
+                    // window.StatsAPI.getStats().then((stats) => {
+                    //     unlockCheck(stats);
+                    // }).catch((e) => {
+                    //     logger.error('Cannot load stats in interval', e);
+                    // });
                     window.StatsAPI.saveStats();
                 }, 5 * 60 * 1000));
             }

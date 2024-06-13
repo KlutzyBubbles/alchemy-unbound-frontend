@@ -6,7 +6,7 @@ export function registerError(entry: ErrorEntryAdd) {
     errors = [{
         ...entry,
         date: new Date()
-    }, ...errors.slice(0, 9)];
+    }, ...errors.slice(0, 24)];
 }
 
 export function getErrors(): ErrorEntry[] {

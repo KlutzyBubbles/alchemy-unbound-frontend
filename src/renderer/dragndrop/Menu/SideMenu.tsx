@@ -243,7 +243,7 @@ export const SideMenu: FC<SideMenuProps> = ({
             <ProcessingModal onCancel={onCancelBefore} show={showIOProcessing}>
                 <p><span className="spinner-grow spinner-grow-sm me-2" aria-hidden="true"></span>{getFromStore(processingText, settings.language)}</p>
             </ProcessingModal>
-            <div className="offcanvas offcanvas-start side-menu" tabIndex={-1} id="sideMenu" aria-labelledby="sideMenuLabel">
+            <div className="offcanvas offcanvas-start side-menu" tabIndex={-1} id="sideMenu" aria-labelledby="sideMenuLabel" data-bs-keyboard="false">
                 <div className="offcanvas-header pb-0">
                     <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>

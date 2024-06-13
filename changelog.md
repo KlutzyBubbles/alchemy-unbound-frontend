@@ -7,10 +7,16 @@ With all the changes, this game has been rewritten
 
 [h1]Fixes[/h1]
 
-- Fixed element dissapearing when copy key was released
-- Optimized side list sort and filter to work better with thousands of items
-- Fixed issue with database files being overwritten after failing to load (it will now opt to not save instead of overwriting)
-- Completely overhauled data storage to reduce filesizes and load times.
+[list]
+    [*]Fixed element dissapearing when copy key was released
+    [*]Optimized side list sort and filter to work better with thousands of items
+    [*]Fixed issue with database files being overwritten after failing to load (it will now opt to not save instead of overwriting)
+    [*]Completely overhauled data storage to reduce filesizes and load times.
+    [*]Refined quit behaviour to hopefully close correctly all the time now.
+    [*]Fixed rate limit errors showing as 'unknown' (or not at all)
+    [*]Fixed dragging copied element to side menu removing the source as well.
+    [*]Fixed a bunch of visual bugs with either color or layout (more noticable with the supporter theme)
+[/list]
 
 
 [h1]New Features[/h1]

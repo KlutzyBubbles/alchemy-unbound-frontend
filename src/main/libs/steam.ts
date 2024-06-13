@@ -49,6 +49,7 @@ export function getSteamGameLanguage(): Language {
 }
 
 export function activateAchievement(achievement: string) {
+    logger.silly('activateAchievement', achievement);
     if (!isAchievementActivated(achievement)) {
         logger.info(`Unlocking achievement ${achievement}`);
         getSteamworksClient().achievement.activate(achievement);

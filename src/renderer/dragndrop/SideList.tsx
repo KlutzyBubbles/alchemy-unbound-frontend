@@ -72,14 +72,14 @@ export const SideList: FC<SideListProps> = ({
 
     const [{ isOver }, drop] = useDrop(
         () => ({
-            accept: [ItemTypes.ELEMENT, ItemTypes.LOCKED_ELEMENT],
+            accept: [ItemTypes.ELEMENT, ItemTypes.LOCKED_ELEMENT, ItemTypes.COPY_ELEMENT],
             drop(item: DragItem, monitor) {
                 if (monitor.didDrop()) {
                     return;
                 }
                 if (item.id !== undefined) {
                     playSound('side-drop');
-                    if (item.type !== ItemTypes.LOCKED_ELEMENT) {
+                    if (item.type !== ItemTypes.LOCKED_ELEMENT && item.type !== ItemTypes.COPY_ELEMENT) {
                         const { x, y } = getXY(item, monitor);
                         moveBox(item.id, x, y).then(() => {
                             (new Promise(resolve => setTimeout(resolve, 100))).then(() => {
