@@ -4,6 +4,7 @@ import { verifyFolder } from '../utils';
 import { DEFAULT_SETTINGS, Settings, SettingsV1, SettingsV2, SettingsV3 } from '../../common/settings';
 import logger from 'electron-log/main';
 import { FileVersionError } from '../../common/types/saveFormat';
+import { hasProp } from 'src/common/utils';
 
 const SETTINGS_VERISON = 3;
 
@@ -77,6 +78,23 @@ export function settingsV3toV4(loaded: SettingsV3): Settings {
     };
 }
 
+function fillUndefined(settings: Settings): Settings {
+    settings.background = settings.background ?? DEFAULT_SETTINGS.background;
+    settings.currentDisplay = settings.currentDisplay ?? DEFAULT_SETTINGS.currentDisplay;
+    settings.fps = settings.fps ?? DEFAULT_SETTINGS.fps;
+    settings.fullscreen = settings.fullscreen ?? DEFAULT_SETTINGS.fullscreen;
+    settings.keybinds = settings.keybinds ?? DEFAULT_SETTINGS.keybinds;
+    settings.language = settings.language ?? DEFAULT_SETTINGS.language;
+    settings.languageSet = settings.languageSet ?? DEFAULT_SETTINGS.languageSet;
+    settings.muted = settings.muted ?? DEFAULT_SETTINGS.muted;
+    settings.offline = settings.offline ?? DEFAULT_SETTINGS.offline;
+    settings.performance = settings.performance ?? DEFAULT_SETTINGS.performance;
+    settings.sidebar = settings.sidebar ?? DEFAULT_SETTINGS.sidebar;
+    settings.theme = settings.theme ?? DEFAULT_SETTINGS.theme;
+    settings.volume = settings.volume ?? DEFAULT_SETTINGS.volume;
+    return settings;
+}
+
 export async function loadSettings(): Promise<void> {
     try {
         const raw = JSON.parse(await fs.readFile(getFolder() + 'settings.json', 'utf-8'));
@@ -111,7 +129,7 @@ export async function loadSettings(): Promise<void> {
         }
         if (workingVersion === 4) {
             logger.info('Found v4 settings, loading...');
-            settings = workingData;
+            settings = fillUndefined(workingData);
         } else {
             loadedVersion = FileVersionError.UNKOWN_VERSION;
             logger.error(`Failed to load database because of unknown version '${raw.version}', has this been altered?`);

@@ -46,5 +46,5 @@ export function isPackaged(): boolean {
 }
 
 export function quit(): void {
-    return app.quit();
+    app.quit();
 }

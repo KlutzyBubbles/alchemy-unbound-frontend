@@ -442,7 +442,7 @@ export async function combine(a: string, b: string): Promise<CombineOutput | und
         if (tempResult !== undefined && tempResult.type === 'success') {
             mission = tempResult.result;
         } else {
-            logger.error('Cannot get mission 1 from sub', tempResult);
+            logger.silly('Cannot get mission 1 from sub', tempResult);
             mission = undefined;
         }
     } catch(e) {

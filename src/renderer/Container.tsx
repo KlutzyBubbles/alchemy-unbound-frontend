@@ -16,6 +16,7 @@ import { StoreModal } from './modals/store/StoreModal';
 import { ItemModal } from './modals/CustomItemModal';
 import { SaveResetModal } from './modals/SaveResetModal';
 import { InfoContext } from './providers/InfoProvider';
+import { DEFAULT_SETTINGS } from '../common/settings';
 
 export type ModalOption = 'settings' | 'info' | 'stats' | 'store' | 'addItem' | 'v2' | 'none';
 
@@ -24,7 +25,7 @@ export const ContentContainer: FC = () => {
     const { loadingVisible } = useContext(LoadingContext);
     const { fileVersions, isLegacy } = useContext(InfoContext);
     const [currentModal, setCurrentModal] = useState<ModalOption>('none');
-    const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.theme, settings.fps));
+    const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background ?? DEFAULT_SETTINGS.background](settings.theme ?? DEFAULT_SETTINGS.theme, settings.fps ?? DEFAULT_SETTINGS.fps));
     const [particleReady, setParticleReady] = useState<boolean>(false);
     const [refreshValues, setRefreshValues] = useState<number>(0);
     const modalCallback = useRef(undefined);
@@ -48,7 +49,7 @@ export const ContentContainer: FC = () => {
     useEffect(() => {
         (async () => {
             setParticleReady(false);
-            setCurrentParticles(options[settings.background](settings.theme, settings.fps));
+            setCurrentParticles(options[settings.background ?? DEFAULT_SETTINGS.background](settings.theme ?? DEFAULT_SETTINGS.theme, settings.fps ?? DEFAULT_SETTINGS.fps));
             await initParticlesEngine(async (engine) => {
                 //await loadSlim(engine);
                 await loadAll(engine);
