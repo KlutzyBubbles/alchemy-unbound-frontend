@@ -1,5 +1,5 @@
 import { DatabaseData } from '../../../common/types/saveFormat';
-import { getMission } from '../server';
+import { getMission, getUserDetails } from '../server';
 import { createDatabase, getDatabaseInfo, reset, save, setDatabaseInfo } from './recipeStore';
 import { setWorkingDatabase } from './workingName';
 import logger from 'electron-log/main';
@@ -17,6 +17,10 @@ export async function switchProfile(profile: string, info: DatabaseData) {
     logger.debug('switchInfo done');
     await save();
     logger.debug('Saved');
+    if (profile === 'custom') {
+        await getUserDetails(true);
+        logger.debug('User details done');
+    }
 }
 
 async function switchInfo(info: DatabaseData) {

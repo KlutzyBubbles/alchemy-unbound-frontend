@@ -95,7 +95,7 @@ export const MainElement: FC<BoxProps> = ({
         } else {
             if (copyHeld) {
                 setCopyFlipFlop(true);
-                logger.info('dragging with copy');
+                logger.silly('dragging with copy');
             }
         }
     }, [draggingState]);
@@ -137,7 +137,7 @@ export const MainElement: FC<BoxProps> = ({
                 if (item.type === ItemTypes.SIDE_ELEMENT) {
                     // Create a new and place it
                     rawCombine(dragId, item.element.name).then(() => {
-                        logger.info('combined: ', dragId, item.element.name);
+                        logger.debug('combined: ', dragId, item.element.name);
                     }).catch((e) => {
                         logger.error('Side element combining error', e);
                     });
@@ -149,7 +149,7 @@ export const MainElement: FC<BoxProps> = ({
                     moveBox(item.id, x, y);
                     if (dragId !== item.id) {
                         combine(dragId, item.id).then(() => {
-                            logger.info('combined: ', dragId, item.id);
+                            logger.debug('combined: ', dragId, item.id);
                         }).catch((e) => {
                             logger.error('Main element combining error', e);
                         });

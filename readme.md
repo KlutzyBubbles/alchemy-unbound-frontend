@@ -27,8 +27,8 @@ $Base64Output | Out-File $OutputPath
 ```
 
 ```
-options
+options (Endpoint needs to come last)
 
---server dev --endpoint http://localhost:5001
---server prerelease
+--server dev --logLevel silly --endpoint http://localhost:5001
+--server prerelease --logLevel silly
 ```

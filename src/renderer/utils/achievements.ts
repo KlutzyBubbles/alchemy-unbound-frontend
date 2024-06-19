@@ -2,23 +2,16 @@ import logger from 'electron-log/renderer';
 import { Stats } from '../../common/stats';
 
 export async function unlockCheck(stats: Stats): Promise<void> {
-    // baseRecipeCheck(stats.baseRecipesFound);
-    // aiRecipeCheck(stats.aiRecipesFound);
-    // baseResultCheck(stats.baseResultsFound);
-    // aiResultCheck(stats.aiResultsFound);
-    // firstDiscoveryCheck(stats.firstDiscoveries);
-    // depthCheck(stats.baseHighestDepth, stats.aiHighestDepth);
-
     const recipes = await window.RecipeAPI.countBaseRecipes();
     const results = await window.RecipeAPI.countBaseResults();
-    logger.info('unlockCheck', stats, recipes, results);
+    logger.silly('unlockCheck', stats, recipes, results);
     baseRecipeCheck(recipes);
     baseResultCheck(results);
 
     if (await shouldDoAICheck('first_discovery', ['1', '10', '100'])
         || await shouldDoAICheck('discover_ai_recipe')
         || await shouldDoAICheck('discover_ai')) {
-        logger.info('Checking for user details');
+        logger.silly('Checking for user details');
         const response = await window.ServerAPI.getUserDetails();
         if (response.type === 'success') {
             const details = response.result.user;

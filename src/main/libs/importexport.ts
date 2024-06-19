@@ -102,7 +102,7 @@ export async function importFile(): Promise<boolean> {
         let v2db = database.data;
         let v3db = database.data;
         let v4db = database.data;
-        logger.info('rawDb', database);
+        logger.silly('rawDb', database);
         if (workingVersion === 1) {
             try {
                 logger.info('Found v1, migrating...');
@@ -115,9 +115,9 @@ export async function importFile(): Promise<boolean> {
         if (workingVersion === 2) {
             try {
                 logger.info('Found v2, migrating...');
-                logger.info('v2db', v2db);
+                logger.silly('v2db', v2db);
                 v3db = await databaseV2toV3(v2db);
-                logger.info('v3db', v3db);
+                logger.silly('v3db', v3db);
                 workingVersion = 3;
             } catch (e) {
                 throw new Error('Failed loading the database from version 2');
@@ -126,9 +126,9 @@ export async function importFile(): Promise<boolean> {
         if (workingVersion === 3) {
             try {
                 logger.info('Found v3, migrating...');
-                logger.info('v3db', v3db);
+                logger.silly('v3db', v3db);
                 v4db = await databaseV3toV4(v3db);
-                logger.info('v4db', v4db);
+                logger.silly('v4db', v4db);
                 workingVersion = 4;
             } catch (e) {
                 throw new Error('Failed loading the database from version 3');
@@ -137,7 +137,7 @@ export async function importFile(): Promise<boolean> {
         if (workingVersion === 4) {
             try {
                 logger.info('Found v4, importing...');
-                logger.info(v4db);
+                logger.silly(v4db);
                 setDatabaseInfo(foundInfo);
                 // if (foundInfo.type === 'custom') {
                 //     await setDataRaw(await noFill(v4db));

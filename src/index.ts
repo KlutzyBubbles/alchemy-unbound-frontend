@@ -138,11 +138,13 @@ const createWindow = (): void => {
     mainWindow.on('close', () => {
         mainWindow = undefined;
         app.quit();
+        return;
     });
 
     mainWindow.on('closed', () => {
         mainWindow = undefined;
         app.quit();
+        return;
     });
   
 };
@@ -173,12 +175,22 @@ app.on('before-quit', async (e) => {
         }
         flagQuit = true;
         app.quit();
+        return;
     }
+});
+
+app.on('window-all-closed', () => {
+    logger.silly('window-all-closed');
+    mainWindow = undefined;
+    app.quit();
+    return;
 });
 
 app.on('quit', () => {
     logger.silly('quit');
+    mainWindow = undefined;
     app.exit(0);
+    return;
 });
 
 app.on('activate', () => {

@@ -255,13 +255,13 @@ export const SideList: FC<SideListProps> = ({
     };
 
     useEffect(() => {
-        logger.info('items changeeed');
+        logger.silly('items changeeed');
         if (itemsDisplayed < elementHolder.length) {
-            logger.info('length');
+            logger.silly('length');
             if (elementRef.current !== undefined) {
-                logger.info('current');
+                logger.silly('current');
                 if (elementRef.current.scrollHeight <= elementRef.current.clientHeight) {
-                    logger.info('Increasing for space');
+                    logger.silly('Increasing for space');
                     setItemsDisplayed((itemsDisplayed) => {
                         return itemsDisplayed + 100;
                     });

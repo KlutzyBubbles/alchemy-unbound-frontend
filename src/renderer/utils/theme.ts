@@ -38,7 +38,7 @@ const blueTheme: Theme = {
 
 const pinkTheme: Theme = {
     background: 'fdb1dd',
-    foreground: '5f416d',
+    foreground: 'fee0f1', // 'f7c2d8', //'5f416d',
     primary: 'ed609e'
 };
 

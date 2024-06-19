@@ -905,7 +905,7 @@ let userDetails: {
     howRecent: number
 } | undefined = undefined;
 
-export async function getUserDetails(): Promise<UserOutput> {
+export async function getUserDetails(force: boolean = false): Promise<UserOutput> {
     logger.silly('getUserDetails');
     if (userDetails === undefined) {
         const apiResult = await apiRequest(
@@ -925,7 +925,7 @@ export async function getUserDetails(): Promise<UserOutput> {
         return apiResult;
     } else {
         logger.debug('Expiry dates', userDetails.howRecent, ((new Date()).getTime() + 60000));
-        if (userDetails.howRecent + 60000 < (new Date()).getTime()) {
+        if (force || userDetails.howRecent + 60000 < (new Date()).getTime()) {
             const apiResult = await apiRequest(
                 'GET',
                 '/v2/session/user',
@@ -1074,30 +1074,5 @@ export async function restorePurchases(): Promise<boolean> {
         logger.error('Unable to check purchases, leaving alone', themes, error);
         hasErrors = true;
     }
-    // for (const theme of ['themeOrange', 'themePurple', 'themeSand', 'themePink', 'themeBlue']) {
-    //     try {
-    //         const result = await checkAndRedeem(theme);
-    //         if (result === undefined) {
-    //             logger.info('Removing theme', theme);
-    //             await removeTheme(theme);
-    //         } else {
-    //             if (result.type === 'success') {
-    //                 if (!result.result.success) {
-    //                     logger.info('Removing theme', theme);
-    //                     await removeTheme(theme);
-    //                 } else {
-    //                     logger.info('Adding theme', theme);
-    //                     await addTheme(theme);
-    //                 }
-    //             } else {
-    //                 logger.error('Unable to get purchase, leaving alone', theme);
-    //                 hasErrors = true;
-    //             }
-    //         }
-    //     } catch (error) {
-    //         logger.error('Unable to check purchases, leaving alone', theme, error);
-    //         hasErrors = true;
-    //     }
-    // }
     return !hasErrors;
 }

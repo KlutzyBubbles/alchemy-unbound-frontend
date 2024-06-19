@@ -234,7 +234,7 @@ export async function noFill(loaded: Compressed): Promise<RecipeRecord[]> {
 export async function checkLanguages(recipes: RecipeRecord[], skipServer: boolean = false): Promise<RecipeRecord[]> {
     logger.silly('checkLanguages()', recipes.length);
     const tempData = structuredClone(recipes);
-    logger.info('tempData', tempData.length);
+    logger.silly('tempData', tempData.length);
     let needToCheck: string[] = [];
     const languages = await getLanguageKeys();
     for (const recipe of tempData) {
@@ -344,7 +344,7 @@ async function loadData(override?: DatabaseData): Promise<RecipeRecord[]> {
         } else {
             loadedVersion = FileVersionError.NO_VERSION;
         }
-        logger.info('raw', raw.version);
+        logger.silly('raw', raw.version);
         let workingVersion = raw.version;
         let workingData = raw.data;
         let foundInfo: DatabaseData = {

@@ -59,11 +59,11 @@ export const TopButtons: FC<TopButtonProps> = ({
     const refreshMission = async () => {
         try {
             setLoading(true);
-            logger.info('Refreshing missions');
+            logger.debug('Refreshing missions');
             const type = fileVersions.databaseInfo.type;
             if (type === 'daily' || type === 'weekly') {
                 const mission = await window.ServerAPI.getMission(type);
-                logger.info('missions', mission, type);
+                logger.debug('missions', mission, type);
                 if (mission.type === 'error') {
                     logger.error('Issue with mission response', mission);
                 } else {
