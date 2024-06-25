@@ -11,6 +11,7 @@ import { SettingsContext } from './providers/SettingsProvider';
 import logger from 'electron-log/renderer';
 import { LoadingContext } from './providers/LoadingProvider';
 import { IdeaModal } from './modals/IdeaModal';
+import { DEFAULT_SETTINGS } from '../common/settings';
 
 export type ModalOption = 'settings' | 'info' | 'idea' | 'none';
 
@@ -18,7 +19,7 @@ export const ContentContainer: FC = () => {
     const { settings } = useContext(SettingsContext);
     const { loading } = useContext(LoadingContext);
     const [currentModal, setCurrentModal] = useState<ModalOption>('none');
-    const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>(options[settings.background](settings.theme, settings.fps));
+    const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>((options[settings.background ?? DEFAULT_SETTINGS.background] ?? options.line)(settings.theme?? DEFAULT_SETTINGS.theme, settings.fps?? DEFAULT_SETTINGS.fps));
     const [particleReady, setParticleReady] = useState<boolean>(false);
 
     useEffect(() => {
@@ -33,7 +34,7 @@ export const ContentContainer: FC = () => {
     useEffect(() => {
         (async () => {
             setParticleReady(false);
-            setCurrentParticles(options[settings.background](settings.theme, settings.fps));
+            setCurrentParticles((options[settings.background ?? DEFAULT_SETTINGS.background] ?? options.line)(settings.theme ?? DEFAULT_SETTINGS.theme, settings.fps ?? DEFAULT_SETTINGS.fps));
             await initParticlesEngine(async (engine) => {
                 await loadSlim(engine);
             });

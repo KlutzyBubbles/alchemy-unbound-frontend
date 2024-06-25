@@ -23,8 +23,24 @@ export async function saveSettings(): Promise<void> {
     }
 }
 
+function fillUndefined(settings: Settings): Settings {
+    settings.background = settings.background ?? DEFAULT_SETTINGS.background;
+    settings.currentDisplay = settings.currentDisplay ?? DEFAULT_SETTINGS.currentDisplay;
+    settings.fps = settings.fps ?? DEFAULT_SETTINGS.fps;
+    settings.fullscreen = settings.fullscreen ?? DEFAULT_SETTINGS.fullscreen;
+    settings.keybinds = settings.keybinds ?? DEFAULT_SETTINGS.keybinds;
+    settings.language = settings.language ?? DEFAULT_SETTINGS.language;
+    settings.languageSet = settings.languageSet ?? DEFAULT_SETTINGS.languageSet;
+    settings.muted = settings.muted ?? DEFAULT_SETTINGS.muted;
+    settings.offline = settings.offline ?? DEFAULT_SETTINGS.offline;
+    settings.sidebar = settings.sidebar ?? DEFAULT_SETTINGS.sidebar;
+    settings.theme = settings.theme ?? DEFAULT_SETTINGS.theme;
+    settings.volume = settings.volume ?? DEFAULT_SETTINGS.volume;
+    return settings;
+}
+
 function loadV1(loaded: RawSettings) {
-    settings = {
+    settings = fillUndefined({
         theme: loaded.theme ?? ((loaded.dark ?? DEFAULT_SETTINGS.theme === 'dark') ? 'dark' : 'light'),
         fullscreen: loaded.fullscreen,
         offline: loaded.offline,
@@ -37,7 +53,7 @@ function loadV1(loaded: RawSettings) {
         muted: loaded.muted,
         fps: loaded.fps,
         keybinds: loaded.keybinds ?? DEFAULT_SETTINGS.keybinds
-    };
+    })
 }
 
 function loadV2(loaded: RawSettings) {
