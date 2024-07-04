@@ -56,8 +56,8 @@ export function settingsV2toV3(loaded: SettingsV2): SettingsV3 {
         volume: loaded.volume,
         muted: loaded.muted,
         fps: loaded.fps,
-        keybinds: loaded.keybinds ?? DEFAULT_SETTINGS.keybinds
-    })
+        keybinds: DEFAULT_SETTINGS.keybinds
+    }
 }
 
 export function settingsV3toV4(loaded: SettingsV3): Settings {
