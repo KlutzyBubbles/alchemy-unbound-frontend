@@ -1,0 +1,72 @@
+import { LanguageStoreRecurring } from '../store';
+
+export const LanguageStore: LanguageStoreRecurring = {
+    days: {
+        english: 'Days',
+        schinese: '日',
+        russian: 'Дни недели',
+        spanish: 'Días',
+        french: 'Jours',
+        japanese: '日',
+        indonesian: 'Hari',
+        german: 'Tage',
+        latam: 'Días',
+        italian: 'Giorni',
+        dutch: 'Dagen',
+        polish: 'Dni',
+        portuguese: 'Dias',
+        tchinese: '日',
+        koreana: '일'
+    },
+    hours: {
+        english: 'Hours',
+        schinese: '小时',
+        russian: 'Часов',
+        spanish: 'Horas',
+        french: 'Heures',
+        japanese: '時間',
+        indonesian: 'Jam',
+        german: 'Stunden',
+        latam: 'Horas',
+        italian: 'Orario',
+        dutch: 'Uren',
+        polish: 'Godzin',
+        portuguese: 'Horas',
+        tchinese: '小時',
+        koreana: '시간'
+    },
+    minutes: {
+        english: 'Minutes',
+        schinese: '纪要',
+        russian: 'Протокол',
+        spanish: 'Acta',
+        french: 'Compte-rendu',
+        japanese: '議事録',
+        indonesian: 'Menit',
+        german: 'Protokoll',
+        latam: 'Acta',
+        italian: 'Verbale',
+        dutch: 'Notulen',
+        polish: 'Protokół',
+        portuguese: 'Ata',
+        tchinese: '紀要',
+        koreana: '분'
+    },
+    seconds: {
+        english: 'Seconds',
+        schinese: '秒',
+        russian: 'Товары второго сорта',
+        spanish: 'Sobras',
+        french: 'Secondes',
+        japanese: 'お代わり',
+        indonesian: 'Detik',
+        german: 'Nachschlag',
+        latam: 'Sobras',
+        italian: 'Secondi',
+        dutch: 'Seconden',
+        polish: 'Sekund',
+        portuguese: 'Segundos',
+        tchinese: '秒',
+        koreana: '초'
+    }
+};

@@ -3,17 +3,23 @@ import { getFolder, isDlcInstalled } from './steam';
 import { verifyFolder } from '../utils';
 import logger from 'electron-log/main';
 import { DEFAULT_HINT, DEFAULT_MAX_HINTS, Hint } from '../../common/hints';
-import { Compressed, compress, decompress } from 'compress-json';
+import { Compressed, compress, decompress, trimUndefinedRecursively } from 'compress-json';
 import { HINT_DLC, Recipe } from '../../common/types';
-import { data, traverseAndFill } from './database';
+import { data, traverseAndFill } from './database/recipeStore';
+import { FileVersionError } from '../../common/types/saveFormat';
 
 const HINT_VERISON = 1;
 
 let maxHints = DEFAULT_MAX_HINTS;
 let hint: Hint = DEFAULT_HINT;
+let loadedVersion: number = FileVersionError.NOT_LOADED;
 let loaded = false;
 
 const EXCLUDED = ['piney', 'shep3rd', 'klutzybubbles', 'ango', 'uncle', 'flikz', 'tvision'];
+
+export function getHintVersion(): number {
+    return loadedVersion;
+}
 
 async function getBaseHint(): Promise<Recipe | undefined> {
     const alreadyFound = [...new Set(data.filter((value) => value.discovered).map((item) => item.result))];
@@ -52,9 +58,11 @@ async function saveHintToFile(filename: string, fullpath = false) {
 export function getHintSaveFormat() {
     logger.debug('getHintSaveFormat()');
     if (hint.hint !== undefined) {
+        const temp = structuredClone(hint);
+        trimUndefinedRecursively(temp);
         return {
             version: HINT_VERISON,
-            hint: compress(hint)
+            hint: compress(temp)
         };
     } else {
         return {
@@ -93,9 +101,15 @@ export async function loadHint(): Promise<void> {
             maxHints = 25;
         }
         const raw = JSON.parse(await fs.readFile(getFolder() + 'hint.json', 'utf-8'));
+        if (raw.version !== undefined) {
+            loadedVersion = raw.version;
+        } else {
+            loadedVersion = FileVersionError.NO_VERSION;
+        }
         if (raw.version === 1) {
             hint = loadHintV1(raw.hint);
         } else {
+            loadedVersion = FileVersionError.ERROR;
             logger.error(`Failed to load hint because of unknown version '${raw.version}', has this been altered?`);
             throw(Error(`Failed to load hint because of unknown version '${raw.version}', has this been altered?`));
         }
@@ -105,12 +119,16 @@ export async function loadHint(): Promise<void> {
             logger.error('Error reading hint JSON', e);
         } else {
             logger.info('Hint file could not be found, initializing with default hint');
-            if (hint === null || hint === undefined)
+            if (hint === null || hint === undefined) {
                 hint = DEFAULT_HINT;
+                loadedVersion = FileVersionError.DEFAULTS;
+            }
         }
     }
-    if (hint === null || hint === undefined)
+    if (hint === null || hint === undefined) {
         hint = DEFAULT_HINT;
+        loadedVersion = FileVersionError.DEFAULTS;
+    }
 }
 
 async function generateHint(): Promise<Recipe | undefined> {
@@ -151,6 +169,15 @@ export async function addHintPoint(amount = 1) {
     await saveHint();
 }
 
+export async function fillHints() {
+    logger.debug('fillHints()');
+    if (!loaded) {
+        await loadHint();
+    }
+    hint.hintsLeft = maxHints;
+    await saveHint();
+}
+
 // export async function setMaxHints(maxHints: number) {
 //     if (!loaded) {
 //         await loadHint();
@@ -178,9 +205,13 @@ export async function getHintsLeft(): Promise<number> {
     return hint.hintsLeft;
 }
 
-export async function resetHint(): Promise<void> {
+export async function resetHint(soft: boolean = false): Promise<void> {
     logger.debug('resetHint()');
-    hint = DEFAULT_HINT;
+    if (soft) {
+        hint.hint = undefined;
+    } else {
+        hint = DEFAULT_HINT;
+    }
     await saveHint();
 }
 

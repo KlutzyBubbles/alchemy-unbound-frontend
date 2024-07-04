@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import { getFolder } from './steam';
-import { dirExists } from '../utils';
+import { verifyFolder } from '../utils';
 import logger from 'electron-log/main';
 import { DEFAULT_STATS, Stats } from '../../common/stats';
 import { hasProp } from '../../common/utils';
@@ -10,9 +10,7 @@ let loaded = false;
 
 export async function saveStats(): Promise<void> {
     try {
-        if (!(await dirExists(getFolder()))) {
-            await fs.mkdir(getFolder(), { recursive: true });
-        }
+        await verifyFolder();
         await fs.writeFile(getFolder() + 'stats.json', JSON.stringify(stats), 'utf-8');
     } catch(e) {
         logger.error('Error saving stats', e);

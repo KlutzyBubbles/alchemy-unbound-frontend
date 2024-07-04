@@ -1,13 +1,20 @@
 import { Languages } from '../../common/types';
 import { LanguageStore as SettingsLanguageStore } from './sections/settings';
 import { LanguageStore as InfoLanguageStore } from './sections/info';
+import { LanguageStore as StoreLanguageStore } from './sections/store';
 import { LanguageStore as DialogLanguageStore } from './sections/dialog';
 import { LanguageStore as SideLanguageStore } from './sections/side';
 import { LanguageStore as ErrorsLanguageStore } from './sections/errors';
-import { LanguageStore as IdeaLanguageStore } from './sections/idea';
+import { LanguageStore as ItemLanguageStore } from './sections/item';
+import { LanguageStore as MenuLanguageStore } from './sections/menu';
+import { LanguageStore as SavesLanguageStore } from './sections/saves';
+import { LanguageStore as RecipesLanguageStore } from './sections/recipes';
+import { LanguageStore as TimerLanguageStore } from './sections/timer';
+
+export type LanguageStoreItem = Partial<Omit<Languages, 'english'>> & { english: string };
 
 export type LanguageStoreRecurring = {
-    [key: string]: Languages | LanguageStoreRecurring
+    [key: string]: LanguageStoreItem | LanguageStoreRecurring
 }
 
 export const LanguageStore: LanguageStoreRecurring = {
@@ -15,8 +22,13 @@ export const LanguageStore: LanguageStoreRecurring = {
     info: InfoLanguageStore,
     dialog: DialogLanguageStore,
     side: SideLanguageStore,
+    store: StoreLanguageStore,
     errors: ErrorsLanguageStore,
-    idea: IdeaLanguageStore,
+    item: ItemLanguageStore,
+    menu: MenuLanguageStore,
+    saves: SavesLanguageStore,
+    recipes: RecipesLanguageStore,
+    timer: TimerLanguageStore,
     hintTooltip: {
         english: 'Click to use a hint point',
         schinese: '点击使用提示点',
@@ -34,4 +46,21 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '點擊使用提示點',
         koreana: '힌트 포인트 사용하려면 클릭하세요'
     },
+    creditsLeft: {
+        english: 'Credits',
+        schinese: '学分',
+        russian: 'Кредиты',
+        spanish: 'Créditos',
+        french: 'Crédits',
+        japanese: 'クレジット',
+        indonesian: 'Kredit',
+        german: 'Kredite',
+        latam: 'Créditos',
+        italian: 'Crediti',
+        dutch: 'Credits',
+        polish: 'Kredyty',
+        portuguese: 'Créditos',
+        tchinese: '學分',
+        koreana: '크레딧'
+    }
 };

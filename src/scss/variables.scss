@@ -42,6 +42,17 @@ $font-sizes: (
   9: $h9-font-size
 );
 
+$spacer: 1rem;
+$spacers: (
+  0: 0,
+  half: $spacer * 0.125,
+  1: $spacer * .25,
+  2: $spacer * .5,
+  3: $spacer,
+  4: $spacer * 1.5,
+  5: $spacer * 3,
+);
+
 $input-border-radius: 2px;
 $input-border-radius-sm: 2px;
 $input-border-radius-lg: 2px;

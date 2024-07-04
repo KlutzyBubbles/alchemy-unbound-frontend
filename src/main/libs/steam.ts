@@ -1,6 +1,6 @@
 import { Language, languages } from '../../common/settings';
 import steamworks from '@ai-zen/steamworks.js';
-import { PlayerSteamId, auth } from '@ai-zen/steamworks.js/client';
+import { PlayerSteamId, auth, overlay } from '@ai-zen/steamworks.js/client';
 import logger from 'electron-log/main';
 import os from 'os';
 
@@ -8,6 +8,7 @@ export const APP_ID = 2858840;
 
 let steamworksClient: Omit<steamworks.Client, 'init' | 'runCallbacks'>;
 let steamId: PlayerSteamId | undefined = undefined;
+// let steamTicket: auth.Ticket | undefined = undefined;
 
 export function getSteamworksClient(): Omit<steamworks.Client, 'init' | 'runCallbacks'> {
     if (steamworksClient === undefined || steamworksClient === null) {
@@ -48,6 +49,7 @@ export function getSteamGameLanguage(): Language {
 }
 
 export function activateAchievement(achievement: string) {
+    logger.silly('activateAchievement', achievement);
     if (!isAchievementActivated(achievement)) {
         logger.info(`Unlocking achievement ${achievement}`);
         getSteamworksClient().achievement.activate(achievement);
@@ -60,6 +62,10 @@ export function isAchievementActivated(achievement: string): boolean {
 
 export function isDlcInstalled(appid: number): boolean {
     return getSteamworksClient().apps.isDlcInstalled(appid);
+}
+
+export function openToDLC(appid: number): void {
+    getSteamworksClient().overlay.activateToStore(appid, overlay.StoreFlag.AddToCartAndShow);
 }
 
 export function getFolder() {
@@ -79,3 +85,20 @@ export function getFolder() {
 export async function getWebAuthTicket(): Promise<auth.Ticket> {
     return await getSteamworksClient().auth.getSessionTicketWithSteamId(getSteamIdRaw().steamId64);
 }
+
+export async function getUsername(): Promise<string> {
+    return await getSteamworksClient().localplayer.getName();
+}
+
+// export async function getWebAuthTicket(): Promise<auth.Ticket> {
+//     if (steamTicket === undefined) {
+//         steamTicket = await getSteamworksClient().auth.getSessionTicketWithSteamId(getSteamIdRaw().steamId64);
+//     }
+//     return steamTicket;
+// }
+// 
+// export async function cancelWebAuthTicket() {
+//     if (steamTicket !== undefined) {
+//         steamTicket.cancel();
+//     }
+// }

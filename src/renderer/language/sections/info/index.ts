@@ -1,24 +1,18 @@
 import { LanguageStoreRecurring } from '../../store';
 import { LanguageStore as StatsLanguageStore } from './stats';
+import { LanguageStore as DevLanguageStore } from './dev';
+import { LanguageStore as FilesLanguageStore } from './files';
 
 export const LanguageStore: LanguageStoreRecurring = {
     stats: StatsLanguageStore,
+    dev: DevLanguageStore,
+    files: FilesLanguageStore,
     alchemyUnbound: {
         english: 'Alchemy Unbound',
-        schinese: 'Alchemy Unbound',
-        russian: 'Alchemy Unbound',
         spanish: 'el Alchemy Unbound',
         french: 'Baguette Unbound',
         japanese: 'Alchemy Unboundu',
-        indonesian: 'Alchemy Unbound',
-        german: 'Alchemy Unbound',
-        latam: 'Alchemy Unbound',
-        italian: 'Alchemy Unbound',
-        dutch: 'Alchemy Unbound',
-        polish: 'Alchemy Unbound',
-        portuguese: 'Alchemy Unboundo',
-        tchinese: 'Alchemy Unbound',
-        koreana: 'Alchemy Unbound'
+        portuguese: 'Alchemy Unboundo'
     },
     apiErrorsTitle: {
         english: 'API Errors',
@@ -37,55 +31,4 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: 'API錯誤',
         koreana: 'API 오류'
     },
-    game: {
-        english: 'Game',
-        schinese: '游戏',
-        russian: 'игра',
-        spanish: 'juego',
-        french: 'jeu',
-        japanese: 'ゲーム',
-        indonesian: 'permainan',
-        german: 'Spiel',
-        latam: 'juego',
-        italian: 'gioco',
-        dutch: 'spel',
-        polish: 'gra',
-        portuguese: 'jogo',
-        tchinese: '遊戲',
-        koreana: '게임'
-    },
-    art: {
-        english: 'Art',
-        schinese: '艺术',
-        russian: 'Искусство',
-        spanish: 'Arte',
-        french: 'Art',
-        japanese: '芸術',
-        indonesian: 'Seni',
-        german: 'Kunst',
-        latam: 'Arte',
-        italian: 'Arte',
-        dutch: 'Kunst',
-        polish: 'Sztuka',
-        portuguese: 'Arte',
-        tchinese: '藝術',
-        koreana: '미술'
-    },
-    hacker: {
-        english: 'Hacker',
-        schinese: '黑客',
-        russian: 'Хакер',
-        spanish: 'Hacker',
-        french: 'Hacker',
-        japanese: 'ハッカー',
-        indonesian: 'Peretas',
-        german: 'Hacker',
-        latam: 'Hacker',
-        italian: 'Hacker',
-        dutch: 'Hacker',
-        polish: 'Haker',
-        portuguese: 'Hacker',
-        tchinese: '駭客',
-        koreana: '해커'
-    }
 };

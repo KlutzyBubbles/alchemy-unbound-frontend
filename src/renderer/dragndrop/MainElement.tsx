@@ -34,7 +34,6 @@ export interface BoxProps {
   loading: boolean,
   error: number,
   locked: boolean,
-  // combineRaw: (a: string, b: string) => Promise<void>,
   children?: ReactNode
 }
 
@@ -65,52 +64,60 @@ export const MainElement: FC<BoxProps> = ({
         drag(node, options);
         drop(node, options);
     };
-    const [recipes, setRecipes] = useState<Recipe[]>(element.recipes);
-    const [isBase, setIsBase] = useState<boolean>(true);
-    const [isAI, setIsAI] = useState<boolean>(false);
+    const [recipes, setRecipes] = useState<Recipe[]>(element.recipes ?? []);
+    const [copyFlipFlop, setCopyFlipFlop] = useState<boolean>(true);
+    const [draggingState, setDraggingState] = useState<boolean>(true);
     const mounted = useRef(false);
-
-    useEffect(() => {
-        let isBase = false;
-        let isAI = false;
-        for (const recipe of element.recipes) {
-            if (recipe.base) {
-                isBase = true;
-            } else {
-                isAI = true;
-            }
-        }
-        setIsBase(isBase);
-        setIsAI(isAI);
-    }, [element]);
     
     const [{ isDragging }, drag, preview] = useDrag<DragItem, unknown, { isDragging: boolean }>(
         () => ({
             type: locked ? ItemTypes.LOCKED_ELEMENT : ItemTypes.ELEMENT,
             item: () => {
-                return { type: locked ? ItemTypes.LOCKED_ELEMENT : copyHeld ? ItemTypes.COPY_ELEMENT : ItemTypes.ELEMENT, id: dragId, left, top, element: element };
+                return { type: copyHeld ? ItemTypes.COPY_ELEMENT : locked ? ItemTypes.LOCKED_ELEMENT : ItemTypes.ELEMENT, id: dragId, left, top, element: element };
             },
-            collect: (monitor) => ({
-                isDragging: monitor.isDragging(),
-            }),
+            collect: (monitor) => {
+                setDraggingState(monitor.isDragging());
+                return{
+                    isDragging: monitor.isDragging(),
+                };
+            },
             options: {
                 force: Math.random(),
                 dropEffect: locked ? 'copy' : copyHeld ? 'copy' : 'move'
             } as DragSourceOptions
         }),
-        [element, dragId, left, top, copyHeld, locked],
+        [element, dragId, left, top, copyHeld, locked, setDraggingState],
     );
 
     useEffect(() => {
-        if (newDiscovery && mounted.current) {
-            controls.start('newItem').then(() => {
-                if (mounted.current) {
-                    controls.start('newItemAway').then(() => {
-                        stopState(dragId, 'newDiscovery');
-                    });
-                }
-            });
+        if (!draggingState) {
+            setCopyFlipFlop(false);
+        } else {
+            if (copyHeld) {
+                setCopyFlipFlop(true);
+                logger.silly('dragging with copy');
+            }
         }
+    }, [draggingState]);
+
+    useEffect(() => {
+        (async () => {
+            if (newDiscovery && mounted.current) {
+                try {
+                    await controls.start('newItem');
+                } catch (error) {
+                    logger.error('Unable to init animation "newItem"', error);
+                }
+                try {
+                    if (newDiscovery && mounted.current) {
+                        await controls.start('newItemAway');
+                        stopState(dragId, 'newDiscovery');
+                    }
+                } catch (error) {
+                    logger.error('Unable to init animation "newItemAway"', error);
+                }
+            }
+        })();
     }, [newDiscovery]);
 
     useEffect(() => {
@@ -130,7 +137,7 @@ export const MainElement: FC<BoxProps> = ({
                 if (item.type === ItemTypes.SIDE_ELEMENT) {
                     // Create a new and place it
                     rawCombine(dragId, item.element.name).then(() => {
-                        logger.info('combined: ', dragId, item.element.name);
+                        logger.debug('combined: ', dragId, item.element.name);
                     }).catch((e) => {
                         logger.error('Side element combining error', e);
                     });
@@ -142,7 +149,7 @@ export const MainElement: FC<BoxProps> = ({
                     moveBox(item.id, x, y);
                     if (dragId !== item.id) {
                         combine(dragId, item.id).then(() => {
-                            logger.info('combined: ', dragId, item.id);
+                            logger.debug('combined: ', dragId, item.id);
                         }).catch((e) => {
                             logger.error('Main element combining error', e);
                         });
@@ -183,7 +190,11 @@ export const MainElement: FC<BoxProps> = ({
     useEffect(() => {
         (async () => {
             if (mounted.current) {
-                controls.start('error');
+                try {
+                    controls.start('error');
+                } catch (error) {
+                    logger.error('Unable to init animation "error"', error);
+                }
             }
         })();
     }, [error]);
@@ -192,9 +203,17 @@ export const MainElement: FC<BoxProps> = ({
         (async () => {
             if (mounted.current) {
                 if (loading) {
-                    controls.start('flash');
+                    try {
+                        controls.start('flash');
+                    } catch (error) {
+                        logger.error('Unable to init animation "flash"', error);
+                    }
                 } else {
-                    controls.start('stopFlash');
+                    try {
+                        controls.start('stopFlash');
+                    } catch (error) {
+                        logger.error('Unable to init animation "stopFlash"', error);
+                    }
                 }
             }
         })();
@@ -204,9 +223,17 @@ export const MainElement: FC<BoxProps> = ({
         (async () => {
             if (mounted.current) {
                 if (combining) {
-                    controls.start('spin');
+                    try {
+                        controls.start('spin');
+                    } catch (error) {
+                        logger.error('Unable to init animation "spin"', error);
+                    }
                 } else {
-                    controls.start('stopSpin');
+                    try {
+                        controls.start('stopSpin');
+                    } catch (error) {
+                        logger.error('Unable to init animation "stopSpin"', error);
+                    }
                 }
             }
         })();
@@ -215,17 +242,30 @@ export const MainElement: FC<BoxProps> = ({
     useEffect(() => {
         (async () => {
             if (mounted.current) {
-                if (isDragging && !copyHeld && !locked) {
-                    controls.start('hide');
+                if (draggingState && !copyFlipFlop && !locked) {
+                    console.log('hidingingnig');
+                    try {
+                        controls.start('hide');
+                    } catch (error) {
+                        logger.error('Unable to init animation "hide"', error);
+                    }
                 } else {
-                    await controls.start('show');
+                    try {
+                        controls.start('show');
+                    } catch (error) {
+                        logger.error('Unable to init animation "show"', error);
+                    }
                     if (loading && mounted.current) {
-                        controls.start('flash');
+                        try {
+                            controls.start('flash');
+                        } catch (error) {
+                            logger.error('Unable to init animation "flash"', error);
+                        }
                     }
                 }
             }
         })();
-    }, [isDragging]);
+    }, [draggingState, copyHeld, locked, copyFlipFlop]);
 
     const customVariants: Variants = {
         error: () => ({
@@ -329,7 +369,8 @@ export const MainElement: FC<BoxProps> = ({
         <ItemRenderer
             element={element}
             type={locked ? ItemTypes.LOCKED_ELEMENT : ItemTypes.MAIN_ELEMENT}
-            dragging={isDragging && !copyHeld && !locked}
+            dragging={isDragging}
+            draggingRenderer={isDragging && !copyFlipFlop && !locked}
             ref={dragDrop}
             top={top}
             left={left}
@@ -351,6 +392,7 @@ export const MainElement: FC<BoxProps> = ({
             animate={controls}
             disabled={loading}
             locked={locked}
+            lockedVisibility={locked}
             exit={{
                 opacity: 0,
                 scale: 0,
@@ -363,8 +405,8 @@ export const MainElement: FC<BoxProps> = ({
                 <Dropdown.Menu>
                     <Dropdown.ItemText>
                         <button className={`btn badge text-bg-${locked ? 'secondary' : 'primary'} rounded-pill`} onClick={() => lockBox(dragId, !locked)}>{locked ? (<IoLockClosedOutline/>) : (<IoLockOpenOutline/>)}</button>
-                        {isBase ? (<div className='badge text-bg-secondary rounded-pill float-end fs-6 ms-2'>Base</div>) : (<Fragment/>)}
-                        {isAI ? (<div className='badge text-bg-success rounded-pill float-end fs-6 ms-2'>AI</div>) : (<Fragment/>)}
+                        {element.base ? (<div className='badge text-bg-secondary rounded-pill float-end fs-6 ms-2'>Base</div>) : (<Fragment/>)}
+                        {element.ai ? (<div className='badge text-bg-success rounded-pill float-end fs-6 ms-2'>AI</div>) : (<Fragment/>)}
                     </Dropdown.ItemText>
                     {recipes.filter((item) => item.discovered).map((recipe) => {
                         if (recipe.a.name === '' || recipe.b.name === '') {

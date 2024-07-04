@@ -11,6 +11,7 @@ export const plugins = [
     new CopyPlugin({
         patterns: [
             { from: 'src/sounds', to: 'sounds' },
+            { from: 'src/images', to: 'images' },
         ],
     }),
 ];

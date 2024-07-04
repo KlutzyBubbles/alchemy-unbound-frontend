@@ -53,7 +53,7 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '支持者',
         koreana: '지지자'
     },
-    purple: {
+    themePurple: {
         english: 'Purple',
         schinese: '紫色',
         russian: 'Фиолетовый',
@@ -70,4 +70,72 @@ export const LanguageStore: LanguageStoreRecurring = {
         tchinese: '紫色',
         koreana: '보라색'
     },
+    themeSand: {
+        english: 'Beach',
+        schinese: '海滩',
+        russian: 'Пляж',
+        spanish: 'Playa',
+        french: 'Plage',
+        japanese: '浜',
+        indonesian: 'Pantai',
+        german: 'Strand',
+        latam: 'Playa',
+        italian: 'Spiaggia',
+        dutch: 'Strand',
+        polish: 'Plaża',
+        portuguese: 'Praia',
+        tchinese: '海灘',
+        koreana: '바닷가'
+    },
+    themeOrange: {
+        english: 'Orange',
+        schinese: '橙',
+        russian: 'Апельсин',
+        spanish: 'Naranja',
+        french: 'Orange',
+        japanese: 'オレンジ',
+        indonesian: 'Jeruk',
+        german: 'Orange',
+        latam: 'Naranja',
+        italian: 'Arancia',
+        dutch: 'Oranje',
+        polish: 'Pomarańcza',
+        portuguese: 'Laranja',
+        tchinese: '橙',
+        koreana: '오렌지'
+    },
+    themePink: {
+        english: 'Blossom',
+        schinese: '花',
+        russian: 'Цветок',
+        spanish: 'Flor',
+        french: 'Fleurir',
+        japanese: '花',
+        indonesian: 'Bunga',
+        german: 'Blüte',
+        latam: 'Flor',
+        italian: 'Bocciolo',
+        dutch: 'Bloesem',
+        polish: 'Kwiat',
+        portuguese: 'Florescer',
+        tchinese: '花',
+        koreana: '꽃'
+    },
+    themeBlue: {
+        english: 'Sky',
+        schinese: '天空',
+        russian: 'Небо',
+        spanish: 'Cielo',
+        french: 'Ciel',
+        japanese: '空',
+        indonesian: 'Langit',
+        german: 'Himmel',
+        latam: 'Cielo',
+        italian: 'Cielo',
+        dutch: 'Hemel',
+        polish: 'Niebo',
+        portuguese: 'Céu',
+        tchinese: '天空',
+        koreana: '하늘'
+    }
 };

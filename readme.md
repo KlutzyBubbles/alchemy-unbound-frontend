@@ -25,3 +25,10 @@ $InputFile = Get-Content $InputPath -Encoding byte
 $Base64Output = [System.Convert]::ToBase64String($InputFile)
 $Base64Output | Out-File $OutputPath
 ```
+
+```
+options (Endpoint needs to come last)
+
+--server dev --logLevel silly --endpoint http://localhost:5001
+--server prerelease --logLevel silly
+```

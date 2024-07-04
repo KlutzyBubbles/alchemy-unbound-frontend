@@ -1,17 +1,22 @@
 import { FC, ReactNode, createContext, useContext, useEffect, useState } from 'react';
 import { SettingsContext } from './SettingsProvider';
 import logger from 'electron-log/renderer';
-import { unlockCheck } from '../utils/achievements';
+// import { unlockCheck } from '../utils/achievements';
 import { InfoContext } from './InfoProvider';
-import { SUPPORTER_DLC } from '../../common/types';
+import { SUPPORTER_DLC, THEME_DLC } from '../../common/types';
 import { BackgroundType, DEFAULT_SETTINGS } from '../../common/settings';
+// import { LanguageStore } from '../language/store';
 
 export const LoadingContext = createContext<{
     loading: boolean
     setLoading: (loading: boolean) => void,
+    loadingVisible: boolean
+    setLoadingVisible: (loading: boolean) => void,
         }>({
             loading: true,
-            setLoading: (loading: boolean) => { console.log('DEFAULT STILL RUN', loading); }
+            setLoading: (loading: boolean) => { console.log('DEFAULT STILL RUN', loading); },
+            loadingVisible: true,
+            setLoadingVisible: (loading: boolean) => { console.log('DEFAULT STILL RUN', loading); }
         });
 
 interface LoadingProviderProps {
@@ -22,13 +27,29 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
     children
 }) => {
     const { setSettings } = useContext(SettingsContext);
-    const { setIsProduction, setHasSupporterTheme } = useContext(InfoContext);
+    const { setIsProduction, setHasSupporterTheme, setIsLegacy, setFileVersions, setHasThemePack } = useContext(InfoContext);
     const [loading, setLoading] = useState<boolean>(true);
+    const [loadingVisible, setLoadingVisible] = useState<boolean>(true);
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout>(undefined);
 
     useEffect(() => {
         (async () => {
             if (loading) {
+                setLoadingVisible(true);
+                // console.log('Language', LanguageStore);
+                try {
+                    logger.info('Loading file versions');
+                    const versions = await window.GenericAPI.getFileVersions();
+                    logger.info('file versions loaded', versions);
+                    setFileVersions(versions);
+                } catch (e) {
+                    logger.error('Failed to load file versions', e);
+                }
+                try {
+                    setIsLegacy((await window.ServerAPI.getVersion()) === 1);
+                } catch (e) {
+                    logger.error('Failed to load legacy check', e);
+                }
                 try {
                     setIsProduction(await window.GenericAPI.isPackaged());
                 } catch (e) {
@@ -40,6 +61,33 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
                     setHasSupporterTheme(hasSupporterTheme);
                 } catch (e) {
                     logger.error('Failed to load production check', e);
+                }
+                let hasThemePack = false;
+                try {
+                    hasThemePack = await window.SteamAPI.isDlcInstalled(THEME_DLC);
+                    setHasThemePack(hasThemePack);
+                } catch (e) {
+                    logger.error('Failed to load production check', e);
+                }
+                try {
+                    const result = await window.ServerAPI.getUserDetails();
+                    if (result.type === 'error') {
+                        logger.error('Failed to load user check', result.result);
+                    } else {
+                        logger.info('User found from load', result);
+                        if (hasSupporterTheme !== result.result.user.supporter) {
+                            const newResult = await window.ServerAPI.checkDLC();
+                            if (newResult.type === 'error') {
+                                logger.error('Failed to load dlc check', newResult.result);
+                            } else {
+                                logger.info('User found from dlc check', newResult);
+                                hasSupporterTheme = result.result.user.supporter;
+                                setHasSupporterTheme(hasSupporterTheme);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    logger.error('Failed to load user', e);
                 }
                 try {
                     const settings = await window.SettingsAPI.getSettings(true);
@@ -102,20 +150,22 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
                 } catch (e) {
                     logger.error('Failed to load database and stats in loader (oops)', e);
                 }
+                logger.silly('Setting loading to false BOTH');
+                setLoading(false);
+                setLoadingVisible(false);
 
                 if (intervalId !== undefined) {
                     clearInterval(intervalId);
                 }
                 // clearInterval();
                 setIntervalId(setInterval(() => {
-                    window.StatsAPI.getStats().then((stats) => {
-                        unlockCheck(stats);
-                    }).catch((e) => {
-                        logger.error('Cannot load stats in interval', e);
-                    });
+                    // window.StatsAPI.getStats().then((stats) => {
+                    //     unlockCheck(stats);
+                    // }).catch((e) => {
+                    //     logger.error('Cannot load stats in interval', e);
+                    // });
                     window.StatsAPI.saveStats();
                 }, 5 * 60 * 1000));
-                setLoading(false);
             }
         })();
     }, [loading]);
@@ -124,7 +174,9 @@ export const LoadingProvider: FC<LoadingProviderProps> = ({
         <LoadingContext.Provider
             value={{
                 loading,
-                setLoading
+                setLoading,
+                loadingVisible,
+                setLoadingVisible
             }}
         >
             {children}

@@ -1,18 +1,34 @@
-export type BackgroundType = 'blank' | 'line' | 'bubble' // | 'particles' | 'rain'
+export type BackgroundType = 'blank' | 'line' | 'bubble' | 'themeSand' | 'themePink' | 'themeBlue' // | 'particles' | 'rain'
 
 export const BackgroundTypeList: BackgroundType[] = [
     'blank',
     'line',
-    'bubble'
+    'bubble',
+    'themeSand',
+    'themePink',
+    'themeBlue'
 ];
 
-export type ThemeType = 'dark' | 'light' | 'supporter' //| 'purple' // | 'github' | 'steam' | 'discord'
+export type ThemeType = 
+| 'dark'
+| 'light'
+| 'supporter'
+| 'themePurple'
+| 'themeOrange'
+| 'themeSand'
+| 'themeBlue'
+| 'themePink'
+//| 'purple' // | 'github' | 'steam' | 'discord'
 
 export const ThemeTypeList: ThemeType[] = [
     'dark',
     'light',
     'supporter',
-    // 'purple'
+    'themePurple',
+    'themeSand',
+    'themeOrange',
+    'themeBlue',
+    'themePink'
 ];
 
 export type LeftRight = 'left' | 'right'
@@ -132,6 +148,7 @@ export type Settings = {
     volume: number
     muted: boolean
     fps: number
+    performance: boolean
     keybinds: Keybinds
 }
 
@@ -142,9 +159,8 @@ export type Keybinds = {
 }
 
 // This is here for future settings changes
-export type RawSettings = {
-    dark?: boolean
-    theme?: ThemeType
+export type SettingsV1 = {
+    dark: boolean
     fullscreen: boolean
     offline: boolean
     currentDisplay: number
@@ -155,7 +171,35 @@ export type RawSettings = {
     volume: number
     muted: boolean
     fps: number
-    keybinds?: Keybinds
+}
+
+export type SettingsV2 = {
+    theme: ThemeType
+    fullscreen: boolean
+    offline: boolean
+    currentDisplay: number
+    background: BackgroundType
+    sidebar: LeftRight
+    language: Language
+    languageSet: boolean
+    volume: number
+    muted: boolean
+    fps: number
+}
+
+export type SettingsV3 = {
+    theme: ThemeType
+    fullscreen: boolean
+    offline: boolean
+    currentDisplay: number
+    background: BackgroundType
+    sidebar: LeftRight
+    language: Language
+    languageSet: boolean
+    volume: number
+    muted: boolean
+    fps: number
+    keybinds: Keybinds
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -169,6 +213,7 @@ export const DEFAULT_SETTINGS: Settings = {
     languageSet: false,
     volume: 0.5,
     muted: false,
+    performance: false,
     fps: 120,
     keybinds: {
         lock: 'l',

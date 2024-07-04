@@ -1,8 +1,22 @@
-$theme: "colorful" !default;
+@use "sass:color";
+
+$theme: "light" !default;
 
 //
 // Color system
 //
+
+// $white:    #000000 !default;
+// $gray-100: #171717 !default;
+// $gray-200: #262626 !default;
+// $gray-300: #404040 !default;
+// $gray-400: #525252 !default;
+// $gray-500: #737373 !default;
+// $gray-600: #a3a3a3 !default;
+// $gray-700: #d4d4d4 !default;
+// $gray-800: #e5e5e5 !default;
+// $gray-900: #f5f5f5 !default;
+// $black:    #ffffff !default;
 $transparent: #00000000;
 
 $white:    #ffffff;
@@ -21,14 +35,14 @@ $blue:    #0d6efd !default;
 $indigo:  #6610f2 !default;
 $purple:  #6f42c1 !default;
 $pink:    #d63384 !default;
-$red:     #c43640 !default;
-$orange:  #de683e !default;
+$red:     #dc3545 !default;
+$orange:  #fd7e14 !default;
 $yellow:  #ffc107 !default;
-$green:   #acd550 !default;
+$green:   #198754 !default;
 $teal:    #20c997 !default;
-$cyan:    #66c0f4 !default;
+$cyan:    #0dcaf0 !default;
 
-$primary:       #45364B !default;
+$primary:       $blue !default;
 $secondary:     $gray-600 !default;
 $success:       $green !default;
 $info:          $cyan !default;
@@ -40,11 +54,23 @@ $dark:          $gray-900 !default;
 $min-contrast-ratio:   1.5 !default;
 
 // Body
-$theme-bg: #2D2327;
-$theme-fg: #8C93A8;//#62466B;
+$theme-bg: #240046;
+$theme-fg: #c77dff;
+$theme-fg-darkened: #5a189a;
 
 $body-bg:                   $theme-bg !default;
 $body-color:                $theme-fg !default;
+
+$body-color-shadow-1: color.scale($body-color, $lightness: 10%);
+$body-color-shadow-2: color.scale($body-color, $lightness: 20%);
+$body-color-shadow-3: color.scale($body-color, $lightness: 30%);
+$body-color-shadow-4: color.scale($body-color, $lightness: 40%);
+$body-color-shadow-5: color.scale($body-color, $lightness: 50%);
+// $body-color-shadow-1: color.scale($body-color, $lightness: -10%);
+// $body-color-shadow-2: color.scale($body-color, $lightness: -20%);
+// $body-color-shadow-3: color.scale($body-color, $lightness: -30%);
+// $body-color-shadow-4: color.scale($body-color, $lightness: -40%);
+// $body-color-shadow-5: color.scale($body-color, $lightness: -50%);
 
 $body-secondary-color:      rgba($body-color, .75) !default;
 $body-secondary-bg:         $theme-fg !default;
@@ -53,27 +79,40 @@ $body-tertiary-color:       rgba($body-color, .5) !default;
 $body-tertiary-bg:          $gray-100 !default;
 $body-emphasis-color:       $body-color !default;
 
-$side-bg:                   $theme-bg;
-$side-color:                $theme-fg !default;
-$side-element-bg:           #62466B;
-$side-element-color:        $gray-100 !default;
-$side-element-bg-hover:     $side-color !default;
-$side-element-color-hover:  $gray-900;
-$side-button-bg:            $theme-bg;
-$side-button-color:         $side-color;
-$side-button-bg-hover:      #62466B;
-$side-button-color-hover:   $side-color;
+$alt-bg: #3c096c;
+$alt-fg: $theme-fg;
 
-$main-bg:                   $theme-bg !default;
-$main-color:                $theme-fg !default;
-$main-element-bg:           $side-bg !default;
-$main-element-color:        $side-color !default;
-$main-element-bg-hover:     $side-color !default;
-$main-element-color-hover:  $side-bg !default;
-$main-button-bg:            $transparent !default;
-$main-button-color:         $side-color !default;
-$main-button-bg-hover:      $transparent !default;
-$main-button-color-hover:   $side-color !default;
+$side-bg:                           $alt-bg;
+$side-color:                        $theme-fg;
+$side-element-bg:                   #240046;
+$side-element-color:                $side-color;
+$side-element-border-color:         $side-color;
+$side-element-bg-hover:             $side-color;
+$side-element-color-hover:          $side-element-bg;
+$side-element-border-color-hover:   $side-color;
+$side-button-bg:                    $alt-bg;
+$side-button-color:                 $side-color;
+$side-button-bg-hover:              #240046;
+$side-button-color-hover:           $side-color;
+
+$main-bg:                                   $theme-bg;
+$main-color:                                $theme-fg;
+$main-element-bg:                           #240046;
+$main-element-color:                        $main-color;
+$main-element-border-color:                 $main-color;
+$main-element-bg-hover:                     $main-color;
+$main-element-color-hover:                  $main-bg;
+$main-element-border-color-hover:           $main-bg;
+$main-element-locked-bg:                    $alt-bg;
+$main-element-locked-color:                 $main-color;
+$main-element-locked-border-color:          $alt-fg;
+$main-element-locked-bg-hover:              $main-bg;
+$main-element-locked-color-hover:           $main-color;
+$main-element-locked-border-color-hover:    $main-color;
+$main-button-bg:                            $transparent;
+$main-button-color:                         $main-color;
+$main-button-bg-hover:                      $transparent;
+$main-button-color-hover:                   $main-color;
 
 // Links
 
@@ -82,7 +121,7 @@ $link-color:                              $white !default;
 // Components
 
 $border-color:                rgba($white, .2) !default;
-$border-color-translucent:    rgba($white, .175) !default;
+$border-color-translucent:    rgba($black, .175) !default;
 
 $box-shadow:                  1px 3px 24px -1px rgba($black, .15) !default;
 $box-shadow-sm:               0 1px 1px rgba($black, .1) !default;
@@ -97,8 +136,36 @@ $blockquote-footer-color:     $text-muted !default;
 
 // Tables
 
-$table-dark-bg:               $dark !default;
-$table-dark-border-color:     darken($dark, 5%) !default;
+// $table-dark-bg:               $dark !default;
+// $table-dark-border-color:     darken($dark, 5%) !default;
+
+$table-color:                 $body-emphasis-color;
+$table-bg:                    $body-bg;
+$table-accent-bg:             transparent;
+
+$table-th-font-weight:        null;
+
+$table-striped-color:         $table-color;
+$table-striped-bg-factor:     .05;
+$table-striped-bg:            rgba($body-emphasis-color, $table-striped-bg-factor);
+
+$table-active-color:          $table-color;
+$table-active-bg-factor:      .1;
+$table-active-bg:             rgba($body-emphasis-color, $table-active-bg-factor);
+
+$table-hover-color:           $table-color;
+$table-hover-bg-factor:       .075;
+$table-hover-bg:              rgba($body-emphasis-color, $table-hover-bg-factor);
+
+$table-border-factor:         .2;
+$table-border-color:          $border-color;
+
+$table-striped-order:         odd;
+$table-striped-columns-order: even;
+
+$table-group-separator-color: currentcolor;
+
+$table-caption-color:         $body-secondary-color;
 
 // Buttons
 
@@ -122,7 +189,6 @@ $input-focus-bg:                        $input-bg;
 $input-focus-border-color:              rgba($body-color, .4);
 $input-focus-color:                     $input-color;
 
-$input-placeholder-color:               $secondary;
 $input-plaintext-color:                 $body-color;
 
 $form-select-disabled-color:        $input-placeholder-color !default;
@@ -149,7 +215,7 @@ $form-switch-focus-bg-image:      url("data:image/svg+xml,<svg xmlns='http://www
 $form-switch-checked-color:       $component-active-color;
 $form-switch-checked-bg-image:    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$form-switch-checked-color}'/></svg>");
 
-$form-select-indicator-color:       $gray-800;
+$form-select-indicator-color:       $theme-fg;
 $form-select-indicator:             url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='#{$form-select-indicator-color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/></svg>");
 
 $form-range-track-bg:             rgba($black, .2) !default;
@@ -169,7 +235,7 @@ $nav-pills-link-active-bg:          $primary !default;
 
 // Dropdowns
 
-$dropdown-border-color:             $border-color !default;
+$dropdown-border-color:             $theme-fg;
 $dropdown-link-hover-color:         $white !default;
 $dropdown-link-hover-bg:            rgba($white, .4) !default;
 
@@ -245,7 +311,7 @@ $breadcrumb-active-color:           $white !default;
 
 // Close
 
-$btn-close-color:            $white;
+$btn-close-color:            $black;
 
 // Modal
 
@@ -260,3 +326,5 @@ $modal-header-border-color:         $border-color;
 
 $modal-footer-bg:                   null;
 $modal-footer-border-color:         $modal-header-border-color;
+
+

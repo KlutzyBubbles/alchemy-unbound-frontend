@@ -43,7 +43,9 @@ export const CustomDragLayer: FC<Record<string, never>> = () => {
                     element={item.element}
                     type={itemType}
                     dragging={true}
+                    draggingRenderer={true}
                     locked={itemType === ItemTypes.LOCKED_ELEMENT}
+                    lockedVisibility={itemType === ItemTypes.LOCKED_ELEMENT}
                     initialOffset={initialOffset}
                     currentOffset={currentOffset}/>
             );
@@ -53,7 +55,7 @@ export const CustomDragLayer: FC<Record<string, never>> = () => {
     }
 
     return (
-        <div style={layerStyles} className='h-100 w-100 z-dragLayer'>
+        <div style={layerStyles} className='h-100 w-100 position-fixed z-dragLayer'>
             {renderItem()}
         </div>
     );

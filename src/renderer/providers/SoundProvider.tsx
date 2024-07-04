@@ -25,6 +25,8 @@ export const SoundProvider: FC<SoundProviderProps> = ({
         'side-drop': undefined,
         'drop': undefined,
         'reset': undefined,
+        'click1': undefined,
+        'click2': undefined,
     });
     const playSound = (sound: SoundFile, multiplier?: number) => {
         const foundAudio = audio[sound];
@@ -42,6 +44,8 @@ export const SoundProvider: FC<SoundProviderProps> = ({
             'side-drop': undefined,
             'drop': undefined,
             'reset': undefined,
+            'click1': undefined,
+            'click2': undefined,
         };
         for (const sound of SoundFiles) {
             const newAudio = new Howl({

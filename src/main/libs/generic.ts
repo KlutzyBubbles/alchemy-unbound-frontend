@@ -1,6 +1,12 @@
 import { app } from 'electron';
 import * as appInfo from '../../../package.json';
-import { SystemVersion, AppVersions } from '../../common/types';
+import { SystemVersion, AppVersions, FileVersions } from '../../common/types';
+import { getHintVersion } from './hints';
+import { getDatabaseInfo, getDatabaseVersion } from './database/recipeStore';
+import { getSettingsVersion } from './settings';
+import { getWorkingDatabase } from './database/workingName';
+import { getMissionDBVersion } from './database/missionStore';
+import { FileVersionError } from '../../common/types/saveFormat';
 
 export function getAppVersions(): AppVersions {
     return {
@@ -8,6 +14,18 @@ export function getAppVersions(): AppVersions {
         electron: process.versions.electron,
         chrome: process.versions.chrome,
         app: getAppVersion()
+    };
+}
+
+export async function getFileVersions(): Promise<FileVersions> {
+    return {
+        database: getDatabaseVersion(),
+        hint: getHintVersion(),
+        stats: FileVersionError.NO_VERSION,
+        settings: getSettingsVersion(),
+        mission: getMissionDBVersion(),
+        databaseInfo: await getDatabaseInfo(),
+        databaseName: await getWorkingDatabase()
     };
 }
 
@@ -28,5 +46,5 @@ export function isPackaged(): boolean {
 }
 
 export function quit(): void {
-    return app.quit();
+    app.quit();
 }

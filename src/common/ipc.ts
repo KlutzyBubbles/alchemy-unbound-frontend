@@ -7,17 +7,32 @@ export enum RecipeChannel {
     SAVE = 'recipe:save',
     HAS_ALL = 'recipe:hasAll',
     HAS_ATLEAST = 'recipe:hasAtleast',
+    SYNC_INFO = 'recipe:syncInfo',
+    COUNT_BASE_RECIPES = 'recipe:countBaseRecipes',
+    COUNT_BASE_RESULTS = 'recipe:countBaseResults',
 }
 
 export enum ServerChannel {
     COMBINE = 'server:combine',
-    IDEA = 'server:idea',
-    GET_TOKEN = 'server:getToken'
+    ADD_ITEM = 'server:addItem',
+    GET_TOKEN = 'server:getToken',
+    GET_VERSION = 'server:getVersion',
+    GET_ENDPOINT = 'server:getEndpoint',
+    INIT_TRANSACTION = 'server:initTransaction',
+    FINALIZE_TRANSACTION = 'server:finalizeTransaction',
+    GET_USER_INFO = 'server:getUserInfo',
+    CHECK_DLC = 'server:checkDLC',
+    RESTORE_PURCHASES = 'server:restore',
+    GET_MISSION = 'server:getMission'
 }
 
 export enum ErrorChannel {
     REGISTER = 'error:register',
     GET_ALL = 'error:getAll'
+}
+
+export enum ProfileChannel {
+    SWITCH = 'profile:switch'
 }
 
 export enum ImportExportChannel {
@@ -43,6 +58,7 @@ export enum HintChannel {
     GET_LEFT = 'hint:getLeft',
     RESET = 'hint:reset',
     COMPLETE = 'hint:complete',
+    FILL = 'hint:fill',
 }
 
 export enum StatsChannel {
@@ -53,8 +69,19 @@ export enum StatsChannel {
     SAVE = 'stats:save'
 }
 
+export enum InfoChannel {
+    LOAD = 'info:load',
+    SET = 'info:set',
+    SET_VALUE = 'info:setInfoKey',
+    GET = 'info:get',
+    SAVE = 'info:save',
+    ADD_THEME = 'info:addTheme',
+    REMOVE_THEME = 'info:removeTheme'
+}
+
 export enum GenericChannel {
     GET_VERSIONS = 'generic:getVersions',
+    GET_FILE_VERSIONS = 'generic:getFileVersions',
     GET_SYSTEM_INFO = 'generic:getSystemInfo',
     GET_IS_PACKAGED = 'generic:isPackaged',
     QUIT = 'generic:quit',
@@ -65,6 +92,7 @@ export enum DisplayChannel {
     GET_DISPLAY = 'display:getCurrent',
     SET_DISPLAY = 'display:set',
     SET_FULLSCREEN = 'display:fullscreen',
+    GET_FULLSCREEN = 'display:isFullscreen'
 }
 
 export enum SteamChannel {
@@ -73,4 +101,6 @@ export enum SteamChannel {
     GET_ID = 'steam:getId',
     GET_LANGUAGE = 'steam:getLanguage',
     CHECK_DLC = 'steam:isDlcInstaled',
+    GET_NAME = 'steam:getName',
+    OPEN_DLC = 'steam:openDLC'
 }

@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { ErrorEntryAdd } from '../../common/types';
 import { ErrorChannel } from '../../common/ipc';
-import { getErrors, registerError } from 'src/main/libs/error';
+import { getErrors, registerError } from '../../main/libs/error';
 
 export const ErrorAPIName = 'ErrorAPI';
 

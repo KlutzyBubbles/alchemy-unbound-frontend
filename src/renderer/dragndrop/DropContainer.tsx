@@ -1,5 +1,5 @@
 import update from 'immutability-helper';
-import type { FC, FocusEventHandler, KeyboardEventHandler } from 'react';
+import type { FC } from 'react';
 import { Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useDrop } from 'react-dnd';
 
@@ -18,15 +18,18 @@ import { UpdateContext } from '../providers/UpdateProvider';
 import { hasProp } from '../../common/utils';
 import { LoadingContext } from '../providers/LoadingProvider';
 import { itemRecipeCheck, unlockCheck } from '../utils/achievements';
-import { MainButtons } from './MainButtons';
-import { SettingsContext } from '../providers/SettingsProvider';
+import { BottomButton } from './MainButtons/BottomButtons';
+import { TopButtons } from './MainButtons/TopButtons';
+import { KeybindListener } from './KeybindListener';
 
 export interface ContainerProps {
-  openModal: (option: ModalOption) => void
+  openModal: (option: ModalOption, onClose?: () => void) => void
+  refreshValues: number
 }
 
 export const DropContainer: FC<ContainerProps> = ({
-    openModal
+    openModal,
+    refreshValues
 }) => {
     const [elements, setElements] = useState<RecipeElement[]>([]);
     const [copyHeld, setCopyHeld] = useState<boolean>(false);
@@ -36,11 +39,13 @@ export const DropContainer: FC<ContainerProps> = ({
     const { setLoading } = useContext(LoadingContext);
     const { playSound } = useContext(SoundContext);
     const mainElement = useRef<HTMLDivElement>();
-    const { shouldUpdate, setShouldUpdate } = useContext(UpdateContext);
+    const { shouldUpdate, setShouldUpdate, keybindUpdate } = useContext(UpdateContext);
+    const [refreshMission, setRefreshMission] = useState<number>(0);
     const [refreshHint, setRefreshHint] = useState<number>(0);
+    const [creditsLeft, setCreditsLeft] = useState<number>(0);
+    const [sizeChange, setSizeChange] = useState<number>(0);
     const currentHover = useRef<string>(undefined);
     const speedTimerRef = useRef<NodeJS.Timeout>(undefined);
-    const { settings } = useContext(SettingsContext);
     const [boxes, setBoxes] = useState<{
         [key: string]: Box
     }>({});
@@ -52,13 +57,28 @@ export const DropContainer: FC<ContainerProps> = ({
 
     useEffect(() => {
         refreshRecipes();
-        mainElement.current.focus();
-        return () => {
-            if (speedTimerRef.current !== undefined) {
-                clearTimeout(speedTimerRef.current);
-            }
-        };
     }, []);
+
+    useEffect(() => {
+        setRefreshHint((value) => {
+            return value + 1;
+        });
+        (async () => {
+            try {
+                const result = await window.ServerAPI.getUserDetails();
+                if (result.type === 'error') {
+                    setCreditsLeft(-1);
+                    logger.error('Failed to load user check', result.result);
+                } else {
+                    logger.info('Setting user from details', result);
+                    setCreditsLeft(result.result.user.credits);
+                }
+            } catch (e) {
+                setCreditsLeft(-1);
+                logger.error('Failed to load user', e);
+            }
+        })();
+    }, [refreshValues]);
 
     useEffect(() => {
         if (rateLimited) {
@@ -73,10 +93,29 @@ export const DropContainer: FC<ContainerProps> = ({
     useEffect(() => {
         (async () => {
             if (shouldUpdate) {
+                setLoading(true);
                 await refreshRecipes();
+                setRefreshMission((value) => {
+                    return value + 1;
+                });
+                setRefreshHint((value) => {
+                    return value + 1;
+                });
+                try {
+                    const result = await window.ServerAPI.getUserDetails();
+                    if (result.type === 'error') {
+                        setCreditsLeft(-1);
+                        logger.error('Failed to load user check', result.result);
+                    } else {
+                        logger.silly('Setting user from details', result);
+                        setCreditsLeft(result.result.user.credits);
+                    }
+                } catch (e) {
+                    setCreditsLeft(-1);
+                    logger.error('Failed to load user', e);
+                }
                 setBoxes(() => { return {}; });
                 setShouldUpdate(false);
-                setLoading(true);
             }
         })();
     }, [shouldUpdate]);
@@ -146,10 +185,6 @@ export const DropContainer: FC<ContainerProps> = ({
         }
     };
 
-    const devButton = () => {
-        logger.warn('This is a dev button and shouldnt be visible');
-    };
-
     const backendCombine = async (aName: string, bName: string): Promise<{
         newDiscovery: boolean,
         firstDiscovery: boolean,
@@ -216,6 +251,15 @@ export const DropContainer: FC<ContainerProps> = ({
                 }
             } else {
                 const combined = combinedResult.result;
+                if (combined.missionComplete) {
+                    setRefreshMission((value) => {
+                        return value + 1;
+                    });
+                }
+                setCreditsLeft((credits) => {
+                    credits += combined.creditAdjust;
+                    return credits;
+                });
                 if (combinedResult === undefined) {
                     logger.debug('Combine failed in offline mode (two)');
                 } else {
@@ -361,6 +405,7 @@ export const DropContainer: FC<ContainerProps> = ({
                                             emoji: recipe.emoji,
                                             first: filtering.first,
                                             base: filtering.base,
+                                            ai: filtering.ai,
                                             sortOrder: ordering.order,
                                             sortDepth: ordering.depth,
                                             recipes: updatedRecipes
@@ -454,6 +499,7 @@ export const DropContainer: FC<ContainerProps> = ({
                                             emoji: recipe.emoji,
                                             first: filtering.first,
                                             base: filtering.base,
+                                            ai: filtering.ai,
                                             sortOrder: ordering.order,
                                             sortDepth: ordering.depth,
                                             recipes: updatedRecipes
@@ -644,40 +690,6 @@ export const DropContainer: FC<ContainerProps> = ({
         }
     };
 
-    const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (e) => {
-        if (e.key === settings.keybinds.copy) {
-            setCopyHeld(true);
-        }
-        if (e.key === settings.keybinds.remove) {
-            setRemoveHeld(true);
-        }
-        if (e.key === settings.keybinds.lock) {
-            if (currentHover.current !== undefined) {
-                invertLock(currentHover.current);
-            }
-        }
-    };
-
-    const handleKeyUp: KeyboardEventHandler<HTMLDivElement> = (e) => {
-        if (e.key === settings.keybinds.copy) {
-            setCopyHeld(false);
-        }
-        if (e.key === settings.keybinds.remove) {
-            setRemoveHeld(false);
-        }
-    };
-
-    const handleBlur: FocusEventHandler<HTMLDivElement> = (e) => {
-        if (e.relatedTarget === undefined || e.relatedTarget === null) {
-            return mainElement.current.focus();
-        }
-        if (e.relatedTarget.classList.contains('override-focus')) {
-            return;
-        } else {
-            return mainElement.current.focus();
-        }
-    };
-
     const clearAll = () => {
         setBoxes({});
     };
@@ -686,14 +698,30 @@ export const DropContainer: FC<ContainerProps> = ({
 
     return (
         <Fragment>
+            <KeybindListener key={keybindUpdate} setCopyHeld={setCopyHeld} setRemoveHeld={setRemoveHeld} onLockClick={() => {
+                if (currentHover.current !== undefined) {
+                    invertLock(currentHover.current);
+                }
+            }} />
             <Split
                 sizes={[75, 25]}
                 className="split p-0 m-0"
                 gutterSize={2}
                 snapOffset={0}
+                onDragEnd={() => setSizeChange((change) => change + 1)}
             >
-                <div className='main-container' ref={mainElement} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} tabIndex={0} onBlur={handleBlur}>
+                <div
+                    className='main-container'
+                    ref={mainElement}
+                    tabIndex={0}
+                >
                     <div ref={drop} className='d-flex flex-column vh-100 h-100 w-100 overflow-hidden z-main'>
+                        <TopButtons
+                            openModal={openModal}
+                            refreshRecipes={refreshRecipes}
+                            clearAll={clearAll}
+                            credits={creditsLeft}
+                            refresh={refreshMission}/>
                         <AnimatePresence>
                             {boxes === undefined ? (<Fragment/>) : Object.keys(boxes).filter((v) => v !== undefined).map((key) => {
                                 const { left, top, element, combining, newCombining, loading, error, newDiscovery, firstDiscovery, locked } = boxes[key];
@@ -733,14 +761,22 @@ export const DropContainer: FC<ContainerProps> = ({
                             })}
                         </AnimatePresence>
                         <CustomDragLayer/>
-                        <MainButtons clearAll={clearAll} openModal={openModal} refreshHint={refreshHint} deprecated={deprecated} rateLimited={rateLimited} devButton={devButton}/>
+                        <BottomButton
+                            clearAll={clearAll}
+                            openModal={openModal}
+                            refreshHint={refreshHint}
+                            deprecated={deprecated}
+                            rateLimited={rateLimited}/>
                     </div>
                 </div>
                 <SideContainer
                     elements={elements}
+                    sizeChange={sizeChange}
                     removeBox={removeBox}
                     moveBox={moveBox}
-                    addBox={addBoxRandomLocation}/>
+                    addBox={addBoxRandomLocation}
+                    refreshRecipes={refreshRecipes}
+                    openModal={openModal}/>
             </Split>
         </Fragment>
     );

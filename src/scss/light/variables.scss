@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $theme: "light" !default;
 
 //
@@ -56,6 +58,17 @@ $min-contrast-ratio:   1.5 !default;
 
 $body-bg:                   $gray-100 !default;
 $body-color:                $gray-900 !default;
+
+$body-color-shadow-1: color.scale($body-color, $lightness: 10%);
+$body-color-shadow-2: color.scale($body-color, $lightness: 20%);
+$body-color-shadow-3: color.scale($body-color, $lightness: 30%);
+$body-color-shadow-4: color.scale($body-color, $lightness: 40%);
+$body-color-shadow-5: color.scale($body-color, $lightness: 50%);
+// $body-color-shadow-1: color.scale($body-color, $lightness: -10%);
+// $body-color-shadow-2: color.scale($body-color, $lightness: -20%);
+// $body-color-shadow-3: color.scale($body-color, $lightness: -30%);
+// $body-color-shadow-4: color.scale($body-color, $lightness: -40%);
+// $body-color-shadow-5: color.scale($body-color, $lightness: -50%);
 
 $body-secondary-color:      rgba($body-color, .75) !default;
 $body-secondary-bg:         $gray-200 !default;
@@ -164,14 +177,13 @@ $input-border-width:                    1px !default;
 $input-focus-border-color:              $input-border-color !default;
 $input-focus-box-shadow:                none !default;
 
-$input-placeholder-color:               $text-muted !default;
+$input-placeholder-color:               $secondary;
 
 $input-color:                           $body-color;
 $input-focus-bg:                        $input-bg;
 $input-focus-border-color:              rgba($body-color, .4);
 $input-focus-color:                     $input-color;
 
-$input-placeholder-color:               $secondary;
 $input-plaintext-color:                 $body-color;
 
 $form-select-disabled-color:        $input-placeholder-color !default;

@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $theme: "dark" !default;
 
 //
@@ -59,6 +61,17 @@ $theme-fg-darkened: #7f878a;
 $body-bg:                   $theme-bg !default;
 $body-color:                $theme-fg !default;
 
+$body-color-shadow-1: color.scale($body-color, $lightness: 10%);
+$body-color-shadow-2: color.scale($body-color, $lightness: 20%);
+$body-color-shadow-3: color.scale($body-color, $lightness: 30%);
+$body-color-shadow-4: color.scale($body-color, $lightness: 40%);
+$body-color-shadow-5: color.scale($body-color, $lightness: 50%);
+// $body-color-shadow-1: color.scale($body-color, $lightness: -10%);
+// $body-color-shadow-2: color.scale($body-color, $lightness: -20%);
+// $body-color-shadow-3: color.scale($body-color, $lightness: -30%);
+// $body-color-shadow-4: color.scale($body-color, $lightness: -40%);
+// $body-color-shadow-5: color.scale($body-color, $lightness: -50%);
+
 $body-secondary-color:      rgba($body-color, .75) !default;
 $body-secondary-bg:         $theme-fg !default;
 
@@ -80,7 +93,7 @@ $side-element-border-color-hover:   $side-color;
 $side-button-bg:                    $alt-bg;
 $side-button-color:                 $side-color;
 $side-button-bg-hover:              $alt-fg;
-$side-button-color-hover:           $side-bg;
+$side-button-color-hover:           $side-color;
 
 $main-bg:                                   $theme-bg;
 $main-color:                                $theme-fg;
@@ -176,7 +189,6 @@ $input-focus-bg:                        $input-bg;
 $input-focus-border-color:              rgba($body-color, .4);
 $input-focus-color:                     $input-color;
 
-$input-placeholder-color:               $secondary;
 $input-plaintext-color:                 $body-color;
 
 $form-select-disabled-color:        $input-placeholder-color !default;

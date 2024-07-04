@@ -1,4 +1,5 @@
 @use "sass:map";
+@use "sass:color";
 
 .split {
     display: flex;
@@ -36,6 +37,14 @@
     background: $side-color;
 }
 
+.bg-purple {
+    background-color: #c929f1;
+}
+
+.bg-orange {
+    background-color: coral;
+}
+
 // @font-face {
 //     font-family: 'Custom Emoji';
 //     src: url('./TwitterColorEmoji-SVGinOT.ttf');
@@ -44,6 +53,255 @@
 // .emoji {
 //     font-family: 'Custom Emoji';
 // }
+
+/*
+$theme-bg: #55030c;
+$theme-fg: #f48c06;
+$theme-fg-darkened: #e85d04;
+
+$body-bg:                   $theme-bg !default;
+$body-color:                $theme-fg !default;
+
+$body-secondary-color:      rgba($body-color, .75) !default;
+$body-secondary-bg:         $theme-fg !default;
+
+$body-tertiary-color:       rgba($body-color, .5) !default;
+$body-tertiary-bg:          $gray-100 !default;
+$body-emphasis-color:       $body-color !default;
+
+$alt-bg: #4a030a;
+$alt-fg: $theme-fg;
+*/
+
+.hint-light {
+    background: #00000000 url("../images/hint-light.png") no-repeat;
+    background-size: 150%;
+    background-position: center;
+    //background-position-x: 12rem;
+}
+
+.hint-dark {
+    background: #00000000 url("../images/hint-dark.png") no-repeat;
+    background-size: 150%;
+    background-position: center;
+    //background-position-x: 12rem;
+}
+
+.credit-card {
+    // background: #00000000 url("../images/money.png") no-repeat;
+    background: #00000000 url("../images/money-reversed.png") no-repeat;
+    background-size: 100%;
+}
+
+.credit-credit250 {
+    background-position-x: 34rem;
+}
+
+.credit-credit750 {
+    background-position-x: 26rem;
+}
+
+.credit-credit1500 {
+    background-position-x: 14rem;
+}
+
+.credit-credit3500 {
+    background-position-x: 0rem;
+}
+
+.card-body {
+    .title {
+        color: $modal-content-color;
+        text-shadow: -2px 2px $modal-content-bg;
+    }
+}
+
+@function stroke($stroke, $color) {
+    $shadow: ();
+    $from: $stroke*-1;
+    @for $i from $from through $stroke {
+        @for $j from $from through $stroke {
+            $shadow: append($shadow, $i*1px $j*1px 0 $color, comma);
+        }
+    }
+    @return $shadow;
+}
+
+@font-face {
+    font-family: 'Sansita';
+    src: url('./fonts/SansitaSwashed-VariableFont_wght.ttf') format('truetype');
+    font-weight: 300 900;
+    font-style: normal;
+}
+
+.theme-box {
+    h1 {
+        font-size: 6rem;
+        text-shadow: stroke(7, #f5f5f5);
+        font-family: 'Sansita', sans-serif;
+    }
+}
+
+.loading-fullscreen {
+    background-color: $main-bg;
+    color: $main-color;
+}
+
+.theme-supporter {
+    background-color: #1b2838;
+
+    .card-body {
+        .title {
+            font-family: 'Sansita';
+            color: #66c0f4;
+            text-shadow: none;
+        }
+    }
+}
+
+.theme-orange {
+    background-color: #4a030a;
+
+    .card-body {
+        color: #f48c06;
+    }
+
+    .btn-element {
+        @include button-variant(#370617, // Background
+            #f48c06, // Border
+            #f48c06, // Color
+            #f48c06, // Hover Background
+            #f48c06, // Hover Border
+            #370617, // Hover Color
+            #370617); // Active Background
+        border-radius: $btn-border-radius;
+    
+        .btn-holder {
+            background-color: #370617;
+        }
+    
+        &:hover > .btn-holder:first-child {
+            background-color: #f48c06;
+        }
+    }
+}
+
+.theme-purple {
+    background-color: #3c096c;
+
+    .card-body {
+        color: #c77dff;
+    }
+
+    .btn-element {
+        @include button-variant(#240046, // Background
+            #c77dff, // Border
+            #c77dff, // Color
+            #c77dff, // Hover Background
+            #c77dff, // Hover Border
+            #240046, // Hover Color
+            #240046); // Active Background
+        border-radius: $btn-border-radius;
+    
+        .btn-holder {
+            background-color: #240046;
+        }
+    
+        &:hover > .btn-holder:first-child {
+            background-color: #c77dff;
+        }
+    }
+}
+
+.theme-sand {
+    background-color: #e8d8b8;
+    background: #00000000 url("../images/themeSand/background.png") no-repeat;
+    background-size: auto 100%;
+    background-position: center;
+
+    .card-body {
+        color: #363126;
+    }
+
+    .btn-element {
+        @include button-variant(#d9be89, // Background
+            #4D4637, // Border
+            #4D4637, // Color
+            #4D4637, // Hover Background
+            #4D4637, // Hover Border
+            #d9be89, // Hover Color
+            #d9be89); // Active Background
+        border-radius: $btn-border-radius;
+    
+        .btn-holder {
+            background-color: #d9be89;
+        }
+    
+        &:hover > .btn-holder:first-child {
+            background-color: #4D4637;
+        }
+    }
+}
+
+.theme-pink {
+    background-color: #f793c5;
+    background: #00000000 url("../images/themePink/background.png") no-repeat;
+    background-size: auto 100%;
+    background-position: center;
+
+    .card-body {
+        color: #5f416d;
+    }
+
+    .btn-element {
+        @include button-variant(#f7c2d8, // Background
+            #5f416d, // Border
+            #5f416d, // Color
+            #e086b2, // Hover Background
+            #5f416d, // Hover Border
+            #5f416d, // Hover Color
+            #f7c2d8); // Active Background
+        border-radius: $btn-border-radius;
+    
+        .btn-holder {
+            background-color: #f7c2d8;
+        }
+    
+        &:hover > .btn-holder:first-child {
+            background-color: #e086b2;
+        }
+    }
+}
+
+.theme-blue {
+    background-color: #9dd5ff;
+    background: #00000000 url("../images/themeBlue/background.png") no-repeat;
+    background-size: auto 100%;
+    background-position: center;
+
+    .card-body {
+        color: #004375;
+    }
+
+    .btn-element {
+        @include button-variant(#41aaff, // Background
+            #e3f6ff, // Border
+            #e3f6ff, // Color
+            #498cc2, // Hover Background
+            #e3f6ff, // Hover Border
+            #e3f6ff, // Hover Color
+            #498cc2); // Active Background
+        border-radius: $btn-border-radius;
+    
+        .btn-holder {
+            background-color: #41aaff;
+        }
+    
+        &:hover > .btn-holder:first-child {
+            background-color: #498cc2;
+        }
+    }
+}
 
 .btn-element {
     @include button-variant($side-element-bg, // Background
@@ -61,6 +319,44 @@
 
     &:hover > .btn-holder:first-child {
         background-color: $side-element-bg-hover;
+    }
+}
+
+.side-menu {
+    background-color: $side-bg;
+
+    .btn-left-hover {
+        background: $side-button-bg;
+        color: $side-button-color;
+        background-size: 210% 100%;
+        background-position: right bottom;
+        transition: background-color 0.3s ease-out;
+        transition: background-position 0.2s ease-out;
+    }
+
+    .btn-left-hover:hover,
+    .btn-left-hover:active {
+        color: $side-button-color-hover;
+        background: linear-gradient(to right, $side-button-bg-hover 50%, $side-button-bg 50%);
+        background-size: 210% 100%;
+        background-position: left bottom;
+    }
+
+    .btn-right-hover {
+        background: $side-button-bg;
+        color: $side-button-color;
+        background-size: 210% 100%;
+        background-position: left bottom;
+        transition: background-color 0.3s ease-out;
+        transition: background-position 0.2s ease-out;
+    }
+
+    .btn-right-hover:hover,
+    .btn-right-hover:active {
+        color: $side-button-color-hover;
+        background: linear-gradient(to left, $side-button-bg-hover 50%, $side-button-bg 50%);
+        background-size: 210% 100%;
+        background-position: right bottom;
     }
 }
 
@@ -154,6 +450,24 @@
     }
 }
 
+.side-text {
+    color: $side-button-color;
+}
+
+.btn-no-outline {
+    @include button-variant(
+        $main-button-bg, // Background
+        $main-button-bg, // Border
+        $main-button-color, // Color
+        $main-button-bg-hover, // Hover Background
+        $main-button-bg-hover, // Hover Border
+        $main-button-color-hover, // Hover Color
+        $main-button-bg-hover, // Active Background
+        $main-button-bg-hover, // Active Border
+        $main-button-color-hover // Active Color
+    );
+}
+
 .main-container {
     background-color: $main-bg;
 
@@ -195,20 +509,6 @@
         &:hover > .btn-holder:first-child {
             background-color: $main-element-locked-bg-hover;
         }
-    }
-
-    .btn-no-outline {
-        @include button-variant(
-            $main-button-bg, // Background
-            $main-button-bg, // Border
-            $main-button-color, // Color
-            $main-button-bg-hover, // Hover Background
-            $main-button-bg-hover, // Hover Border
-            $main-button-color-hover, // Hover Color
-            $main-button-bg-hover, // Active Background
-            $main-button-bg-hover, // Active Border
-            $main-button-color-hover // Active Color
-        );
     }
 
     .btn-info {

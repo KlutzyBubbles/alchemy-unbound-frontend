@@ -1,14 +1,13 @@
 import { useEffect, type FC, type ReactNode, useContext, useRef, memo, CSSProperties } from 'react';
 import { XYCoord, useDrag } from 'react-dnd';
-import { RecipeElement } from '../../common/types';
+import { RecipeElement, SideElement } from '../../common/types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { DragItem, ItemTypes } from '../types';
 import { ItemRenderer } from '../ItemRenderer';
 import { SoundContext } from '../providers/SoundProvider';
-import { arrayEquals } from '../../common/utils';
 
 export type SideElementProps = {
-  element: RecipeElement
+  element: SideElement
   removeBox: (id: string) => void,
   addBox: (element: RecipeElement, combining: boolean) => Promise<string>
   children?: ReactNode
@@ -71,14 +70,14 @@ const SideElementInternal: FC<SideElementProps> = ({
     );
 };
 
-export const SideElement = memo(SideElementInternal, (prevProps, nextProps) => {
+export const SideElementContainer = memo(SideElementInternal, (prevProps, nextProps) => {
     if (prevProps.element.name !== nextProps.element.name) {
         return false;
     }
-    if (!arrayEquals(
-        prevProps.element.recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.first),
-        nextProps.element.recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.first))) {
-        return false;
-    }
+    // if (!arrayEquals(
+    //     prevProps.element.recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.first),
+    //     nextProps.element.recipes.sort((a, b) => `${a.a}${a.b}`.localeCompare(`${b.a}${b.b}`)).map((item) => item.first))) {
+    //     return false;
+    // }
     return true;
 });

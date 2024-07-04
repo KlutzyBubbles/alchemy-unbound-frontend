@@ -1,9 +1,10 @@
-import { type FC, useContext, ReactNode, useEffect } from 'react';
-import { Button, Modal } from 'react-bootstrap';
+import { type FC, useContext, ReactNode, useEffect, Fragment } from 'react';
+import { Button } from 'react-bootstrap';
 import { SettingsContext } from '../providers/SettingsProvider';
 import { getFromStore } from '../language';
 import { SoundContext } from '../providers/SoundProvider';
 import { InfoContext } from '../providers/InfoProvider';
+import { ModalWrapper } from './ModalWrapper';
 
 export interface ConfirmModalProps {
   show: boolean,
@@ -30,24 +31,18 @@ export const ConfirmModal: FC<ConfirmModalProps> = ({
         }
     }, [show]);
 
-    return (
-        <Modal show={show} onHide={onCancel} centered size="xl" data-bs-theme={settings.theme} style={{
-            background: '#000000dd'
-        }}>
-            <Modal.Header closeButton data-bs-theme={settings.theme}>
-                <Modal.Title>{getFromStore('dialog.confirm', settings.language)}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                {children}
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="danger" onClick={onCancel} className='me-auto'>
-                    {getFromStore('dialog.cancel', settings.language)}
-                </Button>
-                <Button variant="primary" onClick={onConfirm}>
-                    {getFromStore('dialog.confirm', settings.language)}
-                </Button>
-            </Modal.Footer>
-        </Modal>
-    );
+    const footerContent = <Fragment>
+        <Button variant="danger" onClick={onCancel} className='me-auto'>
+            {getFromStore('dialog.cancel', settings.language)}
+        </Button>
+        <Button variant="primary" onClick={onConfirm}>
+            {getFromStore('dialog.confirm', settings.language)}
+        </Button>
+    </Fragment>;
+
+    return <ModalWrapper show={show} title={'dialog.confirm'} footerContent={footerContent} handleHide={onCancel} style={{
+        background: '#000000dd'
+    }}>
+        {children}
+    </ModalWrapper>;
 };
