@@ -405,46 +405,46 @@ async function loadData(override?: DatabaseData): Promise<RecipeRecord[]> {
 export async function createDatabase(override?: DatabaseData): Promise<void> {
     logger.silly('createDatabase()', override, loadedVersion);
     try {
-        // PRERELEASE --------------------------
-        await verifyFolder();
-        try {
-            JSON.parse(await fs.readFile(getFolder() + 'prerelease.json', 'utf-8'));
-        } catch (e) {
-            if (e.code === 'ENOENT') {
-                logger.info('No prerelease file found, creating');
-                await fs.writeFile(getFolder() + 'prerelease.json', JSON.stringify({
-                    data: 'DO NOT REMOVE ME (ill just come back, or you might have ghosts in your game OooOooooOOOOoooOO)',
-                    version: 1
-                }), 'utf-8');
-            } else {
-                logger.error(`Failed to read prerlease file with error ${e.code}`, e);
-                throw e;
-            }
-        }
-        // PRERELEASE --------------------------
-        // // RELEASE --------------------------
+        // // PRERELEASE --------------------------
         // await verifyFolder();
         // try {
         //     JSON.parse(await fs.readFile(getFolder() + 'prerelease.json', 'utf-8'));
-        //     logger.info('Found a prerelease file, time to reset!');
-        //     await fs.rm(`${getFolder()}database/`, { recursive: true, force: true });
-        //     data = await loadData();
-        //     await resetAndBackup('prelease_');
-        //     try {
-        //         await fs.rm(getFolder() + 'prerelease.json');
-        //     } catch (error) {
-        //         logger.error('Failed to remove prerelease file, this will NEED to be done manually before launch');
-        //         throw error;
-        //     }
         // } catch (e) {
         //     if (e.code === 'ENOENT') {
-        //         logger.info('No prerelease file found, this is good!');
+        //         logger.info('No prerelease file found, creating');
+        //         await fs.writeFile(getFolder() + 'prerelease.json', JSON.stringify({
+        //             data: 'DO NOT REMOVE ME (ill just come back, or you might have ghosts in your game OooOooooOOOOoooOO)',
+        //             version: 1
+        //         }), 'utf-8');
         //     } else {
         //         logger.error(`Failed to read prerlease file with error ${e.code}`, e);
         //         throw e;
         //     }
         // }
-        // // RELEASE --------------------------
+        // // PRERELEASE --------------------------
+        // RELEASE --------------------------
+        await verifyFolder();
+        try {
+            JSON.parse(await fs.readFile(getFolder() + 'prerelease.json', 'utf-8'));
+            logger.info('Found a prerelease file, time to reset!');
+            await fs.rm(`${getFolder()}database/`, { recursive: true, force: true });
+            data = await loadData();
+            await resetAndBackup('prelease_');
+            try {
+                await fs.rm(getFolder() + 'prerelease.json');
+            } catch (error) {
+                logger.error('Failed to remove prerelease file, this will NEED to be done manually before launch');
+                throw error;
+            }
+        } catch (e) {
+            if (e.code === 'ENOENT') {
+                logger.info('No prerelease file found, this is good!');
+            } else {
+                logger.error(`Failed to read prerlease file with error ${e.code}`, e);
+                throw e;
+            }
+        }
+        // RELEASE --------------------------
         data = await loadData(override);
     } catch(e) {
         loadedVersion = FileVersionError.ERROR;
