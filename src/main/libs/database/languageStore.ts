@@ -11,6 +11,119 @@ import { Language } from '../../../common/settings';
 
 const LANG_DATABASE_VERISON = 1;
 
+const BASE_LANG: {
+    [key: string]: LanguageRecord
+} = {
+    fire: {
+        english: "Fire",
+        schinese: "火",
+        russian: "огонь",
+        spanish: "fuego",
+        french: "feu",
+        japanese: "火",
+        indonesian: "Api",
+        german: "Feuer",
+        latam: "fuego",
+        italian: "fuoco",
+        dutch: "vuur",
+        polish: "ogień",
+        portuguese: "fogo",
+        tchinese: "火",
+        koreana: "불",
+        emoji: "🔥"
+    },
+    earth: {
+        english: "Earth",
+        schinese: "地球",
+        russian: "Земля",
+        spanish: "Tierra",
+        french: "Terre",
+        japanese: "地球",
+        indonesian: "Bumi",
+        german: "Erde",
+        latam: "terra",
+        italian: "terra",
+        dutch: "aarde",
+        polish: "ziemia",
+        portuguese: "terra",
+        tchinese: "地球",
+        koreana: "지구",
+        emoji: "🌎"
+    },
+    air: {
+        english: "Air",
+        schinese: "空气",
+        russian: "Воздух",
+        spanish: "Aire",
+        french: "Air",
+        japanese: "空気",
+        indonesian: "Udara",
+        german: "Luft",
+        latam: "aire",
+        italian: "aria",
+        dutch: "lucht",
+        polish: "powietrze",
+        portuguese: "ar",
+        tchinese: "空氣",
+        koreana: "공기",
+        emoji: "🌬️"
+    },
+    water: {
+        english: "Water",
+        schinese: "水",
+        russian: "Вода",
+        spanish: "Agua",
+        french: "Eau",
+        japanese: "水",
+        indonesian: "Air",
+        german: "Wasser",
+        latam: "agua",
+        italian: "acqua",
+        dutch: "water",
+        polish: "woda",
+        portuguese: "água",
+        tchinese: "水",
+        koreana: "물",
+        emoji: "💧"
+    },
+    time: {
+        english: "Time",
+        schinese: "时间",
+        russian: "Время",
+        spanish: "Tiempo",
+        french: "Temps",
+        japanese: "時間",
+        indonesian: "Waktu",
+        german: "Zeit",
+        latam: "Tiempo",
+        italian: "Tempo",
+        dutch: "Tijd",
+        polish: "Czas",
+        portuguese: "Tempo",
+        tchinese: "時間",
+        koreana: "시간",
+        emoji: "⏰"
+    },
+    life: {
+        english: "Life",
+        schinese: "生活",
+        russian: "Жизнь",
+        spanish: "Vida",
+        french: "Vie",
+        japanese: "人生",
+        indonesian: "Hidup",
+        german: "Leben",
+        latam: "Vida",
+        italian: "Vita",
+        dutch: "Leven",
+        polish: "Życie",
+        portuguese: "Vida",
+        tchinese: "生活",
+        koreana: "인생",
+        emoji: "🌟"
+    }
+};
+
 export let data: LanguageRecords = {};
 
 let loadedVersion: number = FileVersionError.NOT_LOADED;
@@ -73,6 +186,19 @@ async function loadData(): Promise<LanguageRecords> {
     }
 }
 
+async function validateData(shouldSave = false): Promise<void> {
+    if (Object.keys(data).length === 0) {
+        data = structuredClone(baseLanguage) as LanguageRecords;
+        if (Object.keys(data).length === 0) {
+            logger.warn('Still 0 maybe something went wrong with loading');
+            data = BASE_LANG;
+        }
+        if (shouldSave) {
+            await save();
+        }
+    }
+}
+
 export async function createLangDatabase(): Promise<void> {
     try {
         data = await loadData();
@@ -80,13 +206,17 @@ export async function createLangDatabase(): Promise<void> {
         loadedVersion = FileVersionError.ERROR;
         logger.error(`Failed to load lang database '${e.message}'`);
     }
-    if (Object.keys(data).length === 0) {
-        data = structuredClone(baseLanguage) as LanguageRecords;
-        await save();
+    await validateData(true);
+    for (const key of Object.keys(BASE_LANG)) {
+        if (!hasProp(data, key)) {
+            data[key] = BASE_LANG[key];
+        }
     }
+    await save();
 }
 
 export async function insertLanguage(key: string, language: LanguageRecord, override: boolean = false): Promise<void> {
+    await validateData();
     if (hasProp(data, key)) {
         if (override) {
             data[key] = language;
@@ -97,6 +227,7 @@ export async function insertLanguage(key: string, language: LanguageRecord, over
 }
 
 export async function getKeyByLanguage(result: string, language: Language): Promise<string | undefined> {
+    await validateData();
     let found: string | undefined = undefined;
     for (const key of Object.keys(data)) {
         if (data[key][language].toLocaleLowerCase() === result.toLocaleLowerCase()) {
@@ -115,9 +246,11 @@ export function getLanguage(key: string): LanguageRecord | undefined {
 }
 
 export async function getLanguageKeys(): Promise<string[]> {
+    await validateData();
     return Object.keys(data);
 }
 
 export async function getAllLanguages(): Promise<LanguageRecords> {
+    await validateData();
     return data;
 }
