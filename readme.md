@@ -5,7 +5,7 @@
 
 ESCAPE CHARACTER WITH `` ` (~)``
 
-`./steamcmd.exe +login alchemyunbound PASSWORD +quit`
+`./steamcmd.exe +login <username> PASSWORD +quit`
 
 validate with
 
