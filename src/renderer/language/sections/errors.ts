@@ -495,20 +495,20 @@ export const LanguageStore: LanguageStoreRecurring = {
         koreana: '저장 파일이 레거시이며 제대로 작동하지 않을 수 있습니다.'
     },
     noToken: {
-        english: 'No token was provided, verify connection to steam and game server',
-        schinese: '',
-        russian: '',
-        spanish: '',
-        french: '',
-        japanese: '',
-        indonesian: '',
-        german: '',
-        latam: '',
-        italian: '',
-        dutch: '',
-        polish: '',
-        portuguese: '',
-        tchinese: '',
-        koreana: ''
+        english: "No token was provided, verify connection to steam and game server",
+        schinese: "未提供令牌，请验证与 Steam 和游戏服务器的连接",
+        russian: "Токен не предоставлен, подтвердите подключение к steam и игровому серверу",
+        spanish: "No se proporcionó ningún token, verifique la conexión a Steam y al servidor del juego",
+        french: "Aucun jeton n’a été fourni, vérifiez la connexion à Steam et au serveur de jeu",
+        japanese: "トークンが提供されていません。Steamおよびゲームサーバーへの接続を確認してください",
+        indonesian: "Tidak ada token yang diberikan, verifikasi koneksi ke steam dan server game",
+        german: "Es wurde kein Token bereitgestellt, überprüfen Sie die Verbindung zu Steam und Spielserver",
+        latam: "No se proporcionó ningún token, verifique la conexión a Steam y al servidor del juego",
+        italian: "Non è stato fornito alcun token, verifica la connessione a Steam e al server di gioco",
+        dutch: "Er is geen token verstrekt, controleer de verbinding met Steam en de gameserver",
+        polish: "Nie podano tokena, sprawdź połączenie ze Steam i serwerem gry",
+        portuguese: "Nenhum token foi fornecido, verifique a conexão com o Steam e o servidor do jogo",
+        tchinese: "未提供令牌，請驗證與 Steam 和遊戲伺服器的連接",
+        koreana: "토큰이 제공되지 않았습니다. Steam 및 게임 서버에 대한 연결을 확인하십시오."
     }
 };

@@ -12,23 +12,31 @@ export async function unlockCheck(stats: Stats): Promise<void> {
         || await shouldDoAICheck('discover_ai_recipe')
         || await shouldDoAICheck('discover_ai')) {
         logger.silly('Checking for user details');
-        const response = await window.ServerAPI.getUserDetails();
-        if (response.type === 'success') {
-            const details = response.result.user;
-            aiRecipeCheck(details.combines);
-            firstDiscoveryCheck(details.firstDiscoveries);
-        } else {
-            logger.error('Failed to check for achievements');
+        try {
+            const response = await window.ServerAPI.getUserDetails();
+            if (response.type === 'success') {
+                const details = response.result.user;
+                aiRecipeCheck(details.combines);
+                firstDiscoveryCheck(details.firstDiscoveries);
+            } else {
+                logger.error('Failed to check for achievements');
+            }
+        } catch (e) {
+            logger.error('Failed to load user for achievements', e);
         }
     }
 
     if (!await window.SteamAPI.isAchievementActivated('hard_base') || !await window.SteamAPI.isAchievementActivated('medium_base')) {
-        const response = await window.ServerAPI.getUserDetails();
-        if (response.type === 'success') {
-            const details = response.result.user;
-            depthCheck(stats.baseHighestDepth, details.highestDepth);
-        } else {
-            logger.error('Failed to check for achievements');
+        try {
+            const response = await window.ServerAPI.getUserDetails();
+            if (response.type === 'success') {
+                const details = response.result.user;
+                depthCheck(stats.baseHighestDepth, details.highestDepth);
+            } else {
+                logger.error('Failed to check for achievements');
+            }
+        } catch (e) {
+            logger.error('Failed to load user for achievements', e);
         }
     }
 

@@ -138,20 +138,20 @@ export const LanguageStore: LanguageStoreRecurring = {
         koreana: 'AI 크레딧'
     },
     themeSupporter: {
-        english: 'Supporter Theme',
-        schinese: '',
-        russian: '',
-        spanish: '',
-        french: '',
-        japanese: '',
-        indonesian: '',
-        german: '',
-        latam: '',
-        italian: '',
-        dutch: '',
-        polish: '',
-        portuguese: '',
-        tchinese: '',
-        koreana: ''
+        english: "Supporter Theme",
+        schinese: "支持者主题",
+        russian: "Тема для поддержки",
+        spanish: "Tema de apoyo",
+        french: "Thème du supporter",
+        japanese: "サポーターテーマ",
+        indonesian: "Tema Pendukung",
+        german: "Unterstützer-Thema",
+        latam: "Tema de apoyo",
+        italian: "Tema Sostenitore",
+        dutch: "Supporter Thema",
+        polish: "Motyw kibica",
+        portuguese: "Tema de Apoiador",
+        tchinese: "支援者主題",
+        koreana: "서포터 테마"
     }
 };

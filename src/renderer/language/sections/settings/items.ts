@@ -189,20 +189,20 @@ export const LanguageStore: LanguageStoreRecurring = {
         koreana: '아이템 제거'
     },
     performance: {
-        english: 'Performance List',
-        schinese: '',
-        russian: '',
-        spanish: '',
-        french: '',
-        japanese: '',
-        indonesian: '',
-        german: '',
-        latam: '',
-        italian: '',
-        dutch: '',
-        polish: '',
-        portuguese: '',
-        tchinese: '',
-        koreana: ''
+        english: "Performance List",
+        schinese: "性能列表",
+        russian: "Список производительности",
+        spanish: "Lista de rendimiento",
+        french: "Liste des performances",
+        japanese: "パフォーマンス一覧",
+        indonesian: "Daftar Kinerja",
+        german: "Leistungsliste",
+        latam: "Lista de rendimiento",
+        italian: "Elenco delle prestazioni",
+        dutch: "Lijst met prestaties",
+        polish: "Lista wydajności",
+        portuguese: "Lista de desempenho",
+        tchinese: "性能清單",
+        koreana: "성능 목록"
     }
 };

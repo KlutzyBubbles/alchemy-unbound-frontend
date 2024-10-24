@@ -17,14 +17,15 @@ import { ItemModal } from './modals/CustomItemModal';
 import { SaveResetModal } from './modals/SaveResetModal';
 import { InfoContext } from './providers/InfoProvider';
 import { DEFAULT_SETTINGS } from '../common/settings';
+import { NoServerModal } from './modals/LegacyModal';
 
-export type ModalOption = 'settings' | 'info' | 'stats' | 'store' | 'addItem' | 'v2' | 'none';
+export type ModalOption = 'settings' | 'info' | 'stats' | 'store' | 'addItem' | 'v2' | 'noServer' | 'none';
 
 export const ContentContainer: FC = () => {
     const { settings } = useContext(SettingsContext);
     const { loadingVisible } = useContext(LoadingContext);
     const { fileVersions, isLegacy } = useContext(InfoContext);
-    const [currentModal, setCurrentModal] = useState<ModalOption>('none');
+    const [currentModal, setCurrentModal] = useState<ModalOption>('noServer');
     const [currentParticles, setCurrentParticles] = useState<RecursivePartial<IOptions>>((options[settings.background ?? DEFAULT_SETTINGS.background] ?? options.line)(settings.theme?? DEFAULT_SETTINGS.theme, settings.fps?? DEFAULT_SETTINGS.fps));
     const [particleReady, setParticleReady] = useState<boolean>(false);
     const [refreshValues, setRefreshValues] = useState<number>(0);
@@ -113,6 +114,7 @@ export const ContentContainer: FC = () => {
                     <SettingsModal show={currentModal === 'settings'} handleHide={handleModalClose} />
                     <StatsModal show={currentModal === 'stats'} handleHide={handleModalClose} />
                     <SaveResetModal show={currentModal === 'v2'} handleHide={handleModalClose} />
+                    <NoServerModal show={currentModal === 'noServer'} handleHide={handleModalClose} />
                     <ItemModal
                         show={currentModal === 'addItem'}
                         handleHide={handleModalClose}
