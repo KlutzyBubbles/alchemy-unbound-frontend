@@ -3,13 +3,14 @@ import { Collapse } from 'react-bootstrap';
 import { AppVersions, DEFAULT_FILE_VERSIONS, ErrorEntry, FileVersions, LATEST_SERVER_VERSION, SystemVersion, UserSuccess } from '../../../common/types';
 import { SettingsContext } from '../../providers/SettingsProvider';
 import logger from 'electron-log/renderer';
-import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
+import { HiOutlineWrenchScrewdriver, HiOutlineLockOpen } from 'react-icons/hi2';
 import { getFromStore } from '../../language';
 import { DEFAULT_STATS, Stats } from '../../../common/stats';
 import { ErrorItem } from '../ErrorItem';
 import { InfoContext } from '../../providers/InfoProvider';
 import { ModalWrapper } from '../ModalWrapper';
 import { StatsTable } from './StatTable';
+import { unlockOnlineAchievements } from '../../utils/achievements';
 
 
 export interface StatsModalProps {
@@ -87,11 +88,18 @@ export const StatsModal: FC<StatsModalProps> = ({
         })();
     }, [show]);
 
-    const footerContent = <div
-        className='btn btn-sm btn-advanced float-start me-auto mb-2 fs-2 d-flex px-2 py-0'
-        onClick={() => setAdvanced(!advanced)}>
-        <h1 className='mx-2 my-0'><HiOutlineWrenchScrewdriver /><span className='fs-3 ms-3'>v{appVersions.app}</span></h1>
-    </div>;
+    const footerContent = <Fragment>
+        <div
+            className='btn btn-sm btn-advanced float-start me-auto mb-2 fs-2 d-flex px-2 py-0'
+            onClick={() => setAdvanced(!advanced)}>
+            <h1 className='mx-2 my-0'><HiOutlineWrenchScrewdriver /><span className='fs-3 ms-3'>v{appVersions.app}</span></h1>
+        </div>
+        <div
+            className='btn btn-sm btn-advanced float-end ms-auto mb-2 fs-2 d-flex px-2 py-0'
+            onClick={() => unlockOnlineAchievements()}>
+            <h1 className='mx-2 my-0'><HiOutlineLockOpen /></h1>
+        </div>
+    </Fragment>;
 
     return <ModalWrapper show={show} title={'info.stats.title'} footerContent={footerContent} handleHide={handleHide}>
         <Fragment>

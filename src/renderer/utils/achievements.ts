@@ -1,6 +1,22 @@
 import logger from 'electron-log/renderer';
 import { Stats } from '../../common/stats';
 
+export async function unlockOnlineAchievements(): Promise<void> {
+    logger.silly('unlockOnlineAchievements');
+    window.SteamAPI.activateAchievement('weekly');
+    window.SteamAPI.activateAchievement('daily');
+    window.SteamAPI.activateAchievement('baited');
+    window.SteamAPI.activateAchievement('discover_ai_recipe_10');
+    window.SteamAPI.activateAchievement('discover_ai_recipe_50');
+    window.SteamAPI.activateAchievement('discover_ai_recipe_250');
+    window.SteamAPI.activateAchievement('first_discovery_1');
+    window.SteamAPI.activateAchievement('first_discovery_10');
+    window.SteamAPI.activateAchievement('first_discovery_100');
+    window.SteamAPI.activateAchievement('discover_ai_10');
+    window.SteamAPI.activateAchievement('discover_ai_50');
+    window.SteamAPI.activateAchievement('discover_ai_250');
+}
+
 export async function unlockCheck(stats: Stats): Promise<void> {
     const recipes = await window.RecipeAPI.countBaseRecipes();
     const results = await window.RecipeAPI.countBaseResults();
