@@ -205,7 +205,7 @@ export type SettingsV3 = {
 export const DEFAULT_SETTINGS: Settings = {
     theme: 'dark',
     fullscreen: true,
-    offline: false,
+    offline: true,
     currentDisplay: 1,
     background: 'line',
     sidebar: 'right',

@@ -35,10 +35,10 @@ let endpointVersion: EndpointVersion | 'custom' = 'custom'; // 'release';
 let endpoint = 'http://localhost:5001';
 // endpoint = 'https://api.alchemyunbound.net';
 // endpoint = 'https://alchemy-unbound-prerelease-b687af701d77.herokuapp.com';
-if (isPackaged()) {
-    // Production
-    endpoint = 'https://api.alchemyunbound.net';
-}
+// if (isPackaged()) {
+//     // Production
+//     endpoint = 'https://api.alchemyunbound.net';
+// }
 
 export function setEndpointVersion(version: EndpointVersion | 'custom') {
     if (ENDPOINT_VERSIONS.includes(version.toLocaleLowerCase())) {

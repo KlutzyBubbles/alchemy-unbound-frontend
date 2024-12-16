@@ -223,20 +223,20 @@ export const LanguageStore: LanguageStoreRecurring = {
         koreana: "게임을 플레이해주셔서 감사합니다:) 불행히도 서버는 곧 종료될 것입니다. 도저히 살릴 수가 없:("
     },
     noServerB: {
-        english: "Feel free to check the steam post for more info",
-        schinese: "请随时查看 Steam 帖子以获取更多信息",
-        russian: "Не стесняйтесь проверять пост в Steam для получения дополнительной информации",
-        spanish: "No dudes en consultar la publicación de Steam para obtener más información",
-        french: "N’hésitez pas à consulter le post steam pour plus d’informations",
-        japanese: "詳細については、Steamの投稿をお気軽に確認してください",
-        indonesian: "Jangan ragu untuk memeriksa postingan uap untuk info lebih lanjut",
-        german: "Schaut gerne im Steam-Post vorbei, um weitere Informationen zu erhalten",
-        latam: "No dudes en consultar la publicación de Steam para obtener más información",
-        italian: "Sentiti libero di controllare il post di Steam per maggiori informazioni",
-        dutch: "Voel je vrij om de stoompost te controleren voor meer info",
-        polish: "Zapraszam do sprawdzenia postu na Steam, aby uzyskać więcej informacji",
-        portuguese: "Sinta-se à vontade para verificar a postagem do Steam para obter mais informações",
-        tchinese: "請隨時查看 Steam 帖子以獲取更多資訊",
-        koreana: "자세한 내용은 Steam 게시물을 확인하십시오."
+        english: "Feel free to check the steam post for more info. (It is recommended to disable AI generation in settings)",
+        schinese: "请随时查看 Steam 帖子以获取更多信息. (建议在设置中禁用 AI 生成)",
+        russian: "Не стесняйтесь проверять пост в Steam для получения дополнительной информации. (Рекомендуется отключить генерацию ИИ в настройках.)",
+        spanish: "No dudes en consultar la publicación de Steam para obtener más información. (Se recomienda desactivar la generación de IA en la configuración.)",
+        french: "N’hésitez pas à consulter le post steam pour plus d’informations. (Il est recommandé de désactiver la génération d'IA dans les paramètres)",
+        japanese: "詳細については、Steamの投稿をお気軽に確認してください. (設定でAI生成を無効にすることをお勧めします)",
+        indonesian: "Jangan ragu untuk memeriksa postingan uap untuk info lebih lanjut. (Disarankan untuk menonaktifkan pembuatan AI di pengaturan)",
+        german: "Schaut gerne im Steam-Post vorbei, um weitere Informationen zu erhalten. (Es wird empfohlen, die KI-Generierung in den Einstellungen zu deaktivieren)",
+        latam: "No dudes en consultar la publicación de Steam para obtener más información. (Se recomienda desactivar la generación de IA en la configuración.)",
+        italian: "Sentiti libero di controllare il post di Steam per maggiori informazioni. (Si consiglia di disattivare la generazione di AI nelle impostazioni)",
+        dutch: "Voel je vrij om de stoompost te controleren voor meer info. (Het wordt aanbevolen om AI-generatie in de instellingen uit te schakelen)",
+        polish: "Zapraszam do sprawdzenia postu na Steam, aby uzyskać więcej informacji. (Zaleca się wyłączenie generowania AI w ustawieniach)",
+        portuguese: "Sinta-se à vontade para verificar a postagem do Steam para obter mais informações. (É recomendável desabilitar a geração de IA nas configurações)",
+        tchinese: "請隨時查看 Steam 帖子以獲取更多資訊. (建议在设置中禁用 AI 生成)",
+        koreana: "자세한 내용은 Steam 게시물을 확인하십시오. (설정에서 AI 생성을 비활성화하는 것이 좋습니다.)"
     }
 };
