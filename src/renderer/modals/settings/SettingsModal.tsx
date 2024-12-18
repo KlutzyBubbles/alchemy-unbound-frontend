@@ -248,7 +248,16 @@ export const SettingsModal: FC<SettingsModalProps> = ({
                                     return true;
                                 }
                             })}
-                            onChange={(value) => changeValue('theme', value)}
+                            onChange={(value) => {
+                                changeValue('theme', value);
+                                try {
+                                    if (value === 'light') {
+                                        window.SteamAPI.activateAchievement('flashbang');
+                                    }
+                                } catch (e) {
+                                    logger.error('Failed to activate flashbang achievement', e);
+                                }
+                            }}
                             getDisplay={(value) => getFromStore(`settings.themes.${value}`, settings.language)} />
                         <MainSelector<BackgroundType>
                             title={'settings.items.background'}
