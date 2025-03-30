@@ -34,6 +34,11 @@ if (app.isPackaged) {
 }
 logger.initialize();
 logger.info('Initialized logger main');
+logger.error('Error');
+logger.warn('Warn');
+logger.info('Info');
+logger.debug('Debug');
+logger.silly('Silly');
 
 if (hasProp(argv, 'logLevel')) {
     const logLevel = argv.logLevel;

@@ -735,7 +735,7 @@ export function countBaseResults(): number {
 
 export function hasAtleastRecipe(result: string, ignoreCustom: boolean = false): boolean {
     logger.silly('hasAtleastRecipe', result, ignoreCustom);
-    if (info.type !== 'custom') {
+    if (info.type === 'custom') {
         if (!ignoreCustom) {
             return false;
         }

@@ -21,6 +21,7 @@ import { itemRecipeCheck, unlockCheck } from '../utils/achievements';
 import { BottomButton } from './MainButtons/BottomButtons';
 import { TopButtons } from './MainButtons/TopButtons';
 import { KeybindListener } from './KeybindListener';
+import { Stats } from '../../common/stats';
 
 export interface ContainerProps {
   openModal: (option: ModalOption, onClose?: () => void) => void
@@ -279,7 +280,21 @@ export const DropContainer: FC<ContainerProps> = ({
                             return value + 1;
                         });
                     }
-                    const stats = await window.StatsAPI.getStats();
+                    let stats: Stats = {
+                        baseRecipesFound: 0,
+                        aiRecipesFound: 0,
+                        itemsCombined: 0,
+                        baseResultsFound: 0,
+                        firstDiscoveries: 0,
+                        baseHighestDepth: 0,
+                        aiHighestDepth: 0,
+                        aiResultsFound: 0
+                    };
+                    try {
+                        stats = await window.StatsAPI.getStats();
+                    } catch (e) {
+                        logger.error('Stats failed to load', e);
+                    }
                     if (combined.newDiscovery) {
                         playSound('new-discovery');
                         if (combined.recipe.base) {

@@ -5,7 +5,7 @@ import { SettingsContext } from './providers/SettingsProvider';
 import { XYCoord } from 'react-dnd';
 import { AnimationControls, TargetAndTransition, VariantLabels, Variants, motion } from 'framer-motion';
 import { ItemTypes } from './types';
-import Logger from 'electron-log/renderer';
+// import Logger from 'electron-log/renderer';
 import { InfoContext } from './providers/InfoProvider';
 
 export type ElementType = 'main' | 'side' | 'crafting'
@@ -83,7 +83,7 @@ function getMainStyles(
         top = -100;
     }
     const transform = `translate3d(${left}px, ${top}px, 0)`;
-    Logger.info('BIGPP', [top, left], locked, isDragging, locked ? 1 : isDragging ? 0 : 1);
+    // Logger.info('BIGPP', [top, left], locked, isDragging, locked ? 1 : isDragging ? 0 : 1);
     return {
         position: 'fixed',
         left: left === undefined ? 0 : left,
