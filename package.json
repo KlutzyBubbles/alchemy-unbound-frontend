@@ -1,7 +1,7 @@
 {
   "name": "alchemy-unbound",
   "productName": "alchemy-unbound",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "Alchemy Unbound frontend application",
   "main": ".webpack/main",
   "scripts": {

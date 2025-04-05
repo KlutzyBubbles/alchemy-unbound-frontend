@@ -49,9 +49,11 @@ export async function unlockCheck(stats: Stats): Promise<void> {
                 const details = response.result.user;
                 depthCheck(stats.baseHighestDepth, details.highestDepth);
             } else {
+                depthCheck(stats.baseHighestDepth, 0);
                 logger.error('Failed to check for achievements');
             }
         } catch (e) {
+            depthCheck(stats.baseHighestDepth, 0);
             logger.error('Failed to load user for achievements', e);
         }
     }
